@@ -12,9 +12,7 @@ import {
   UserCheck,
   XCircle,
   Clock,
-  AlertCircle,
-  MessageSquare,
-  PhoneCall
+  AlertCircle
 } from 'lucide-react';
 import { currentUser } from '../mockData';
 
@@ -24,6 +22,7 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
   const [statusFilter, setStatusFilter] = useState(filterStatus || 'all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   // Filter and sort leads
   const getFilteredLeads = () => {
@@ -31,17 +30,13 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
 
     // Status filter
     if (statusFilter !== 'all') {
-      if (statusFilter === 'active') {
-        // Active excludes archived AND completed (owners who finished onboarding)
-        filtered = filtered.filter(l => l.status !== 'archived' && l.status !== 'completed');
-      } else if (statusFilter === 'onboarding') {
-        // Show approved leads that are in onboarding
-        filtered = filtered.filter(l => l.status === 'approved' && l.onboardingStatus === 'in_progress');
+      if (statusFilter === 'archived') {
+        filtered = filtered.filter(l => l.status === 'archived' || l.status === 'completed');
       } else {
         filtered = filtered.filter(l => l.status === statusFilter);
       }
     } else {
-      // Don't show archived or completed in "all" view - they've been converted to owners
+      // Don't show archived or completed in "all" view
       filtered = filtered.filter(l => l.status !== 'archived' && l.status !== 'completed');
     }
 
@@ -111,29 +106,24 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
     }
   };
 
-  const toggleContactStatus = (leadId, e) => {
+  const handleArchiveLead = (leadId, e) => {
     e.stopPropagation();
-    console.log('Toggle contact status for lead:', leadId);
-    // In real app, would update lead.hasBeenContacted
+    if (window.confirm('Are you sure you want to archive this lead?')) {
+      console.log('Archiving lead:', leadId);
+      // In real app, would update lead status to archived
+    }
+    setOpenDropdown(null);
   };
 
   const getStatusBadge = (lead) => {
     const configs = {
-      partial: { color: '#f59e0b', label: 'Partial Lead', icon: AlertCircle },
-      qualified: { color: '#10b981', label: 'Qualified Lead', icon: CheckCircle },
-      approved: { color: '#8b5cf6', label: 'Approved', icon: UserCheck },
-      onboarding: { color: '#6366f1', label: 'In Onboarding', icon: Clock },
-      denied: { color: '#ef4444', label: 'Denied', icon: XCircle },
+      lead: { color: '#f59e0b', label: 'Lead', icon: AlertCircle },
+      application: { color: '#3b82f6', label: 'Application', icon: Clock },
+      'awaiting approval': { color: '#8b5cf6', label: 'Awaiting Approval', icon: UserCheck },
       archived: { color: '#6b7280', label: 'Archived', icon: Archive }
     };
 
-    // Show "Onboarding" for approved leads that are in onboarding
-    let statusKey = lead.status;
-    if (lead.status === 'approved' && lead.onboardingStatus === 'in_progress') {
-      statusKey = 'onboarding';
-    }
-
-    const config = configs[statusKey] || configs.partial;
+    const config = configs[lead.status] || configs.lead;
     const Icon = config.icon;
 
     return (
@@ -148,6 +138,12 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
         {config.label}
       </span>
     );
+  };
+
+  const formatPropertyCount = (count) => {
+    if (count === 0) return 'None';
+    if (count >= 4) return '4+';
+    return count.toString();
   };
 
   const formatDate = (dateString) => {
@@ -195,28 +191,22 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
             All Active
           </button>
           <button
-            className={`filter-tab ${statusFilter === 'partial' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('partial')}
+            className={`filter-tab ${statusFilter === 'lead' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('lead')}
           >
-            Partial
+            Lead
           </button>
           <button
-            className={`filter-tab ${statusFilter === 'qualified' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('qualified')}
+            className={`filter-tab ${statusFilter === 'application' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('application')}
           >
-            Qualified
+            Application
           </button>
           <button
-            className={`filter-tab ${statusFilter === 'approved' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('approved')}
+            className={`filter-tab ${statusFilter === 'awaiting approval' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('awaiting approval')}
           >
-            Approved
-          </button>
-          <button
-            className={`filter-tab ${statusFilter === 'onboarding' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('onboarding')}
-          >
-            Onboarding
+            Awaiting Approval
           </button>
           <button
             className={`filter-tab ${statusFilter === 'archived' ? 'active' : ''}`}
@@ -271,9 +261,6 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
                   onChange={toggleAllLeads}
                 />
               </th>
-              <th width="40" title="Contacted">
-                <PhoneCall size={16} />
-              </th>
               <th>Name</th>
               <th>Contact</th>
               <th>Status</th>
@@ -281,16 +268,14 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
               <th>Assigned To</th>
               <th>Created</th>
               <th>Updated</th>
-              <th width="40" title="Notes">
-                <MessageSquare size={16} />
-              </th>
+              <th>Last Reached Out</th>
               <th width="60"></th>
             </tr>
           </thead>
           <tbody>
             {filteredLeads.length === 0 ? (
               <tr>
-                <td colSpan="11" className="empty-table">
+                <td colSpan="10" className="empty-table">
                   <div className="empty-state">
                     <AlertCircle size={48} style={{ opacity: 0.3 }} />
                     <p>No leads found</p>
@@ -310,15 +295,6 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
                       type="checkbox"
                       checked={selectedLeads.has(lead.id)}
                       onChange={() => toggleLeadSelection(lead.id)}
-                    />
-                  </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={lead.hasBeenContacted || false}
-                      onChange={(e) => toggleContactStatus(lead.id, e)}
-                      title={lead.hasBeenContacted ? 'Contacted' : 'Not contacted'}
-                      style={{ cursor: 'pointer' }}
                     />
                   </td>
                   <td>
@@ -360,11 +336,7 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
                     {getStatusBadge(lead)}
                   </td>
                   <td>
-                    {lead.properties.length > 0 ? (
-                      <span>{lead.properties.length} {lead.properties.length === 1 ? 'property' : 'properties'}</span>
-                    ) : (
-                      <span className="text-muted">None</span>
-                    )}
+                    <span>{formatPropertyCount(lead.properties?.length || 0)}</span>
                   </td>
                   <td>
                     {lead.assignedTo ? (
@@ -376,16 +348,78 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
                   <td>{formatDate(lead.createdAt)}</td>
                   <td>{formatDate(lead.updatedAt)}</td>
                   <td>
-                    {(lead.noteCount > 0 || lead.notes) && (
-                      <div className="note-indicator-cell">
-                        <span className="note-badge-sm">{lead.noteCount || 1}</span>
-                      </div>
+                    {lead.lastReachedOut ? (
+                      <span>{formatDate(lead.lastReachedOut)}</span>
+                    ) : (
+                      <span className="text-muted">Never</span>
                     )}
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
-                    <button className="btn-icon">
-                      <MoreVertical size={16} />
-                    </button>
+                    <div style={{ position: 'relative' }}>
+                      <button 
+                        className="btn-icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdown(openDropdown === lead.id ? null : lead.id);
+                        }}
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+                      {openDropdown === lead.id && (
+                        <>
+                          <div 
+                            style={{
+                              position: 'fixed',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              zIndex: 999
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenDropdown(null);
+                            }}
+                          />
+                          <div className="dropdown-menu" style={{ 
+                            position: 'absolute',
+                            right: '0',
+                            top: '100%',
+                            marginTop: '4px',
+                            background: 'white',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            minWidth: '160px',
+                            zIndex: 1000,
+                            overflow: 'hidden'
+                          }}>
+                            <button
+                              className="dropdown-item"
+                              onClick={(e) => handleArchiveLead(lead.id, e)}
+                              style={{
+                                width: '100%',
+                                padding: '8px 12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                border: 'none',
+                                background: 'none',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                color: '#6b7280',
+                                textAlign: 'left'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                            >
+                              <Archive size={16} />
+                              Archive Lead
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

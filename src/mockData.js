@@ -7,7 +7,8 @@ const addDefaultValues = (lead) => ({
   initialMessage: lead.initialMessage || null,
   sourceMetadata: lead.sourceMetadata || null,
   isDuplicate: lead.isDuplicate !== undefined ? lead.isDuplicate : false,
-  duplicateOf: lead.duplicateOf || null
+  duplicateOf: lead.duplicateOf || null,
+  lastReachedOut: lead.lastReachedOut || null
 });
 
 export const mockLeads = [
@@ -18,13 +19,15 @@ export const mockLeads = [
     lastName: 'Johnson',
     email: 'emily.j@email.com',
     phone: '(555) 234-5678',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-22T09:15:00Z',
     updatedAt: '2025-10-22T09:15:00Z',
+    lastReachedOut: '2025-10-23T10:30:00Z',
     completionPercentage: 45,
-    source: 'Referral',
+    source: 'Word of Mouth',
+    leadSource: 'Word of Mouth',
     isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
@@ -62,13 +65,15 @@ export const mockLeads = [
     lastName: 'Taylor',
     email: 'rtaylor@email.com',
     phone: '(555) 678-9012',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-25T14:20:00Z',
     updatedAt: '2025-10-25T14:20:00Z',
+    lastReachedOut: null,
     completionPercentage: 30,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     emailBounced: true, // Example of bounced email
     phoneInvalid: false,
@@ -99,13 +104,14 @@ export const mockLeads = [
     lastName: 'Anderson',
     email: 'lisa.anderson@email.com',
     phone: '(555) 789-0123',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-26T10:45:00Z',
     updatedAt: '2025-10-26T10:45:00Z',
     completionPercentage: 60,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
@@ -133,13 +139,14 @@ export const mockLeads = [
     lastName: 'Wilson',
     email: 'jwilson@email.com',
     phone: '(555) 890-1234',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-27T08:00:00Z',
     updatedAt: '2025-10-27T08:00:00Z',
     completionPercentage: 25,
     source: 'Phone Call',
+    leadSource: 'Phone',
     isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
@@ -165,13 +172,14 @@ export const mockLeads = [
     lastName: 'Moore',
     email: 'pmoore@email.com',
     phone: '(555) 901-2345',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-23T16:30:00Z',
     updatedAt: '2025-10-23T16:30:00Z',
     completionPercentage: 50,
     source: 'Referral',
+    leadSource: 'Email',
     isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
@@ -195,13 +203,14 @@ export const mockLeads = [
     lastName: 'Brown',
     email: 'cbrown@email.com',
     phone: '(800) 555-0100', // Toll-free number - cannot text
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-27T11:15:00Z',
     updatedAt: '2025-10-27T11:15:00Z',
     completionPercentage: 35,
     source: 'Website Form',
+    leadSource: 'SMS',
     isDuplicate: false,
     emailBounced: false,
     phoneInvalid: true, // Example of non-textable phone
@@ -228,13 +237,14 @@ export const mockLeads = [
     lastName: 'Davis',
     email: 'mdavis@email.com',
     phone: '(555) 123-7890',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-21T13:00:00Z',
     updatedAt: '2025-10-21T13:00:00Z',
     completionPercentage: 70,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
@@ -260,13 +270,14 @@ export const mockLeads = [
     lastName: 'Garcia',
     email: 'dgarcia@email.com',
     phone: '(555) 234-8901',
-    status: 'partial',
+    status: 'lead',
     stage: 'Lead Created',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-28T09:30:00Z',
     updatedAt: '2025-10-28T09:30:00Z',
     completionPercentage: 40,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
@@ -292,13 +303,14 @@ export const mockLeads = [
     lastName: 'Smith',
     email: 'john.smith@email.com',
     phone: '(555) 123-4567',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-20T10:00:00Z',
     updatedAt: '2025-10-21T14:30:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     sourceMetadata: {
       formName: 'Owner Interest Form',
       referrerUrl: 'https://propertymanagement.com/services',
@@ -365,13 +377,14 @@ export const mockLeads = [
     lastName: 'Williams',
     email: 'swilliams@email.com',
     phone: '(555) 456-7890',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-24T08:30:00Z',
     updatedAt: '2025-10-24T09:00:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
+    leadSource: 'Phone',
     isDuplicate: false,
     properties: [
       {
@@ -415,13 +428,14 @@ export const mockLeads = [
     lastName: 'Rodriguez',
     email: 'krodriguez@email.com',
     phone: '(555) 345-9012',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-19T15:00:00Z',
     updatedAt: '2025-10-20T10:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [
       {
@@ -465,13 +479,14 @@ export const mockLeads = [
     lastName: 'Miller',
     email: 'tmiller@email.com',
     phone: '(555) 456-0123',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-25T12:00:00Z',
     updatedAt: '2025-10-25T16:45:00Z',
     completionPercentage: 100,
     source: 'Referral',
+    leadSource: 'Word of Mouth',
     isDuplicate: false,
     properties: [
       {
@@ -506,13 +521,14 @@ export const mockLeads = [
     lastName: 'White',
     email: 'nwhite@email.com',
     phone: '(555) 567-1234',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-23T09:00:00Z',
     updatedAt: '2025-10-23T14:30:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'Email',
     isDuplicate: false,
     properties: [
       {
@@ -546,13 +562,14 @@ export const mockLeads = [
     lastName: 'Lee',
     email: 'slee@email.com',
     phone: '(555) 678-2345',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-26T14:00:00Z',
     updatedAt: '2025-10-27T09:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [
       {
@@ -587,13 +604,14 @@ export const mockLeads = [
     lastName: 'Harris',
     email: 'bharris@email.com',
     phone: '(555) 789-3456',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-18T11:30:00Z',
     updatedAt: '2025-10-19T08:00:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
+    leadSource: 'Phone',
     isDuplicate: false,
     properties: [
       {
@@ -627,13 +645,14 @@ export const mockLeads = [
     lastName: 'Clark',
     email: 'rclark@email.com',
     phone: '(555) 890-4567',
-    status: 'qualified',
+    status: 'application',
     stage: 'Qualified',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-27T10:00:00Z',
     updatedAt: '2025-10-27T15:30:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'SMS',
     isDuplicate: false,
     properties: [
       {
@@ -669,13 +688,14 @@ export const mockLeads = [
     lastName: 'Lewis',
     email: 'jlewis@email.com',
     phone: '(555) 901-5678',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Approved',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-16T09:00:00Z',
     updatedAt: '2025-10-22T11:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [
       {
@@ -725,13 +745,14 @@ export const mockLeads = [
     lastName: 'Walker',
     email: 'mwalker@email.com',
     phone: '(555) 012-6789',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Approved',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-17T14:00:00Z',
     updatedAt: '2025-10-23T16:00:00Z',
     completionPercentage: 100,
     source: 'Referral',
+    leadSource: 'Word of Mouth',
     isDuplicate: false,
     properties: [
       {
@@ -772,13 +793,14 @@ export const mockLeads = [
     lastName: 'Hall',
     email: 'dhall@email.com',
     phone: '(555) 123-7890',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Approved',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-19T08:00:00Z',
     updatedAt: '2025-10-24T10:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     properties: [
       {
@@ -819,13 +841,14 @@ export const mockLeads = [
     lastName: 'Young',
     email: 'kyoung@email.com',
     phone: '(555) 234-8901',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Approved',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-21T12:00:00Z',
     updatedAt: '2025-10-26T09:00:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
+    leadSource: 'Phone',
     isDuplicate: false,
     properties: [
       {
@@ -868,13 +891,14 @@ export const mockLeads = [
     lastName: 'Chen',
     email: 'mchen@email.com',
     phone: '(555) 345-6789',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-15T11:00:00Z',
     updatedAt: '2025-10-23T16:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'Email',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 60,
@@ -988,13 +1012,14 @@ export const mockLeads = [
     lastName: 'King',
     email: 'jking@email.com',
     phone: '(555) 345-9012',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-14T10:00:00Z',
     updatedAt: '2025-10-25T14:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 45,
@@ -1065,13 +1090,14 @@ export const mockLeads = [
     lastName: 'Wright',
     email: 'bwright@email.com',
     phone: '(555) 456-0123',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-12T15:00:00Z',
     updatedAt: '2025-10-24T10:00:00Z',
     completionPercentage: 100,
     source: 'Referral',
+    leadSource: 'Word of Mouth',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 80,
@@ -1153,13 +1179,14 @@ export const mockLeads = [
     lastName: 'Lopez',
     email: 'slopez@email.com',
     phone: '(555) 567-1234',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-13T11:00:00Z',
     updatedAt: '2025-10-26T15:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'PMW',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 35,
@@ -1227,13 +1254,14 @@ export const mockLeads = [
     lastName: 'Hill',
     email: 'ghill@email.com',
     phone: '(555) 678-2345',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-11T09:00:00Z',
     updatedAt: '2025-10-27T11:00:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
+    leadSource: 'Phone',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 90,
@@ -1337,13 +1365,14 @@ export const mockLeads = [
     lastName: 'Scott',
     email: 'cscott@email.com',
     phone: '(555) 789-3456',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-16T13:00:00Z',
     updatedAt: '2025-10-23T09:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSource: 'SMS',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 55,
@@ -1418,13 +1447,14 @@ export const mockLeads = [
     lastName: 'Green',
     email: 'egreen@email.com',
     phone: '(555) 890-4567',
-    status: 'approved',
+    status: 'awaiting approval',
     stage: 'Onboarding',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-14T08:00:00Z',
     updatedAt: '2025-10-25T16:00:00Z',
     completionPercentage: 100,
     source: 'Referral',
+    leadSource: 'Email',
     isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 70,
@@ -2409,4 +2439,177 @@ export const mockOnboardingForm = {
 };
 
 export const fibonacciCadence = [1, 2, 3, 5, 8, 13]; // Days
+
+// Generate time-series funnel data for the past year
+// Hard-coded with specific close rates by source:
+// PMW: 70% close rate | Phone: 60% | Email: 55% | SMS: 65% | Word of Mouth: 75%
+// Target: ~150 leads/year → ~100 onboarded/year (overall ~67% close rate)
+const generateTimeSeriesData = () => {
+  const data = [];
+  const now = new Date();
+  const leadSources = ['PMW', 'Phone', 'Email', 'SMS', 'Word of Mouth'];
+  
+  // Hard-coded conversion rates by source
+  // Lead → Application: 85% | Application → Onboarded: varies by source to hit target close rates
+  const sourceMetrics = {
+    'PMW': { 
+      targetLeadsPerYear: 90,  // 60% of total
+      leadToApp: 0.85,         // 85% become applications (77 apps)
+      appToOnboard: 0.82       // 82% of apps onboard (63 onboarded) → 70% close rate
+    },
+    'Phone': { 
+      targetLeadsPerYear: 23,  // 15% of total
+      leadToApp: 0.85,         // 85% become applications (20 apps)
+      appToOnboard: 0.71       // 71% of apps onboard (14 onboarded) → 60% close rate
+    },
+    'Email': { 
+      targetLeadsPerYear: 18,  // 12% of total
+      leadToApp: 0.85,         // 85% become applications (15 apps)
+      appToOnboard: 0.65       // 65% of apps onboard (10 onboarded) → 55% close rate
+    },
+    'SMS': { 
+      targetLeadsPerYear: 12,  // 8% of total
+      leadToApp: 0.85,         // 85% become applications (10 apps)
+      appToOnboard: 0.76       // 76% of apps onboard (8 onboarded) → 65% close rate
+    },
+    'Word of Mouth': { 
+      targetLeadsPerYear: 15,  // 10% of total
+      leadToApp: 0.85,         // 85% become applications (13 apps)
+      appToOnboard: 0.88       // 88% of apps onboard (11 onboarded) → 75% close rate
+    }
+  };
+  
+  // Generate hourly data for the last 24 hours
+  // Hard-coded patterns for realistic hourly distribution
+  const hourlyPatterns = {
+    'PMW': [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0],      // 4 leads in 24h
+    'Phone': [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0],    // 2 leads in 24h
+    'Email': [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],    // 1 lead in 24h
+    'SMS': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],      // 0 leads in 24h
+    'Word of Mouth': [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0] // 1 lead in 24h
+  };
+  
+  for (let i = 24; i >= 0; i--) {
+    const date = new Date(now);
+    date.setHours(date.getHours() - i);
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
+    
+    let totalLeads = 0;
+    let totalApplications = 0;
+    let totalOnboarded = 0;
+    
+    leadSources.forEach((source) => {
+      const hourlyLeads = hourlyPatterns[source][i];
+      const applications = hourlyLeads > 0 ? (Math.random() < sourceMetrics[source].leadToApp ? 1 : 0) : 0;
+      const onboarded = applications > 0 ? (Math.random() < sourceMetrics[source].appToOnboard ? 1 : 0) : 0;
+      
+      totalLeads += hourlyLeads;
+      totalApplications += applications;
+      totalOnboarded += onboarded;
+      
+      data.push({
+        date: dateStr,
+        source,
+        leads: hourlyLeads,
+        applications: applications,
+        onboarded: onboarded
+      });
+    });
+    
+    data.push({
+      date: dateStr,
+      source: 'all',
+      leads: totalLeads,
+      applications: totalApplications,
+      onboarded: totalOnboarded
+    });
+  }
+  
+  // Generate daily data points for the past 365 days
+  // Hard-coded patterns that sum to target annual totals with proper conversion rates
+  const dailyPatterns = {
+    // PMW: 90 leads/year → 0.25 leads/day avg → pattern: mostly 0s, some 1s, occasional 2s
+    'PMW': Array(365).fill(0).map((_, i) => {
+      const pattern = i % 4; // Cycle: 0,1,2,3
+      if (pattern === 0) return 1;
+      if (pattern === 1) return 0;
+      if (pattern === 2) return 1;
+      return 0; // pattern === 3
+    }), // ~91 leads
+    
+    // Phone: 23 leads/year → 0.06 leads/day avg → pattern: mostly 0s, rare 1s
+    'Phone': Array(365).fill(0).map((_, i) => {
+      return i % 16 === 0 ? 1 : 0;
+    }), // ~23 leads
+    
+    // Email: 18 leads/year → 0.05 leads/day avg → pattern: mostly 0s, rare 1s
+    'Email': Array(365).fill(0).map((_, i) => {
+      return i % 20 === 0 ? 1 : 0;
+    }), // ~18 leads
+    
+    // SMS: 12 leads/year → 0.03 leads/day avg → pattern: mostly 0s, very rare 1s
+    'SMS': Array(365).fill(0).map((_, i) => {
+      return i % 30 === 0 ? 1 : 0;
+    }), // ~12 leads
+    
+    // Word of Mouth: 15 leads/year → 0.04 leads/day avg → pattern: mostly 0s, rare 1s
+    'Word of Mouth': Array(365).fill(0).map((_, i) => {
+      return i % 24 === 0 ? 1 : 0;
+    }) // ~15 leads
+  };
+  
+  for (let i = 365; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    const dayIndex = 365 - i;
+    
+    let totalLeads = 0;
+    let totalApplications = 0;
+    let totalOnboarded = 0;
+    
+    leadSources.forEach((source) => {
+      const dailyLeads = dailyPatterns[source][dayIndex] || 0;
+      
+      // Apply conversion rates deterministically based on cumulative progress
+      let applications = 0;
+      let onboarded = 0;
+      
+      if (dailyLeads > 0) {
+        // Use day index to deterministically convert leads
+        const conversionSeed = (dayIndex * 7 + leadSources.indexOf(source)) % 100;
+        applications = conversionSeed < (sourceMetrics[source].leadToApp * 100) ? dailyLeads : 0;
+        
+        if (applications > 0) {
+          const onboardSeed = (dayIndex * 13 + leadSources.indexOf(source) * 3) % 100;
+          onboarded = onboardSeed < (sourceMetrics[source].appToOnboard * 100) ? applications : 0;
+        }
+      }
+      
+      totalLeads += dailyLeads;
+      totalApplications += applications;
+      totalOnboarded += onboarded;
+      
+      data.push({
+        date: dateStr,
+        source,
+        leads: dailyLeads,
+        applications: applications,
+        onboarded: onboarded
+      });
+    });
+    
+    data.push({
+      date: dateStr,
+      source: 'all',
+      leads: totalLeads,
+      applications: totalApplications,
+      onboarded: totalOnboarded
+    });
+  }
+  
+  return data;
+};
+
+export const timeSeriesFunnelData = generateTimeSeriesData();
 
