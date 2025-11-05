@@ -1,0 +1,114 @@
+/* Trellis Design System Colors - Onyx Theme */
+/* High-end, sophisticated color palette for luxury property management */
+
+:root {
+  /* Surface Colors */
+  --surface: #ffffff;
+  --surface-elevated: #fafafa;
+  --surface-overlay: rgba(0, 0, 0, 0.6);
+  
+  /* Foreground/Text Colors */
+  --fg-neutral-active: #0a0a0a;
+  --fg-neutral-default: #1a1a1a;
+  --fg-neutral-muted: #666666;
+  --fg-neutral-subtle: #999999;
+  
+  /* On Colors (text on dark backgrounds) */
+  --on-neutral: #ffffff;
+  --on-neutral-muted: rgba(255, 255, 255, 0.85);
+  
+  /* Neutral/Background Colors */
+  --neutral-active: #1a1a1a;
+  --neutral-default: #2a2a2a;
+  --neutral-hover: #3a3a3a;
+  --neutral-subtle: #f5f5f5;
+  
+  /* Border Colors */
+  --border-default: #e5e5e5;
+  --border-subtle: #f0f0f0;
+  --border-strong: #d0d0d0;
+  
+  /* Brand/Accent Colors */
+  --accent-primary: #03893F;
+  --accent-primary-hover: #027032;
+  --accent-primary-light: #e6f5ed;
+  --accent-secondary: #000000;
+  
+  /* Semantic Colors */
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --info: #3b82f6;
+  --info-light: #dbeafe;
+  
+  /* Shadow/Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  
+  /* Gradients */
+  --gradient-gold: linear-gradient(135deg, #03893F 0%, #04a04a 100%);
+  --gradient-dark: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  --gradient-light: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  
+  /* Typography Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+  --transition-slower: 500ms ease;
+  
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0a0a0a;
+    --surface-elevated: #1a1a1a;
+    
+    --fg-neutral-active: #ffffff;
+    --fg-neutral-default: #f5f5f5;
+    --fg-neutral-muted: #999999;
+    
+    --neutral-subtle: #2a2a2a;
+    --border-default: #333333;
+    --border-subtle: #2a2a2a;
+  }
+}
+

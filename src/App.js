@@ -10,6 +10,7 @@ import CRMSettings from './components/CRMSettings';
 import FormsBuilder from './components/FormsBuilder';
 import PropertyManagementSite from './components/PropertyManagementSite';
 import MobileOwnerQuestionnaire from './components/MobileOwnerQuestionnaire';
+import OnyxPropertyManagement from './components/OnyxPropertyManagement';
 import NewLeadModal from './components/NewLeadModal';
 import { mockLeads } from './mockData';
 import './index.css';
@@ -74,6 +75,9 @@ function App() {
   // Check if we're on the mobile questionnaire route
   const isMobileQuestionnaire = currentPath === '/mobile-apply' || currentPath === '/apply';
   
+  // Check if we're on the Onyx property management site route
+  const isOnyxSite = currentPath === '/pmw';
+  
   if (isExampleSite) {
     return <PropertyManagementSite />;
   }
@@ -83,6 +87,10 @@ function App() {
       console.log('Application completed:', data);
       // Could redirect to success page or back to home
     }} />;
+  }
+
+  if (isOnyxSite) {
+    return <OnyxPropertyManagement />;
   }
 
   const handleNavigateToList = (filterStatus = null) => {
