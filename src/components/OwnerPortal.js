@@ -21,7 +21,10 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  PenTool,
+  Download,
+  Eye
 } from 'lucide-react';
 import OwnerApplicationForm from './OwnerApplicationForm';
 
@@ -30,6 +33,124 @@ const OwnerPortal = () => {
   const [selectedProperty, setSelectedProperty] = useState('all');
   const [currentView, setCurrentView] = useState('dashboard'); // dashboard, application-form
   const [selectedLead, setSelectedLead] = useState(null);
+  const [testStage, setTestStage] = useState(0); // 0: awaiting approval, 1: signed agreement, 2: property setup, 3: onboarded
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [documents, setDocuments] = useState([
+    {
+      id: 'doc-001',
+      name: 'Property Management Agreement',
+      description: 'Standard agreement outlining terms and conditions',
+      type: 'Management Agreement',
+      status: 'pending', // pending, signed
+      uploadedDate: '2024-01-15',
+      size: '245 KB'
+    },
+    {
+      id: 'doc-002',
+      name: 'W-9 Tax Form',
+      description: 'Required for tax reporting purposes',
+      type: 'Tax Form',
+      status: 'pending',
+      uploadedDate: '2024-01-15',
+      size: '128 KB'
+    },
+    {
+      id: 'doc-003',
+      name: 'Direct Deposit Authorization',
+      description: 'Setup automatic rent payments to your account',
+      type: 'Banking Form',
+      status: 'pending',
+      uploadedDate: '2024-01-15',
+      size: '95 KB'
+    }
+  ]);
+
+  // Map test stage to owner status and completion
+  const getOwnerStatus = () => {
+    switch(testStage) {
+      case 0:
+        return { status: 'awaiting approval', onboardingCompletion: 75 };
+      case 1:
+        return { status: 'onboarding', onboardingCompletion: 75 };
+      case 2:
+        return { status: 'onboarding', onboardingCompletion: 90 };
+      case 3:
+        return { status: 'completed', onboardingCompletion: 100 };
+      default:
+        return { status: 'awaiting approval', onboardingCompletion: 75 };
+    }
+  };
+
+  const handleTestAdvance = () => {
+    if (testStage < 3) {
+      const newStage = testStage + 1;
+      setTestStage(newStage);
+      if (newStage === 3) {
+        // Show completion modal and confetti
+        setTimeout(() => {
+          setShowCompletionModal(true);
+          triggerConfetti();
+        }, 500);
+      }
+    } else {
+      setTestStage(0); // Reset to beginning
+      setShowCompletionModal(false);
+    }
+  };
+
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      // Create confetti from multiple positions
+      createConfetti(Object.assign({}, defaults, { 
+        particleCount, 
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } 
+      }));
+      createConfetti(Object.assign({}, defaults, { 
+        particleCount, 
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } 
+      }));
+    }, 250);
+  };
+
+  const createConfetti = (options) => {
+    // Simple confetti implementation using DOM elements
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const confettiCount = options.particleCount || 50;
+
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = (options.origin.x * 100) + '%';
+      confetti.style.top = (options.origin.y * 100 + 50) + '%';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.setProperty('--x', (Math.random() - 0.5) * 200 + 'vw');
+      confetti.style.setProperty('--y', (Math.random() * 100 + 100) + 'vh');
+      confetti.style.setProperty('--rotation', Math.random() * 360 + 'deg');
+      document.body.appendChild(confetti);
+
+      setTimeout(() => {
+        confetti.remove();
+      }, 3000);
+    }
+  };
+
+  const ownerStatus = getOwnerStatus();
 
   // Mock data for the logged-in owner
   // This would come from authentication/API in real app
@@ -39,9 +160,9 @@ const OwnerPortal = () => {
     lastName: 'Chen',
     email: 'mchen@email.com',
     phone: '(555) 345-6789',
-    status: 'awaiting approval', // Can be: qualified, application, awaiting approval, onboarding
+    status: ownerStatus.status, // Can be: qualified, application, awaiting approval, onboarding, completed
     stage: 'Awaiting Approval',
-    onboardingCompletion: 75, // Progress percentage
+    onboardingCompletion: ownerStatus.onboardingCompletion, // Progress percentage
     properties: [
       {
         id: 'prop-002',
@@ -96,6 +217,25 @@ const OwnerPortal = () => {
   const handlePropertyClick = (property) => {
     setSelectedLead(currentOwner);
     setCurrentView('application-form');
+  };
+
+  const handleSignDocument = (docId) => {
+    // In a real app, this would open a signing interface
+    const updatedDocs = documents.map(doc => 
+      doc.id === docId ? { ...doc, status: 'signed' } : doc
+    );
+    setDocuments(updatedDocs);
+    alert('Document signed successfully! It will now appear in your Files.');
+  };
+
+  const handleViewDocument = (docId) => {
+    // In a real app, this would open a document viewer
+    alert('Opening document viewer...');
+  };
+
+  const handleDownloadDocument = (docId) => {
+    // In a real app, this would download the document
+    alert('Downloading document...');
   };
 
   const handleBackToDashboard = () => {
@@ -222,6 +362,12 @@ const OwnerPortal = () => {
           </div>
 
           <div className="header-actions">
+            <button className="test-advance-button" onClick={handleTestAdvance}>
+              {testStage === 0 && 'Test Approve'}
+              {testStage === 1 && 'Continue to Property Setup'}
+              {testStage === 2 && 'Complete Onboarding'}
+              {testStage === 3 && 'Reset to Start'}
+            </button>
             <button className="icon-button">
               <Bell size={20} />
               <span className="notification-badge">1</span>
@@ -250,7 +396,7 @@ const OwnerPortal = () => {
                 <h2 className="onboarding-stages-title">Your Onboarding Progress</h2>
                 
                 <div className="onboarding-stages">
-                  <div className={`stage ${currentOwner.status === 'qualified' || currentOwner.status === 'application' || currentOwner.status === 'awaiting approval' || currentOwner.status === 'onboarding' ? 'completed' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'qualified' || currentOwner.status === 'application' || currentOwner.status === 'awaiting approval' || currentOwner.status === 'onboarding' || currentOwner.status === 'completed' ? 'completed' : ''}`}>
                     <div className="stage-indicator">
                       <CheckCircle size={20} />
                     </div>
@@ -262,7 +408,7 @@ const OwnerPortal = () => {
 
                   <div className="stage-connector"></div>
 
-                  <div className={`stage ${currentOwner.status === 'awaiting approval' || currentOwner.status === 'onboarding' ? 'current' : currentOwner.status === 'onboarding' ? 'completed' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'awaiting approval' ? 'current' : (currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
                     <div className="stage-indicator">
                       {currentOwner.status === 'awaiting approval' ? <Clock size={20} /> : <CheckCircle size={20} />}
                     </div>
@@ -276,9 +422,9 @@ const OwnerPortal = () => {
 
                   <div className="stage-connector"></div>
 
-                  <div className={`stage ${currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion >= 75 ? 'current' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 75 ? 'current' : (currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion > 75) || currentOwner.status === 'completed' ? 'completed' : ''}`}>
                     <div className="stage-indicator">
-                      <FileText size={20} />
+                      {currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 75 ? <FileText size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
                       <div className="stage-title">Signed Agreement</div>
@@ -288,9 +434,9 @@ const OwnerPortal = () => {
 
                   <div className="stage-connector"></div>
 
-                  <div className={`stage ${currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion >= 90 ? 'current' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 90 ? 'current' : currentOwner.status === 'completed' ? 'completed' : ''}`}>
                     <div className="stage-indicator">
-                      <Home size={20} />
+                      {currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 90 ? <Home size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
                       <div className="stage-title">Property Setup</div>
@@ -325,6 +471,60 @@ const OwnerPortal = () => {
                   </div>
                 )}
               </div>
+
+              {/* Documents to Sign */}
+              {documents.filter(doc => doc.status === 'pending').length > 0 && 
+               currentOwner.status === 'onboarding' && 
+               currentOwner.onboardingCompletion === 75 && (
+                <div className="section-container">
+                  <h2 className="section-title">Documents to Sign</h2>
+                  <p className="section-subtitle">REVIEW AND SIGN REQUIRED DOCUMENTS</p>
+                  
+                  <div className="documents-grid">
+                    {documents.filter(doc => doc.status === 'pending').map((doc) => (
+                      <div key={doc.id} className="document-card">
+                        <div className="document-card-header">
+                          <div className="document-icon-wrapper">
+                            <FileText size={24} />
+                          </div>
+                          <div className="document-info">
+                            <h3 className="document-name">{doc.name}</h3>
+                            <p className="document-description">{doc.description}</p>
+                            <div className="document-meta">
+                              <span className="document-type">{doc.type}</span>
+                              <span className="document-divider">•</span>
+                              <span className="document-size">{doc.size}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="document-actions">
+                          <button 
+                            className="btn-document-secondary"
+                            onClick={() => handleViewDocument(doc.id)}
+                          >
+                            <Eye size={16} />
+                            View
+                          </button>
+                          <button 
+                            className="btn-document-secondary"
+                            onClick={() => handleDownloadDocument(doc.id)}
+                          >
+                            <Download size={16} />
+                            Download
+                          </button>
+                          <button 
+                            className="btn-document-primary"
+                            onClick={() => handleSignDocument(doc.id)}
+                          >
+                            <PenTool size={16} />
+                            Sign Document
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Pending Properties */}
               <div className="section-container">
@@ -417,6 +617,30 @@ const OwnerPortal = () => {
           )}
         </main>
       </div>
+
+      {/* Completion Modal */}
+      {showCompletionModal && (
+        <div className="modal-overlay" onClick={() => setShowCompletionModal(false)}>
+          <div className="completion-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="completion-icon">
+              <CheckCircle size={80} />
+            </div>
+            <h2 className="completion-title">🎉 Congratulations!</h2>
+            <p className="completion-message">
+              You're all set and ready to go! Your onboarding is complete.
+            </p>
+            <p className="completion-submessage">
+              Welcome to the RentVine family. We're excited to help you manage your properties!
+            </p>
+            <button 
+              className="completion-button"
+              onClick={() => setShowCompletionModal(false)}
+            >
+              Let's Get Started
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

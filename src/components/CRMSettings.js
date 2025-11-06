@@ -15,6 +15,122 @@ import {
 } from 'lucide-react';
 import { mockUsers, mockTemplates, currentUser, mockLeadQuestionnaireForm, mockOnboardingForm } from '../mockData';
 
+// Custom fields that already exist in the property management system
+export const customPropertyFields = {
+  hoa: {
+    category: 'HOA',
+    fields: [
+      { id: 'hoa_name', label: 'HOA Name', type: 'text' },
+      { id: 'hoa_address', label: 'HOA Address', type: 'text' },
+      { id: 'hoa_phone', label: 'HOA Phone', type: 'phone' },
+      { id: 'hoa_email', label: 'HOA Email', type: 'email' }
+    ]
+  },
+  alarm: {
+    category: 'Alarm System',
+    fields: [
+      { id: 'alarm_pad', label: 'Numeric Alarm Pad', type: 'text' },
+      { id: 'alarm_company', label: 'Alarm Company', type: 'text' },
+      { id: 'alarm_provider', label: 'Alarm Provider', type: 'text' },
+      { id: 'alarm_price', label: 'Alarm System Price', type: 'number' }
+    ]
+  },
+  wifi: {
+    category: 'WiFi',
+    fields: [
+      { id: 'wifi_password', label: 'WiFi Password', type: 'text' },
+      { id: 'router_type', label: 'Type of Router', type: 'text' },
+      { id: 'internet_provider', label: 'Internet Provider', type: 'text' }
+    ]
+  },
+  parking: {
+    category: 'Parking',
+    fields: [
+      { id: 'parking_space_number', label: 'Parking Space Number', type: 'text' }
+    ]
+  },
+  lockbox: {
+    category: 'Lockbox',
+    fields: [
+      { id: 'lockbox_code', label: 'Lockbox Code', type: 'text' }
+    ]
+  },
+  sprinkler: {
+    category: 'Sprinkler System',
+    fields: [
+      { id: 'sprinkler_test_date', label: 'Date of Test', type: 'date' }
+    ]
+  },
+  homeWarranty: {
+    category: 'Home Warranty',
+    fields: [
+      { id: 'warranty_info', label: 'Warranty Info', type: 'text' },
+      { id: 'warranty_phone', label: 'Phone Number', type: 'phone' },
+      { id: 'warranty_exp_date', label: 'Expiration Date', type: 'date' },
+      { id: 'warranty_coverage', label: 'Coverage', type: 'textarea' }
+    ]
+  },
+  appliances: {
+    category: 'Appliances & Amenities',
+    fields: [
+      { id: 'has_washer', label: 'Washer', type: 'checkbox' },
+      { id: 'has_dryer', label: 'Dryer', type: 'checkbox' }
+    ]
+  },
+  smokeDetectors: {
+    category: 'Smoke Detectors',
+    fields: [
+      { id: 'smoke_detector_count', label: 'How Many', type: 'number' }
+    ]
+  },
+  landscape: {
+    category: 'Landscape Maintenance',
+    fields: [
+      { id: 'has_landscaping', label: 'Has Landscaping', type: 'select', options: ['Yes', 'No'] },
+      { id: 'landscape_company', label: 'Landscape Company', type: 'text' }
+    ]
+  },
+  roof: {
+    category: 'Roof',
+    fields: [
+      { id: 'roof_age', label: 'Age of Roof', type: 'number' }
+    ]
+  },
+  pool: {
+    category: 'Pool',
+    fields: [
+      { id: 'pool_cleaning_company', label: 'Pool Cleaning Company', type: 'text' },
+      { id: 'pool_manufacturer', label: 'Manufacturer', type: 'text' }
+    ]
+  },
+  trash: {
+    category: 'Trash',
+    fields: [
+      { id: 'trash_company', label: 'Trash Company', type: 'text' },
+      { id: 'trash_day', label: 'Trash Day', type: 'select', options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] }
+    ]
+  },
+  mailbox: {
+    category: 'Mailbox',
+    fields: [
+      { id: 'mailbox_on_site', label: 'Is It On Site', type: 'select', options: ['Yes', 'No'] },
+      { id: 'mailbox_address', label: 'Mailbox Address (if not on site)', type: 'text' }
+    ]
+  },
+  airFilter: {
+    category: 'Air Filter Info',
+    fields: [
+      { id: 'air_filter_size', label: 'Air Filter Size', type: 'text' }
+    ]
+  },
+  septic: {
+    category: 'Septic Tank / Plumbing',
+    fields: [
+      { id: 'septic_inspection_date', label: 'Date Inspected', type: 'date' }
+    ]
+  }
+};
+
 const CRMSettings = ({ onEditForm }) => {
   const [activeSection, setActiveSection] = useState('permissions');
   const [users, setUsers] = useState(mockUsers);

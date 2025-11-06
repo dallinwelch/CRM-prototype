@@ -15,9 +15,12 @@ import {
   ArrowLeft,
   AlertCircle,
   Settings,
-  Copy
+  Copy,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { mockLeadQuestionnaireForm, mockOnboardingForm } from '../mockData';
+import { customPropertyFields } from './CRMSettings';
 
 const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
   const [form, setForm] = useState(null);
@@ -25,6 +28,7 @@ const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
   const [hasChanges, setHasChanges] = useState(false);
   const [editingField, setEditingField] = useState(null);
   const [draggedField, setDraggedField] = useState(null);
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   // Load form data on mount
   useEffect(() => {
@@ -50,6 +54,66 @@ const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
   ];
 
   const isLeadQuestionnaire = formType === 'lead-questionnaire';
+
+  const toggleCategory = (categoryKey) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryKey]: !prev[categoryKey]
+    }));
+  };
+
+  const addCustomPropertyField = (sectionId, customField) => {
+    const section = form.sections.find(s => s.id === sectionId);
+    const newField = {
+      id: `field-${Date.now()}`,
+      label: customField.label,
+      type: customField.type,
+      required: false,
+      order: section.fields.length + 1,
+      helpText: '',
+      options: customField.options ? [...customField.options] : undefined,
+      customPropertyId: customField.id // Link to the property system
+    };
+    
+    setForm({
+      ...form,
+      sections: form.sections.map(s =>
+        s.id === sectionId
+          ? { ...s, fields: [...s.fields, newField] }
+          : s
+      )
+    });
+    setHasChanges(true);
+  };
+
+  const addCustomPropertyCategory = (sectionId, categoryKey, categoryData) => {
+    const section = form.sections.find(s => s.id === sectionId);
+    const timestamp = Date.now();
+    
+    // Create all fields from this category
+    const newFields = categoryData.fields.map((field, index) => ({
+      id: `field-${timestamp}-${index}`,
+      label: field.label,
+      type: field.type,
+      required: false,
+      order: section.fields.length + index + 1,
+      helpText: '',
+      options: field.options ? [...field.options] : undefined,
+      customPropertyId: field.id,
+      categoryGroup: categoryKey, // Mark as part of a category group
+      categoryLabel: categoryData.category
+    }));
+    
+    setForm({
+      ...form,
+      sections: form.sections.map(s =>
+        s.id === sectionId
+          ? { ...s, fields: [...s.fields, ...newFields] }
+          : s
+      )
+    });
+    setHasChanges(true);
+  };
 
   const addSection = () => {
     const newSection = {
@@ -351,7 +415,7 @@ const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
     
     return (
       <div 
-        className={`preview-field-item ${isDragging ? 'dragging' : ''}`}
+        className={`preview-field-item ${isDragging ? 'dragging' : ''} ${field.categoryGroup ? 'grouped-field' : ''}`}
         draggable
         onDragStart={(e) => handleDragStart(e, sectionId, field.id)}
         onDragOver={handleDragOver}
@@ -374,6 +438,11 @@ const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
               placeholder="Field label"
             />
             <div className="preview-field-badges">
+              {field.categoryGroup && (
+                <span className="field-category-badge" title="Auto-syncs with Property Info">
+                  {field.categoryLabel}
+                </span>
+              )}
               {field.required && <span className="field-required-badge">Required</span>}
               <span className="field-type-badge">{field.type}</span>
             </div>
@@ -588,6 +657,57 @@ const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
                   })}
                 </div>
               </div>
+
+              {/* Custom Property Fields - Only for Onboarding Application */}
+              {formType === 'onboarding-application' && (
+                <div className="custom-property-fields-section">
+                  <div className="custom-fields-section-header">
+                    <h4>Add from Property Info</h4>
+                    <p>Add grouped fields from your property management system - they will auto-sync</p>
+                  </div>
+                  <div className="custom-property-categories">
+                    {Object.entries(customPropertyFields).map(([key, categoryData]) => (
+                      <div key={key} className="custom-property-category">
+                        <button 
+                          className="custom-category-header"
+                          onClick={() => toggleCategory(key)}
+                        >
+                          {expandedCategories[key] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                          <span className="custom-category-name">{categoryData.category}</span>
+                          <span className="custom-field-count">{categoryData.fields.length} fields</span>
+                        </button>
+                        {expandedCategories[key] && (
+                          <div className="custom-category-fields">
+                            <div className="category-add-all-button-wrapper">
+                              <button
+                                className="category-add-all-button"
+                                onClick={() => addCustomPropertyCategory(currentSection.id, key, categoryData)}
+                                title={`Add all ${categoryData.category} fields`}
+                              >
+                                <Plus size={16} />
+                                <span>Add All {categoryData.category} Fields</span>
+                              </button>
+                            </div>
+                            <div className="category-fields-preview">
+                              <span className="preview-label">Includes:</span>
+                              {categoryData.fields.map((field, index) => (
+                                <span key={field.id} className="field-preview-item">
+                                  {field.label}
+                                  {index < categoryData.fields.length - 1 ? ', ' : ''}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="custom-fields-info">
+                    <AlertCircle size={14} />
+                    <span>Fields added from Property Info automatically sync with your property management data</span>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
