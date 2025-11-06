@@ -461,9 +461,9 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                   fontWeight: '600'
                 }}
               >
-                {isApplicant ? '📋 Applicant' : '🎯 Lead'}
+                {/* {isApplicant ? '📋 Applicant' : '🎯 Lead'} */}
               </span>
-              <span className="detail-separator">•</span>
+              {/* <span className="detail-separator">•</span> */}
               {/* Status Badge */}
               <span 
                 className="status-badge"

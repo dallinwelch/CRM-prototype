@@ -186,6 +186,58 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
 
   const filteredLeads = getFilteredLeads();
 
+  // Calculate counts for each filter
+  const getFilterCounts = () => {
+    const counts = {
+      all: 0,
+      lead: 0,
+      application: 0,
+      'awaiting approval': 0,
+      onboarding: 0,
+      archived: 0
+    };
+
+    leads.forEach(lead => {
+      // Count for "All Active" - excludes archived and completed
+      if (lead.status !== 'archived' && lead.status !== 'completed') {
+        counts.all++;
+      }
+
+      // Count for "Lead" - includes both 'lead' and 'qualified' status
+      if (lead.status === 'lead' || lead.status === 'qualified') {
+        counts.lead++;
+      }
+
+      // Count for "Application"
+      if (lead.status === 'application') {
+        counts.application++;
+      }
+
+      // Count for "Awaiting Approval"
+      if (lead.status === 'awaiting approval') {
+        counts['awaiting approval']++;
+      }
+
+      // Count for "Onboarding"
+      if (lead.status === 'onboarding') {
+        counts.onboarding++;
+      }
+
+      // Count for "Archived" - includes both archived and completed
+      if (lead.status === 'archived' || lead.status === 'completed') {
+        counts.archived++;
+      }
+    });
+
+    return counts;
+  };
+
+  const filterCounts = getFilterCounts();
+
+  const formatCount = (count) => {
+    return count > 99 ? '99+' : count.toString();
+  };
+
   const toggleLeadSelection = (leadId) => {
     const newSelected = new Set(selectedLeads);
     if (newSelected.has(leadId)) {
@@ -396,37 +448,37 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
             className={`filter-tab ${statusFilter === 'all' ? 'active' : ''}`}
             onClick={() => setStatusFilter('all')}
           >
-            All Active
+            All Active <span className="filter-count">{formatCount(filterCounts.all)}</span>
           </button>
           <button
             className={`filter-tab ${statusFilter === 'lead' ? 'active' : ''}`}
             onClick={() => setStatusFilter('lead')}
           >
-            Lead
+            Lead <span className="filter-count">{formatCount(filterCounts.lead)}</span>
           </button>
           <button
             className={`filter-tab ${statusFilter === 'application' ? 'active' : ''}`}
             onClick={() => setStatusFilter('application')}
           >
-            Application
+            Application <span className="filter-count">{formatCount(filterCounts.application)}</span>
           </button>
           <button
             className={`filter-tab ${statusFilter === 'awaiting approval' ? 'active' : ''}`}
             onClick={() => setStatusFilter('awaiting approval')}
           >
-            Awaiting Approval
+            Awaiting Approval <span className="filter-count">{formatCount(filterCounts['awaiting approval'])}</span>
           </button>
           <button
             className={`filter-tab ${statusFilter === 'onboarding' ? 'active' : ''}`}
             onClick={() => setStatusFilter('onboarding')}
           >
-            Onboarding
+            Onboarding <span className="filter-count">{formatCount(filterCounts.onboarding)}</span>
           </button>
           <button
             className={`filter-tab ${statusFilter === 'archived' ? 'active' : ''}`}
             onClick={() => setStatusFilter('archived')}
           >
-            Archived
+            Archived <span className="filter-count">{formatCount(filterCounts.archived)}</span>
           </button>
         </div>
       </div>

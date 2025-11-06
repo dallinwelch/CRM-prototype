@@ -53,23 +53,21 @@ const Sidebar = ({ activeTab, setActiveTab, activeSubTab, setActiveSubTab, isOpe
       )}
       
       <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-header">
-          <Briefcase size={32} className="logo-icon" />
-          <h1 className="logo-text">RentVine CRM</h1>
-          {/* Mobile close button */}
-          {onClose && (
-            <button 
-              className="mobile-menu-toggle"
-              onClick={onClose}
-              style={{
-                marginLeft: 'auto',
-                display: 'none'
-              }}
-            >
-              <X size={24} />
-            </button>
-          )}
-        </div>
+        {/* Mobile close button */}
+        {onClose && (
+          <button 
+            className="mobile-menu-toggle mobile-close-btn"
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              display: 'none'
+            }}
+          >
+            <X size={24} />
+          </button>
+        )}
 
         <nav className="sidebar-nav">
         {/* Portfolio Section with Sub-nav */}
@@ -170,10 +168,10 @@ const Sidebar = ({ activeTab, setActiveTab, activeSubTab, setActiveSubTab, isOpe
 
       <div className="sidebar-footer">
         <div className="user-profile">
-          <div className="user-avatar">SJ</div>
+          {/* <div className="user-avatar">SJ</div> */}
           <div className="user-info">
-            <div className="user-name">Sarah Johnson</div>
-            <div className="user-role">Manager</div>
+            <div className="user-name">Rentvine PM LLC</div>
+            {/* <div className="user-role"></div> */}
           </div>
         </div>
       </div>
