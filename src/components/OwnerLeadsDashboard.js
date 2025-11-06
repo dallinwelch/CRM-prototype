@@ -52,7 +52,7 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
     lead: filteredLeads.filter(l => l.status === 'lead').length,
     application: filteredLeads.filter(l => l.status === 'application').length,
     awaitingApproval: filteredLeads.filter(l => l.status === 'awaiting approval').length,
-    onboarding: filteredLeads.filter(l => l.onboardingStatus === 'in_progress').length
+    onboarding: filteredLeads.filter(l => l.status === 'onboarding').length
   };
 
   // Calculate funnel metrics
@@ -1719,7 +1719,7 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
 
       {/* Onboarding Section - Full Width Row */}
       <div>
-        {/* Approved Leads / Onboarding */}
+        {/* Onboarding Leads */}
         <div className="leads-section">
             <div className="section-header collapsible" onClick={() => toggleSection('approved')}>
               <h2 className="section-title">
@@ -1730,8 +1730,8 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
                     <ChevronDown size={20} />
                   )}
                 </span>
-                <Clock size={20} style={{ color: '#8b5cf6' }} />
-                In Onboarding ({filteredLeads.filter(l => l.onboardingStatus === 'in_progress').length})
+                <UserCheck size={20} style={{ color: '#10b981' }} />
+                Onboarding ({filteredLeads.filter(l => l.status === 'onboarding').length})
               </h2>
               <button 
                 className="btn-link"
@@ -1745,9 +1745,9 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
             </div>
             {!collapsedSections.approved && (
               <div className="leads-list">
-                {filteredLeads.filter(l => l.onboardingStatus === 'in_progress').length > 0 ? (
-                  filteredLeads.filter(l => l.onboardingStatus === 'in_progress').slice(0, 5).map(lead => (
-                    <OnboardingStatusCard key={lead.id} lead={lead} onClick={onNavigateToLead} />
+                {filteredLeads.filter(l => l.status === 'onboarding').length > 0 ? (
+                  filteredLeads.filter(l => l.status === 'onboarding').slice(0, 5).map(lead => (
+                    <LeadCard key={lead.id} lead={lead} onClick={onNavigateToLead} />
                   ))
                 ) : (
                   <div className="empty-state">No leads in onboarding</div>

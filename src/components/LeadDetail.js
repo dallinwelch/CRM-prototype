@@ -19,7 +19,8 @@ import {
   AlertCircle,
   MoreVertical,
   Trash2,
-  Save
+  Save,
+  Building
 } from 'lucide-react';
 import { currentUser, mockOnboardingForm } from '../mockData';
 
@@ -36,6 +37,13 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [sectionFormData, setSectionFormData] = useState({});
   const [modalPropertyCount, setModalPropertyCount] = useState(1);
+  const [showSubmitForApprovalModal, setShowSubmitForApprovalModal] = useState(false);
+  const [showApproveApplicationModal, setShowApproveApplicationModal] = useState(false);
+  const [showRequestChangesModal, setShowRequestChangesModal] = useState(false);
+  const [showDenyApplicationModal, setShowDenyApplicationModal] = useState(false);
+  const [changeRequestMessage, setChangeRequestMessage] = useState('');
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const lead = leads.find(l => l.id === leadId);
   
@@ -259,11 +267,37 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
     // In a real app, this would save to the backend
     console.log('Saving section data:', sectionFormData);
     
-    // Update the lead's onboardingAnswers with the new data
-    lead.onboardingAnswers = {
-      ...lead.onboardingAnswers,
-      ...sectionFormData
-    };
+    // Check if we're editing a specific property
+    const editingPropertyIndex = sectionFormData._editingPropertyIndex;
+    
+    if (editingPropertyIndex !== undefined) {
+      // We're editing a specific property, so map property-0-* fields back to property-X-* fields
+      const updatedData = {};
+      Object.keys(sectionFormData).forEach(key => {
+        if (key.startsWith('property-0-')) {
+          const fieldId = key.replace('property-0-', '');
+          const newKey = `property-${editingPropertyIndex}-${fieldId}`;
+          updatedData[newKey] = sectionFormData[key];
+        } else if (key !== '_editingPropertyIndex') {
+          updatedData[key] = sectionFormData[key];
+        }
+      });
+      
+      // Update the lead's onboardingAnswers with the mapped data
+      lead.onboardingAnswers = {
+        ...lead.onboardingAnswers,
+        ...updatedData
+      };
+    } else {
+      // Normal save for non-property sections or multiple properties
+      const cleanedData = {...sectionFormData};
+      delete cleanedData._editingPropertyIndex;
+      
+      lead.onboardingAnswers = {
+        ...lead.onboardingAnswers,
+        ...cleanedData
+      };
+    }
     
     // Close modal
     setShowSectionModal(false);
@@ -276,6 +310,51 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
     setSelectedSection(null);
     setSectionFormData({});
     setModalPropertyCount(1);
+  };
+
+  const handleSubmitForApproval = () => {
+    // Update lead status to "pending_review"
+    console.log('Submitting application for approval:', lead.id);
+    // In real app, this would call API and send notification
+    setShowSubmitForApprovalModal(false);
+    // Update the lead object (in real app this would be from backend)
+    lead.applicationStatus = 'pending_review';
+  };
+
+  const handleApproveApplication = () => {
+    console.log('Approving application:', lead.id);
+    // Update status to approved and send email
+    setShowApproveApplicationModal(false);
+    lead.applicationStatus = 'approved';
+    lead.status = 'onboarding';
+  };
+
+  const handleRequestChanges = () => {
+    console.log('Requesting changes:', changeRequestMessage);
+    // Send email and change status back to applicant (approved) status
+    setShowRequestChangesModal(false);
+    lead.status = 'approved'; // Back to applicant status
+    lead.applicationStatus = 'changes_requested';
+    setChangeRequestMessage('');
+  };
+
+  const handleDenyApplication = () => {
+    console.log('Denying application:', lead.id);
+    setShowDenyApplicationModal(false);
+    lead.status = 'denied';
+    lead.applicationStatus = 'denied';
+  };
+
+  const handleAddToPortfolio = () => {
+    console.log('Adding to portfolio:', lead.id);
+    // Trigger confetti
+    setShowConfetti(true);
+    // Show celebration modal
+    setShowCelebrationModal(true);
+    // Hide confetti after 5 seconds
+    setTimeout(() => setShowConfetti(false), 5000);
+    // Update lead status
+    lead.status = 'completed';
   };
 
   const displayData = isEditing ? editedData : lead;
@@ -417,7 +496,37 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
         </div>
 
         <div className="detail-actions">
-          {/* Actions moved to Lead Info section */}
+          {/* Add to Portfolio button - shows when application is approved and onboarding complete */}
+          {lead.status === 'onboarding' && lead.applicationStatus === 'approved' && (
+            <button 
+              className="btn btn-success"
+              onClick={handleAddToPortfolio}
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white',
+                fontWeight: '600',
+                padding: '12px 24px',
+                fontSize: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                border: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+              }}
+            >
+              <CheckCircle size={20} />
+              Add to Portfolio
+            </button>
+          )}
         </div>
       </div>
 
@@ -1299,23 +1408,528 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                     </div>
                   )}
 
-                  {/* Ready for Approval */}
-                  {lead.onboardingCompletion === 100 && (
+                  {/* Application Actions Based on Status */}
+                  {lead.onboardingCompletion === 100 && !lead.applicationStatus && (
                     <div style={{
                       marginTop: '20px',
-                      padding: '14px 18px',
+                      padding: '18px',
                       background: '#f0fdf4',
                       border: '1px solid #bbf7d0',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px'
+                      borderRadius: '8px'
                     }}>
-                      <CheckCircle size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                      <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#166534' }}>
-                        <strong>Application Complete:</strong> All required sections have been completed. 
-                        This application is ready for your review and approval.
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                        <CheckCircle size={20} style={{ color: '#10b981', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#166534' }}>
+                          <strong>Application Complete:</strong> All required sections have been completed.
+                        </div>
                       </div>
+                      <button
+                        onClick={() => setShowSubmitForApprovalModal(true)}
+                        className="btn btn-success"
+                        style={{ width: '100%' }}
+                      >
+                        <Send size={18} />
+                        Submit for Approval
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Pending Review Status */}
+                  {lead.applicationStatus === 'pending_review' && (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '18px',
+                      background: '#eff6ff',
+                      border: '1px solid #dbeafe',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <Clock size={20} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#1e40af', flex: 1 }}>
+                          <strong>Pending Manager Review:</strong> This application is awaiting manager approval.
+                        </div>
+                      </div>
+
+                      {/* Manager Actions */}
+                      {currentUser.permissions.approveOwnerOnboarding && (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => setShowApproveApplicationModal(true)}
+                            className="btn btn-success"
+                            style={{ flex: 1 }}
+                          >
+                            <CheckCircle size={18} />
+                            Approve & Send to Onboarding
+                          </button>
+                          <button
+                            onClick={() => setShowRequestChangesModal(true)}
+                            className="btn btn-warning"
+                            style={{ flex: 1 }}
+                          >
+                            <AlertCircle size={18} />
+                            Request Changes
+                          </button>
+                          <button
+                            onClick={() => setShowDenyApplicationModal(true)}
+                            className="btn btn-danger"
+                          >
+                            <XCircle size={18} />
+                            Deny
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Changes Requested Status */}
+                  {lead.applicationStatus === 'changes_requested' && (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '18px',
+                      background: '#fef3c7',
+                      border: '1px solid #fde047',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#92400e' }}>
+                          <strong>Changes Requested:</strong> The manager has requested changes to this application. Please review the feedback and resubmit.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Approved - Shows Onboarding Link */}
+                  {lead.applicationStatus === 'approved' && (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '18px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <CheckCircle size={20} style={{ color: '#10b981', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#166534' }}>
+                          <strong>Application Approved!</strong> This applicant has been approved and can now proceed to property onboarding.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* PROPERTY ONBOARDING SECTION - Shows after application approval */}
+            {lead.applicationStatus === 'approved' && (
+              <div className="detail-section full-width" style={{ 
+                border: '2px solid #10b981', 
+                borderRadius: '12px',
+                overflow: 'hidden'
+              }}>
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '16px 20px',
+                    background: '#f0fdf4',
+                    borderBottom: '1px solid #bbf7d0'
+                  }}
+                >
+                  <h3 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Building size={20} />
+                    Property Onboarding
+                  </h3>
+                  <span style={{
+                    padding: '4px 12px',
+                    background: '#10b981',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '600'
+                  }}>
+                    IN PROGRESS
+                  </span>
+                </div>
+
+                <div style={{ padding: '24px' }}>
+                  {/* Non-repeatable sections (Owner Information, Management Preferences, Documents) */}
+                  {mockOnboardingForm.sections
+                    .filter(section => !section.repeatable)
+                    .map((section, sectionIndex) => {
+                      // Calculate completion for this section
+                      const requiredFields = section.fields.filter(f => f.required);
+                      const completedFields = requiredFields.filter(f => lead.onboardingAnswers?.[f.id]);
+                      const isComplete = requiredFields.length === 0 || completedFields.length === requiredFields.length;
+                      
+                      return (
+                        <div 
+                          key={section.id}
+                          style={{
+                            marginBottom: '24px',
+                            padding: '20px',
+                            background: 'white',
+                            borderRadius: '8px',
+                            border: '1px solid #d1d5db',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onClick={() => handleOpenSectionModal(section)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '16px'
+                          }}>
+                            <h4 style={{ 
+                              margin: 0, 
+                              fontSize: '14px', 
+                              fontWeight: '600', 
+                              color: '#374151',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              {section.title}
+                            </h4>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenSectionModal(section);
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: '#3b82f6',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = '#2563eb';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '#3b82f6';
+                                }}
+                              >
+                                <Edit size={14} />
+                                Edit
+                              </button>
+                              {isComplete && (
+                                <span style={{ 
+                                  fontSize: '12px', 
+                                  fontWeight: '600',
+                                  color: '#10b981',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  <CheckCircle size={14} />
+                                  Complete
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div style={{ display: 'grid', gap: '12px' }}>
+                            {section.fields.map((field) => {
+                              const hasValue = lead.onboardingAnswers?.[field.id];
+                              return (
+                                <div 
+                                  key={field.id}
+                                  style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '8px',
+                                    padding: '8px 12px',
+                                    background: hasValue ? '#f0fdf4' : '#f9fafb',
+                                    borderRadius: '6px',
+                                    fontSize: '13px'
+                                  }}
+                                >
+                                  <CheckCircle 
+                                    size={16} 
+                                    style={{ 
+                                      color: hasValue ? '#10b981' : '#d1d5db',
+                                      flexShrink: 0 
+                                    }} 
+                                  />
+                                  <span style={{ color: '#374151', flex: 1 }}>
+                                    {field.label}
+                                  </span>
+                                  {hasValue && (
+                                    <span style={{ 
+                                      color: '#6b7280', 
+                                      fontSize: '12px',
+                                      fontStyle: 'italic'
+                                    }}>
+                                      {String(lead.onboardingAnswers[field.id]).substring(0, 40)}
+                                      {String(lead.onboardingAnswers[field.id]).length > 40 ? '...' : ''}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })
+                  }
+
+                  {/* Property-specific information grouped by property */}
+                  {lead.properties && lead.properties.length > 0 && (
+                    <div>
+                      <h4 style={{ 
+                        margin: '0 0 16px 0', 
+                        fontSize: '15px', 
+                        fontWeight: '600', 
+                        color: '#374151',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <Home size={18} />
+                        Properties
+                      </h4>
+                      {lead.properties.map((property, propertyIndex) => {
+                        // Get property-specific section
+                        const propertySection = mockOnboardingForm.sections.find(s => s.repeatable);
+                        
+                        // Calculate completion for this property
+                        const requiredFields = propertySection.fields.filter(f => f.required);
+                        const completedFields = requiredFields.filter(f => {
+                          const fieldKey = `property-${propertyIndex}-${f.id}`;
+                          return lead.onboardingAnswers?.[fieldKey];
+                        });
+                        const completionPercent = requiredFields.length > 0 
+                          ? Math.round((completedFields.length / requiredFields.length) * 100)
+                          : 100;
+                        
+                        return (
+                          <div 
+                            key={propertyIndex}
+                            style={{
+                              marginBottom: propertyIndex < lead.properties.length - 1 ? '16px' : '0',
+                              padding: '20px',
+                              background: 'white',
+                              borderRadius: '8px',
+                              border: '2px solid #e5e7eb',
+                              borderLeftWidth: '4px',
+                              borderLeftColor: completionPercent === 100 ? '#10b981' : '#f59e0b',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onClick={() => {
+                              const propertySection = mockOnboardingForm.sections.find(s => s.repeatable);
+                              if (propertySection) {
+                                setSelectedSection(propertySection);
+                                
+                                // Initialize form data with THIS specific property's data
+                                const initialData = {};
+                                setModalPropertyCount(1); // Edit single property at a time
+                                
+                                propertySection.fields.forEach(field => {
+                                  const fieldKey = `property-${propertyIndex}-${field.id}`;
+                                  initialData[`property-0-${field.id}`] = lead.onboardingAnswers?.[fieldKey] || '';
+                                });
+                                
+                                // Store which property index we're editing
+                                initialData._editingPropertyIndex = propertyIndex;
+                                
+                                setSectionFormData(initialData);
+                                setShowSectionModal(true);
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-2px)';
+                              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                          >
+                            <div style={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              marginBottom: '16px'
+                            }}>
+                              <h5 style={{ 
+                                margin: 0, 
+                                fontSize: '14px', 
+                                fontWeight: '600', 
+                                color: '#374151',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                              }}>
+                                <Building size={16} />
+                                Property {propertyIndex + 1}
+                              </h5>
+                              <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '12px'
+                              }}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const propertySection = mockOnboardingForm.sections.find(s => s.repeatable);
+                                    if (propertySection) {
+                                      setSelectedSection(propertySection);
+                                      
+                                      // Initialize form data with THIS specific property's data
+                                      const initialData = {};
+                                      setModalPropertyCount(1);
+                                      
+                                      propertySection.fields.forEach(field => {
+                                        const fieldKey = `property-${propertyIndex}-${field.id}`;
+                                        initialData[`property-0-${field.id}`] = lead.onboardingAnswers?.[fieldKey] || '';
+                                      });
+                                      
+                                      initialData._editingPropertyIndex = propertyIndex;
+                                      
+                                      setSectionFormData(initialData);
+                                      setShowSectionModal(true);
+                                    }
+                                  }}
+                                  style={{
+                                    padding: '6px 12px',
+                                    background: '#3b82f6',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = '#2563eb';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#3b82f6';
+                                  }}
+                                >
+                                  <Edit size={14} />
+                                  Edit
+                                </button>
+                                <div style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: '8px'
+                                }}>
+                                  <span style={{ 
+                                    fontSize: '12px', 
+                                    fontWeight: '600',
+                                    color: completionPercent === 100 ? '#10b981' : '#f59e0b'
+                                  }}>
+                                    {completionPercent}% Complete
+                                  </span>
+                                  <div style={{
+                                    width: '60px',
+                                    height: '6px',
+                                    background: '#e5e7eb',
+                                    borderRadius: '3px',
+                                    overflow: 'hidden'
+                                  }}>
+                                    <div style={{
+                                      width: `${completionPercent}%`,
+                                      height: '100%',
+                                      background: completionPercent === 100 ? '#10b981' : '#f59e0b',
+                                      transition: 'width 0.3s ease'
+                                    }} />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Property Address */}
+                            <div style={{ 
+                              padding: '12px',
+                              background: '#f9fafb',
+                              borderRadius: '6px',
+                              marginBottom: '12px',
+                              fontSize: '13px',
+                              fontWeight: '500',
+                              color: '#6b7280'
+                            }}>
+                              {property.address || `Property ${propertyIndex + 1}`}
+                            </div>
+
+                            {/* All fields for this property */}
+                            <div style={{ display: 'grid', gap: '8px' }}>
+                              {propertySection.fields.map((field) => {
+                                const fieldKey = `property-${propertyIndex}-${field.id}`;
+                                const hasValue = lead.onboardingAnswers?.[fieldKey];
+                                return (
+                                  <div 
+                                    key={fieldKey}
+                                    style={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      gap: '8px',
+                                      padding: '8px 12px',
+                                      background: hasValue ? '#f0fdf4' : '#fafafa',
+                                      borderRadius: '6px',
+                                      fontSize: '13px'
+                                    }}
+                                  >
+                                    <CheckCircle 
+                                      size={16} 
+                                      style={{ 
+                                        color: hasValue ? '#10b981' : '#d1d5db',
+                                        flexShrink: 0 
+                                      }} 
+                                    />
+                                    <span style={{ 
+                                      color: '#374151', 
+                                      flex: 1,
+                                      fontWeight: field.required ? '500' : '400'
+                                    }}>
+                                      {field.label}
+                                      {field.required && <span style={{ color: '#ef4444' }}> *</span>}
+                                    </span>
+                                    {hasValue && (
+                                      <span style={{ 
+                                        color: '#6b7280', 
+                                        fontSize: '12px',
+                                        fontStyle: 'italic',
+                                        maxWidth: '200px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                      }}>
+                                        {String(lead.onboardingAnswers[fieldKey])}
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -2329,6 +2943,368 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
           </div>
         </div>
       )}
+
+      {/* Submit for Approval Modal */}
+      {showSubmitForApprovalModal && (
+        <div className="modal-overlay" onClick={() => setShowSubmitForApprovalModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Submit Application for Approval</h2>
+              <button className="btn-close" onClick={() => setShowSubmitForApprovalModal(false)}>
+                <XCircle size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p>
+                You are about to submit this application for manager review. Once submitted:
+              </p>
+              <ul style={{ marginTop: '12px', paddingLeft: '20px', lineHeight: '1.8' }}>
+                <li>The manager will be notified to review the application</li>
+                <li>You won't be able to make changes until approved or changes are requested</li>
+                <li>The applicant will receive a confirmation email</li>
+              </ul>
+              <div style={{ marginTop: '16px', padding: '12px', background: '#f0f9ff', borderRadius: '8px', border: '1px solid #e0f2fe' }}>
+                <strong style={{ color: '#0369a1' }}>✓ All Required Information Complete</strong>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#0c4a6e' }}>
+                  All required application sections have been completed and validated.
+                </p>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowSubmitForApprovalModal(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={handleSubmitForApproval}>
+                <Send size={18} />
+                Submit for Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Application Modal */}
+      {showApproveApplicationModal && (
+        <div className="modal-overlay" onClick={() => setShowApproveApplicationModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Approve Application</h2>
+              <button className="btn-close" onClick={() => setShowApproveApplicationModal(false)}>
+                <XCircle size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p>
+                Approving <strong>{lead.firstName} {lead.lastName}</strong>'s application will:
+              </p>
+              <ul style={{ marginTop: '12px', paddingLeft: '20px', lineHeight: '1.8' }}>
+                <li><strong>Send an approval email</strong> with next steps for property onboarding</li>
+                <li><strong>Change status to "Onboarding"</strong> - they can now complete property details</li>
+                <li><strong>Grant access</strong> to non-required property information forms</li>
+                <li><strong>Create onboarding tasks</strong> for both the owner and your team</li>
+              </ul>
+              <div style={{ marginTop: '16px', padding: '12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                <strong style={{ color: '#166534' }}>✓ Ready for Approval</strong>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#166534' }}>
+                  All required application fields have been reviewed and verified.
+                </p>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowApproveApplicationModal(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-success" onClick={handleApproveApplication}>
+                <CheckCircle size={18} />
+                Approve & Send to Onboarding
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request Changes Modal */}
+      {showRequestChangesModal && (
+        <div className="modal-overlay" onClick={() => setShowRequestChangesModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Request Changes</h2>
+              <button className="btn-close" onClick={() => setShowRequestChangesModal(false)}>
+                <XCircle size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p>
+                Request changes to <strong>{lead.firstName} {lead.lastName}</strong>'s application:
+              </p>
+              <div style={{ marginTop: '16px' }}>
+                <label className="form-label">
+                  What needs to be changed? <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <textarea
+                  className="form-input"
+                  rows={5}
+                  value={changeRequestMessage}
+                  onChange={(e) => setChangeRequestMessage(e.target.value)}
+                  placeholder="Please provide specific details about what information needs to be updated or corrected..."
+                  style={{ resize: 'vertical' }}
+                />
+                <p style={{ marginTop: '8px', fontSize: '13px', color: '#64748b' }}>
+                  This message will be sent to the applicant via email and they'll be able to make updates.
+                </p>
+              </div>
+              <div style={{ marginTop: '16px', padding: '12px', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+                <strong style={{ color: '#92400e' }}>⚠ Application will return to "In Progress"</strong>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#92400e' }}>
+                  The applicant will be notified and can make the requested changes.
+                </p>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowRequestChangesModal(false)}>
+                Cancel
+              </button>
+              <button 
+                className="btn btn-warning" 
+                onClick={handleRequestChanges}
+                disabled={!changeRequestMessage.trim()}
+              >
+                <AlertCircle size={18} />
+                Send Change Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deny Application Modal */}
+      {showDenyApplicationModal && (
+        <div className="modal-overlay" onClick={() => setShowDenyApplicationModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Deny Application</h2>
+              <button className="btn-close" onClick={() => setShowDenyApplicationModal(false)}>
+                <XCircle size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p>
+                Are you sure you want to deny <strong>{lead.firstName} {lead.lastName}</strong>'s application?
+              </p>
+              <div style={{ marginTop: '16px', padding: '12px', background: '#fef2f2', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                <strong style={{ color: '#dc2626' }}>⚠ This action will:</strong>
+                <ul style={{ marginTop: '8px', paddingLeft: '20px', color: '#991b1b', lineHeight: '1.8' }}>
+                  <li>Send a denial notification email to the applicant</li>
+                  <li>Change the lead status to "Denied"</li>
+                  <li>Remove this application from the active pipeline</li>
+                </ul>
+              </div>
+              <div style={{ marginTop: '16px' }}>
+                <label className="form-label">
+                  Reason for Denial (Optional)
+                </label>
+                <textarea
+                  className="form-input"
+                  rows={3}
+                  placeholder="Provide a reason for the denial (this will be included in the notification email)..."
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowDenyApplicationModal(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={handleDenyApplication}>
+                <XCircle size={18} />
+                Deny Application
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Celebration Modal - Add to Portfolio */}
+      {showCelebrationModal && (
+        <div className="modal-overlay" style={{ background: 'rgba(0, 0, 0, 0.75)' }}>
+          <div 
+            className="modal" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '600px',
+              textAlign: 'center',
+              background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
+              border: '3px solid #10b981',
+              position: 'relative',
+              overflow: 'visible'
+            }}
+          >
+            {/* Success Icon */}
+            <div style={{
+              width: '120px',
+              height: '120px',
+              margin: '-60px auto 24px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+              border: '6px solid white'
+            }}>
+              <CheckCircle size={64} style={{ color: 'white' }} />
+            </div>
+
+            <div className="modal-content" style={{ padding: '0 32px 32px' }}>
+              <h2 style={{ 
+                fontSize: '32px', 
+                fontWeight: '800', 
+                color: '#065f46',
+                marginBottom: '16px',
+                lineHeight: '1.2'
+              }}>
+                🎉 Welcome to the Portfolio!
+              </h2>
+              
+              <p style={{ 
+                fontSize: '18px', 
+                color: '#374151', 
+                marginBottom: '32px',
+                lineHeight: '1.6'
+              }}>
+                <strong>{lead.firstName} {lead.lastName}</strong> has been successfully added to your portfolio!
+              </p>
+
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                textAlign: 'left',
+                marginBottom: '24px'
+              }}>
+                <h3 style={{ 
+                  fontSize: '16px', 
+                  fontWeight: '600', 
+                  color: '#065f46',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  ✅ What happens next:
+                </h3>
+                <ul style={{ 
+                  listStyle: 'none', 
+                  padding: 0, 
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>📧</span>
+                    <div>
+                      <strong style={{ color: '#374151', display: 'block' }}>Welcome email sent</strong>
+                      <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                        Confirmation and next steps delivered to {lead.email}
+                      </span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>🏠</span>
+                    <div>
+                      <strong style={{ color: '#374151', display: 'block' }}>
+                        {lead.properties?.length || 0} {lead.properties?.length === 1 ? 'property' : 'properties'} added
+                      </strong>
+                      <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                        Now visible in your active portfolio
+                      </span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>🔐</span>
+                    <div>
+                      <strong style={{ color: '#374151', display: 'block' }}>Portal access granted</strong>
+                      <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                        Owner can now access their client dashboard
+                      </span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>📋</span>
+                    <div>
+                      <strong style={{ color: '#374151', display: 'block' }}>Tasks created</strong>
+                      <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                        Initial setup tasks added to your workflow
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <button 
+                className="btn btn-success"
+                onClick={() => {
+                  setShowCelebrationModal(false);
+                  onBack(); // Navigate back to dashboard
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  width: '100%',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  border: 'none'
+                }}
+              >
+                View Portfolio
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confetti Effect */}
+      {showConfetti && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 9999,
+          overflow: 'hidden'
+        }}>
+          {[...Array(100)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                width: '10px',
+                height: '10px',
+                background: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'][i % 5],
+                top: '-10px',
+                left: `${Math.random() * 100}%`,
+                animation: `confetti-fall ${2 + Math.random() * 3}s linear forwards`,
+                transform: `rotate(${Math.random() * 360}deg)`,
+                opacity: Math.random()
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes confetti-fall {
+          to {
+            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };

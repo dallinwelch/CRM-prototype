@@ -30,7 +30,7 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
   // Calculate section completion for a lead in onboarding
   const calculateSectionCompletion = (lead) => {
     // Only calculate for leads with application status or those in onboarding
-    const isApplication = lead.status === 'application' || lead.status === 'qualified';
+    const isApplication = lead.status === 'application';
     const isInOnboarding = lead.onboardingStatus === 'in_progress';
     
     if (!isApplication && !isInOnboarding) {
@@ -109,6 +109,11 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
     if (statusFilter !== 'all') {
       if (statusFilter === 'archived') {
         filtered = filtered.filter(l => l.status === 'archived' || l.status === 'completed');
+      } else if (statusFilter === 'onboarding') {
+        filtered = filtered.filter(l => l.status === 'onboarding');
+      } else if (statusFilter === 'lead') {
+        // Lead filter includes both 'lead' and 'qualified' status
+        filtered = filtered.filter(l => l.status === 'lead' || l.status === 'qualified');
       } else {
         filtered = filtered.filter(l => l.status === statusFilter);
       }
@@ -238,6 +243,13 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
       displayColor = '#6b7280';
       displayIcon = Archive;
     }
+    // If status is 'onboarding'
+    else if (lead.status === 'onboarding') {
+      displayLabel = 'Onboarding';
+      displayColor = '#10b981';
+      displayIcon = CheckCircle;
+      showCompletion = false;
+    }
     // If status is 'awaiting approval'
     else if (lead.status === 'awaiting approval') {
       displayLabel = 'Awaiting Approval';
@@ -245,8 +257,8 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
       displayIcon = UserCheck;
       showCompletion = false;
     }
-    // If status is 'application' or 'qualified' (these show as "Application")
-    else if (lead.status === 'application' || lead.status === 'qualified') {
+    // If status is 'application' (actively working on application)
+    else if (lead.status === 'application') {
       // Check if they've completed all sections (4/4)
       if (completion && completion.completed === completion.total) {
         displayLabel = 'Awaiting Approval';
@@ -261,7 +273,7 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
         showCompletion = true; // Show (X/4)
       }
     }
-    // Everything else is a Lead (lead, partial, etc.)
+    // Everything else is a Lead (lead, qualified, partial, etc.)
     else {
       displayLabel = 'Lead';
       displayColor = '#f59e0b';
@@ -403,6 +415,12 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
             onClick={() => setStatusFilter('awaiting approval')}
           >
             Awaiting Approval
+          </button>
+          <button
+            className={`filter-tab ${statusFilter === 'onboarding' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('onboarding')}
+          >
+            Onboarding
           </button>
           <button
             className={`filter-tab ${statusFilter === 'archived' ? 'active' : ''}`}

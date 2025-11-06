@@ -11,7 +11,7 @@ const addDefaultValues = (lead) => ({
 
 export const mockLeads = [
   // ONYX PROPERTY MANAGEMENT FORM LEADS
-  // Qualified lead with 2 complete properties
+  // LEAD - Just filled out questionnaire, no application yet
   {
     id: 'lead-onyx-001',
     firstName: 'Sarah',
@@ -62,6 +62,28 @@ export const mockLeads = [
       'field-email': 'sarah.martinez@email.com',
       'field-phone': '(555) 401-2345',
       'field-num-properties': '2'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE
+      'field-legal-entity': 'Martinez Properties LLC',
+      'field-tax-id': '22-3344556',
+      'field-mailing-address': '456 Riverside Drive, Austin, TX 78704',
+      'field-business-structure': 'LLC',
+      'field-emergency-contact': 'Roberto Martinez',
+      'field-emergency-phone': '(555) 401-2346',
+      // Section 2: Property Information - COMPLETE (2/4 complete)
+      'property-0-field-property-address': '456 Riverside Drive, Austin, TX 78704',
+      'property-0-field-property-bedrooms': '3',
+      'property-0-field-property-bathrooms': '2',
+      'property-0-field-square-footage': '1850',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '2400',
+      'property-1-field-property-address': '789 Elm Street, Austin, TX 78705',
+      'property-1-field-property-bedrooms': '2',
+      'property-1-field-property-bathrooms': '1.5',
+      'property-1-field-square-footage': '1200',
+      'property-1-field-pets-allowed': 'No',
+      'property-1-field-min-rent': '1800'
     },
     timeline: [
       {
@@ -119,6 +141,13 @@ export const mockLeads = [
       'field-email': 'michael.chen@email.com',
       'field-phone': '(555) 402-3456',
       'field-num-properties': '1'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE (1/4)
+      'field-legal-entity': 'Michael Chen',
+      'field-tax-id': '33-4455667',
+      'field-mailing-address': '321 Park Avenue, Austin, TX 78701',
+      'field-business-structure': 'Individual'
     },
     timeline: [
       {
@@ -201,16 +230,14 @@ export const mockLeads = [
     createdAt: '2025-11-03T11:20:00Z',
     updatedAt: '2025-11-03T11:20:00Z',
     lastReachedOut: null,
-    completionPercentage: 100,
+    completionPercentage: 55,
     source: 'Onyx Contact Form',
     leadSource: 'Onyx Website',
     properties: [],
     questionnaireAnswers: {
       'field-name': 'David Thompson',
       'field-email': 'david.thompson@email.com',
-      'field-phone': '(555) 404-5678',
-      'inquiry-type': 'Property Management Inquiry',
-      'comment': 'I\'m considering purchasing a rental property and want to understand your property management services and pricing before I make the purchase.'
+      'field-phone': '(555) 404-5678'
     },
     timeline: [
       {
@@ -221,10 +248,10 @@ export const mockLeads = [
         user: 'System'
       }
     ],
-    notes: 'Prospective property owner - considering purchase.',
+    notes: 'Prospective property owner - inquired about services.',
     noteCount: 1,
     hasBeenContacted: false,
-    initialMessage: 'I\'m considering purchasing a rental property and want to understand your property management services and pricing before I make the purchase.',
+    initialMessage: 'I\'m considering purchasing a rental property and want to understand your property management services.',
     sourceMetadata: {
       formName: 'Onyx Contact Form',
       referrerUrl: 'https://onyxpm.com/owners'
@@ -296,6 +323,38 @@ export const mockLeads = [
       'field-email': 'lisa.rodriguez@email.com',
       'field-phone': '(555) 405-6789',
       'field-num-properties': '3'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE
+      'field-legal-entity': 'Rodriguez Property Management LLC',
+      'field-tax-id': '44-5566778',
+      'field-mailing-address': '111 Main Street, Austin, TX 78701',
+      'field-business-structure': 'LLC',
+      'field-emergency-contact': 'Carlos Rodriguez',
+      'field-emergency-phone': '(555) 405-6790',
+      // Section 2: Property Information - COMPLETE (3 properties)
+      'property-0-field-property-address': '111 Main Street, Austin, TX 78701',
+      'property-0-field-property-bedrooms': '4',
+      'property-0-field-property-bathrooms': '3',
+      'property-0-field-square-footage': '2500',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '3200',
+      'property-1-field-property-address': '222 Oak Boulevard, Austin, TX 78702',
+      'property-1-field-property-bedrooms': '2',
+      'property-1-field-property-bathrooms': '2',
+      'property-1-field-square-footage': '1400',
+      'property-1-field-pets-allowed': 'No',
+      'property-1-field-min-rent': '1900',
+      'property-2-field-property-address': '333 Sunset Lane, Austin, TX 78703',
+      'property-2-field-property-bedrooms': '3',
+      'property-2-field-property-bathrooms': '2',
+      'property-2-field-square-footage': '1600',
+      'property-2-field-pets-allowed': 'Yes',
+      'property-2-field-min-rent': '2100',
+      // Section 3: Management Preferences - COMPLETE (3/4)
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '750',
+      'field-showing-instructions': 'All properties require 24-hour notice for showings'
     },
     timeline: [
       {
@@ -437,23 +496,53 @@ export const mockLeads = [
     lastName: 'Johnson',
     email: 'emily.j@email.com',
     phone: '(555) 234-5678',
-    status: 'lead',
-    stage: 'Lead Created',
+    status: 'qualified',
+    stage: 'Qualified',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-22T09:15:00Z',
-    updatedAt: '2025-10-22T09:15:00Z',
+    updatedAt: '2025-10-23T15:30:00Z',
     lastReachedOut: '2025-10-23T10:30:00Z',
-    completionPercentage: 45,
+    completionPercentage: 100,
     source: 'Word of Mouth',
     leadSource: 'Word of Mouth',
-    properties: [],
+    properties: [
+      {
+        id: 'prop-002-1',
+        address: '567 Maple Avenue, Austin, TX 78703',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '1650',
+        minRentPrice: '2200',
+        agreementLength: '1',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      },
+      {
+        id: 'prop-002-2',
+        address: '890 Cedar Lane, Austin, TX 78704',
+        bedrooms: '2',
+        bathrooms: '1',
+        sqft: '1100',
+        minRentPrice: '1600',
+        agreementLength: '1',
+        homeType: 'condo',
+        furnished: 'unfurnished',
+        repairLimit: '300',
+        currentlyLiveInHome: 'no',
+        petsAllowed: false
+      }
+    ],
     questionnaireAnswers: {
       'field-firstname': 'Emily',
       'field-lastname': 'Johnson',
       'field-email': 'emily.j@email.com',
       'field-phone': '(555) 234-5678',
       'field-num-properties': '2',
-      'field-timeline': 'Immediately'
+      'field-timeline': 'Immediately',
+      'field-experience': 'No'
     },
     timeline: [
       {
@@ -466,14 +555,21 @@ export const mockLeads = [
       {
         id: 'event-003-note',
         type: 'note_added',
-        description: 'Referred by current client - David Thompson',
+        description: 'Referred by current client',
         timestamp: '2025-10-22T09:20:00Z',
+        user: 'Mike Davis'
+      },
+      {
+        id: 'event-003-qualified',
+        type: 'status_changed',
+        description: 'Lead qualified - properties added',
+        timestamp: '2025-10-23T15:30:00Z',
         user: 'Mike Davis'
       }
     ],
-    notes: 'Referred by current client - David Thompson',
+    notes: 'Referred by current client - properties added',
     noteCount: 1,
-    hasBeenContacted: false,
+    hasBeenContacted: true,
     initialMessage: null
   },
   {
@@ -488,7 +584,7 @@ export const mockLeads = [
     createdAt: '2025-10-25T14:20:00Z',
     updatedAt: '2025-10-25T14:20:00Z',
     lastReachedOut: null,
-    completionPercentage: 30,
+    completionPercentage: 20,
     source: 'Website Form',
     leadSource: 'PMW',
     emailBounced: true, // Example of bounced email
@@ -496,9 +592,7 @@ export const mockLeads = [
     properties: [],
     questionnaireAnswers: {
       'field-firstname': 'Robert',
-      'field-lastname': 'Taylor',
-      'field-email': 'rtaylor@email.com',
-      'field-phone': '(555) 678-9012'
+      'field-email': 'rtaylor@email.com'
     },
     timeline: [
       {
@@ -509,10 +603,10 @@ export const mockLeads = [
         user: 'System'
       }
     ],
-    notes: 'Started form but did not complete property details',
+    notes: 'Minimal info provided',
     noteCount: 1,
     hasBeenContacted: false,
-    initialMessage: 'Started the form but abandoned midway'
+    initialMessage: null
   },
   {
     id: 'lead-007',
@@ -520,16 +614,36 @@ export const mockLeads = [
     lastName: 'Anderson',
     email: 'lisa.anderson@email.com',
     phone: '(555) 789-0123',
-    status: 'lead',
-    stage: 'Lead Created',
+    status: 'qualified',
+    stage: 'Qualified',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-26T10:45:00Z',
-    updatedAt: '2025-10-26T10:45:00Z',
-    completionPercentage: 60,
+    updatedAt: '2025-10-28T11:15:00Z',
+    lastReachedOut: '2025-10-27T14:20:00Z',
+    completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    properties: [],
+    properties: [
+      {
+        id: 'prop-007-1',
+        address: '234 Willow Street, Austin, TX 78705',
+        bedrooms: '4',
+        bathrooms: '2.5',
+        sqft: '2100',
+        minRentPrice: '2800',
+        agreementLength: '2',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '750',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      }
+    ],
     questionnaireAnswers: {
+      'field-firstname': 'Lisa',
+      'field-lastname': 'Anderson',
+      'field-email': 'lisa.anderson@email.com',
+      'field-phone': '(555) 789-0123',
       'field-num-properties': '1',
       'field-timeline': '1-3 months',
       'field-experience': 'No'
@@ -541,12 +655,19 @@ export const mockLeads = [
         description: 'Lead created from website form',
         timestamp: '2025-10-26T10:45:00Z',
         user: 'System'
+      },
+      {
+        id: 'event-011-qualified',
+        type: 'status_changed',
+        description: 'Lead qualified - property details completed',
+        timestamp: '2025-10-28T11:15:00Z',
+        user: 'Mike Davis'
       }
     ],
-    notes: 'Interested but needs more time to decide',
+    notes: 'Property details completed - ready for review',
     noteCount: 1,
     hasBeenContacted: true,
-    initialMessage: null
+    initialMessage: 'Looking into property management options'
   },
   {
     id: 'lead-008',
@@ -554,17 +675,66 @@ export const mockLeads = [
     lastName: 'Wilson',
     email: 'jwilson@email.com',
     phone: '(555) 890-1234',
-    status: 'lead',
-    stage: 'Lead Created',
+    status: 'qualified',
+    stage: 'Qualified',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-27T08:00:00Z',
-    updatedAt: '2025-10-27T08:00:00Z',
-    completionPercentage: 25,
+    updatedAt: '2025-10-29T16:45:00Z',
+    lastReachedOut: '2025-10-27T08:15:00Z',
+    completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
-    properties: [],
+    properties: [
+      {
+        id: 'prop-008-1',
+        address: '445 Oak Drive, Austin, TX 78701',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '1800',
+        minRentPrice: '2500',
+        agreementLength: '1',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      },
+      {
+        id: 'prop-008-2',
+        address: '778 Pine Street, Austin, TX 78702',
+        bedrooms: '2',
+        bathrooms: '2',
+        sqft: '1300',
+        minRentPrice: '1850',
+        agreementLength: '1',
+        homeType: 'townhouse',
+        furnished: 'unfurnished',
+        repairLimit: '400',
+        currentlyLiveInHome: 'no',
+        petsAllowed: false
+      },
+      {
+        id: 'prop-008-3',
+        address: '990 Elm Court, Austin, TX 78703',
+        bedrooms: '4',
+        bathrooms: '3',
+        sqft: '2400',
+        minRentPrice: '3200',
+        agreementLength: '2',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '1000',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      }
+    ],
     questionnaireAnswers: {
-      'field-num-properties': '3'
+      'field-firstname': 'James',
+      'field-lastname': 'Wilson',
+      'field-email': 'jwilson@email.com',
+      'field-phone': '(555) 890-1234',
+      'field-num-properties': '3',
+      'field-timeline': 'Within 1 month'
     },
     timeline: [
       {
@@ -573,9 +743,16 @@ export const mockLeads = [
         description: 'Lead created from phone inquiry',
         timestamp: '2025-10-27T08:00:00Z',
         user: 'Sarah Johnson'
+      },
+      {
+        id: 'event-012-qualified',
+        type: 'status_changed',
+        description: 'Lead qualified - all 3 properties added',
+        timestamp: '2025-10-29T16:45:00Z',
+        user: 'Sarah Johnson'
       }
     ],
-    notes: 'Multiple properties, needs to gather more info before completing form',
+    notes: 'All 3 properties added - ready for onboarding',
     noteCount: 1,
     hasBeenContacted: true,
     initialMessage: 'I have 3 properties that need management'
@@ -591,13 +768,14 @@ export const mockLeads = [
     assignedTo: null,
     createdAt: '2025-10-23T16:30:00Z',
     updatedAt: '2025-10-23T16:30:00Z',
-    completionPercentage: 50,
+    lastReachedOut: null,
+    completionPercentage: 35,
     source: 'Referral',
     leadSource: 'Email',
     properties: [],
     questionnaireAnswers: {
-      'field-num-properties': '1',
-      'field-timeline': 'Within 1 month'
+      'field-email': 'pmoore@email.com',
+      'field-num-properties': '1'
     },
     timeline: [
       {
@@ -608,7 +786,10 @@ export const mockLeads = [
         user: 'Jessica Martinez'
       }
     ],
-    notes: 'Referred by existing owner - Jennifer Lee'
+    notes: 'Referred by existing owner - Jennifer Lee',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: null
   },
   {
     id: 'lead-010',
@@ -621,7 +802,8 @@ export const mockLeads = [
     assignedTo: null,
     createdAt: '2025-10-27T11:15:00Z',
     updatedAt: '2025-10-27T11:15:00Z',
-    completionPercentage: 35,
+    lastReachedOut: null,
+    completionPercentage: 25,
     source: 'Website Form',
     leadSource: 'SMS',
     emailBounced: false,
@@ -629,8 +811,7 @@ export const mockLeads = [
     properties: [],
     questionnaireAnswers: {
       'field-firstname': 'Christopher',
-      'field-email': 'cbrown@email.com',
-      'field-phone': '(800) 555-0100'
+      'field-email': 'cbrown@email.com'
     },
     timeline: [
       {
@@ -641,7 +822,10 @@ export const mockLeads = [
         user: 'System'
       }
     ],
-    notes: 'Form abandoned after contact info'
+    notes: 'Minimal contact info provided',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: null
   },
   {
     id: 'lead-011',
@@ -649,16 +833,50 @@ export const mockLeads = [
     lastName: 'Davis',
     email: 'mdavis@email.com',
     phone: '(555) 123-7890',
-    status: 'lead',
-    stage: 'Lead Created',
+    status: 'qualified',
+    stage: 'Qualified',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-21T13:00:00Z',
-    updatedAt: '2025-10-21T13:00:00Z',
-    completionPercentage: 70,
+    updatedAt: '2025-10-23T14:20:00Z',
+    lastReachedOut: '2025-10-22T10:00:00Z',
+    completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    properties: [],
+    properties: [
+      {
+        id: 'prop-011-1',
+        address: '156 Birch Avenue, Austin, TX 78704',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '1750',
+        minRentPrice: '2300',
+        agreementLength: '1',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      },
+      {
+        id: 'prop-011-2',
+        address: '489 Spruce Lane, Austin, TX 78705',
+        bedrooms: '2',
+        bathrooms: '1.5',
+        sqft: '1250',
+        minRentPrice: '1750',
+        agreementLength: '1',
+        homeType: 'condo',
+        furnished: 'unfurnished',
+        repairLimit: '350',
+        currentlyLiveInHome: 'no',
+        petsAllowed: false
+      }
+    ],
     questionnaireAnswers: {
+      'field-firstname': 'Michelle',
+      'field-lastname': 'Davis',
+      'field-email': 'mdavis@email.com',
+      'field-phone': '(555) 123-7890',
       'field-num-properties': '2',
       'field-timeline': 'Within 1 month',
       'field-experience': 'Yes',
@@ -671,9 +889,19 @@ export const mockLeads = [
         description: 'Lead created from website form',
         timestamp: '2025-10-21T13:00:00Z',
         user: 'System'
+      },
+      {
+        id: 'event-015-qualified',
+        type: 'status_changed',
+        description: 'Lead qualified - both properties added',
+        timestamp: '2025-10-23T14:20:00Z',
+        user: 'Sarah Johnson'
       }
     ],
-    notes: 'High completion rate - likely to finish form'
+    notes: 'Properties added - experienced owner looking to switch PM',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'Looking to switch from current property manager'
   },
   {
     id: 'lead-012',
@@ -686,13 +914,14 @@ export const mockLeads = [
     assignedTo: null,
     createdAt: '2025-10-28T09:30:00Z',
     updatedAt: '2025-10-28T09:30:00Z',
-    completionPercentage: 40,
+    lastReachedOut: null,
+    completionPercentage: 30,
     source: 'Website Form',
     leadSource: 'PMW',
     properties: [],
     questionnaireAnswers: {
-      'field-num-properties': '1',
-      'field-timeline': 'Immediately'
+      'field-phone': '(555) 234-8901',
+      'field-num-properties': '1'
     },
     timeline: [
       {
@@ -703,7 +932,10 @@ export const mockLeads = [
         user: 'System'
       }
     ],
-    notes: 'New lead - requires follow-up'
+    notes: 'New lead - requires follow-up',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: null
   },
 
   // QUALIFIED LEADS (8 examples)
@@ -714,7 +946,7 @@ export const mockLeads = [
     email: 'john.smith@email.com',
     phone: '(555) 123-4567',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-20T10:00:00Z',
     updatedAt: '2025-10-21T14:30:00Z',
@@ -755,6 +987,13 @@ export const mockLeads = [
       'property-0-field-bathrooms': '2',
       'property-0-field-currently-rented': 'Yes'
     },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE (1/4 sections complete)
+      'field-legal-entity': 'John Smith',
+      'field-tax-id': '12-3456789',
+      'field-mailing-address': '123 Main St, Austin, TX 78701',
+      'field-business-structure': 'Individual'
+    },
     timeline: [
       {
         id: 'event-001',
@@ -787,7 +1026,7 @@ export const mockLeads = [
     email: 'swilliams@email.com',
     phone: '(555) 456-7890',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-24T08:30:00Z',
     updatedAt: '2025-10-24T09:00:00Z',
@@ -819,6 +1058,22 @@ export const mockLeads = [
       'property-0-field-bathrooms': '2.5',
       'property-0-field-currently-rented': 'Yes'
     },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE
+      'field-legal-entity': 'Sarah Williams',
+      'field-tax-id': '98-7654321',
+      'field-mailing-address': '321 Elm St, Austin, TX 78704',
+      'field-business-structure': 'Individual',
+      'field-emergency-contact': 'Michael Williams',
+      'field-emergency-phone': '(555) 456-7891',
+      // Section 2: Property Information - COMPLETE (2/4 sections complete)
+      'property-0-field-property-address': '321 Elm St, Austin, TX 78704',
+      'property-0-field-property-bedrooms': '3',
+      'property-0-field-property-bathrooms': '2.5',
+      'property-0-field-square-footage': '2100',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '2800'
+    },
     timeline: [
       {
         id: 'event-007',
@@ -837,7 +1092,7 @@ export const mockLeads = [
     email: 'krodriguez@email.com',
     phone: '(555) 345-9012',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-19T15:00:00Z',
     updatedAt: '2025-10-20T10:00:00Z',
@@ -869,6 +1124,9 @@ export const mockLeads = [
       'property-0-field-bathrooms': '3',
       'property-0-field-currently-rented': 'Yes'
     },
+    onboardingAnswers: {
+      // 0/4 sections complete - not started onboarding yet
+    },
     timeline: [
       {
         id: 'event-017',
@@ -887,7 +1145,7 @@ export const mockLeads = [
     email: 'tmiller@email.com',
     phone: '(555) 456-0123',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: null,
     createdAt: '2025-10-25T12:00:00Z',
     updatedAt: '2025-10-25T16:45:00Z',
@@ -905,10 +1163,32 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Thomas',
+      'field-lastname': 'Miller',
+      'field-email': 'tmiller@email.com',
+      'field-phone': '(555) 456-0123',
       'field-num-properties': '1',
       'field-timeline': '1-3 months',
       'field-experience': 'No',
-      'field-additional-info': 'First rental property. Need guidance on the process.'
+      'field-additional-info': 'First rental property. Need guidance on the process.',
+      'property-0-field-address': '234 Cedar Ln, Austin, TX 78706',
+      'property-0-field-property-type': 'Condo',
+      'property-0-field-bedrooms': '2',
+      'property-0-field-bathrooms': '2',
+      'property-0-field-currently-rented': 'No'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE
+      'field-legal-entity': 'Thomas Miller',
+      'field-tax-id': '33-4455667',
+      'field-mailing-address': '234 Cedar Ln, Austin, TX 78706',
+      'field-business-structure': 'Individual',
+      // Section 2: Property Information - COMPLETE (2/4 sections complete)
+      'property-0-field-property-address': '234 Cedar Ln, Austin, TX 78706',
+      'property-0-field-property-bedrooms': '2',
+      'property-0-field-property-bathrooms': '2',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '2200'
     },
     timeline: [
       {
@@ -928,7 +1208,7 @@ export const mockLeads = [
     email: 'nwhite@email.com',
     phone: '(555) 567-1234',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-23T09:00:00Z',
     updatedAt: '2025-10-23T14:30:00Z',
@@ -946,9 +1226,25 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Nancy',
+      'field-lastname': 'White',
+      'field-email': 'nwhite@email.com',
+      'field-phone': '(555) 567-1234',
       'field-num-properties': '1',
       'field-timeline': 'Within 1 month',
-      'field-experience': 'No'
+      'field-experience': 'No',
+      'property-0-field-address': '567 Birch St, Austin, TX 78707',
+      'property-0-field-property-type': 'Single Family Home',
+      'property-0-field-bedrooms': '3',
+      'property-0-field-bathrooms': '2',
+      'property-0-field-currently-rented': 'No'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE (1/4 sections complete)
+      'field-legal-entity': 'Nancy White',
+      'field-tax-id': '55-6677889',
+      'field-mailing-address': '567 Birch St, Austin, TX 78707',
+      'field-business-structure': 'Individual'
     },
     timeline: [
       {
@@ -968,7 +1264,7 @@ export const mockLeads = [
     email: 'slee@email.com',
     phone: '(555) 678-2345',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-26T14:00:00Z',
     updatedAt: '2025-10-27T09:00:00Z',
@@ -986,10 +1282,42 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Steven',
+      'field-lastname': 'Lee',
+      'field-email': 'slee@email.com',
+      'field-phone': '(555) 678-2345',
       'field-num-properties': '1',
       'field-timeline': 'Immediately',
       'field-experience': 'Yes',
-      'field-additional-info': 'Large executive home. Looking for quality tenants only.'
+      'field-additional-info': 'Large executive home. Looking for quality tenants only.',
+      'property-0-field-address': '678 Walnut Ave, Austin, TX 78708',
+      'property-0-field-property-type': 'Single Family Home',
+      'property-0-field-bedrooms': '5',
+      'property-0-field-bathrooms': '4',
+      'property-0-field-currently-rented': 'No'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE
+      'field-legal-entity': 'Lee Family Trust',
+      'field-tax-id': '77-8899001',
+      'field-mailing-address': '678 Walnut Ave, Austin, TX 78708',
+      'field-business-structure': 'Trust',
+      'field-emergency-contact': 'Michelle Lee',
+      'field-emergency-phone': '(555) 678-2346',
+      // Section 2: Property Information - COMPLETE
+      'property-0-field-property-address': '678 Walnut Ave, Austin, TX 78708',
+      'property-0-field-property-bedrooms': '5',
+      'property-0-field-property-bathrooms': '4',
+      'property-0-field-square-footage': '5200',
+      'property-0-field-year-built': '2021',
+      'property-0-field-pets-allowed': 'No',
+      'property-0-field-min-rent': '4200',
+      'property-0-field-hoa': 'Walnut Hills Executive HOA',
+      'property-0-field-hoa-fee': '350',
+      // Section 3: Management Preferences - COMPLETE (3/4 sections complete)
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '2000',
+      'field-showing-instructions': 'White glove showing service required. Professional photos on file.'
     },
     timeline: [
       {
@@ -1009,7 +1337,7 @@ export const mockLeads = [
     email: 'bharris@email.com',
     phone: '(555) 789-3456',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-18T11:30:00Z',
     updatedAt: '2025-10-19T08:00:00Z',
@@ -1027,9 +1355,21 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Betty',
+      'field-lastname': 'Harris',
+      'field-email': 'bharris@email.com',
+      'field-phone': '(555) 789-3456',
       'field-num-properties': '1',
       'field-timeline': '1-3 months',
-      'field-experience': 'Yes'
+      'field-experience': 'Yes',
+      'property-0-field-address': '789 Ash Ct, Austin, TX 78709',
+      'property-0-field-property-type': 'Townhouse',
+      'property-0-field-bedrooms': '3',
+      'property-0-field-bathrooms': '2.5',
+      'property-0-field-currently-rented': 'Yes'
+    },
+    onboardingAnswers: {
+      // 0/4 sections complete - not started onboarding yet
     },
     timeline: [
       {
@@ -1049,7 +1389,7 @@ export const mockLeads = [
     email: 'rclark@email.com',
     phone: '(555) 890-4567',
     status: 'application',
-    stage: 'Qualified',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-27T10:00:00Z',
     updatedAt: '2025-10-27T15:30:00Z',
@@ -1067,9 +1407,35 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Richard',
+      'field-lastname': 'Clark',
+      'field-email': 'rclark@email.com',
+      'field-phone': '(555) 890-4567',
       'field-num-properties': '1',
       'field-timeline': 'Within 1 month',
-      'field-experience': 'No'
+      'field-experience': 'No',
+      'property-0-field-address': '890 Spruce Way, Austin, TX 78710',
+      'property-0-field-property-type': 'Townhouse',
+      'property-0-field-bedrooms': '2',
+      'property-0-field-bathrooms': '1.5',
+      'property-0-field-currently-rented': 'No'
+    },
+    onboardingAnswers: {
+      // Section 1: Owner Information - COMPLETE
+      'field-legal-entity': 'Richard Clark',
+      'field-tax-id': '99-0011223',
+      'field-mailing-address': '890 Spruce Way, Austin, TX 78710',
+      'field-business-structure': 'Individual',
+      // Section 2: Property Information - COMPLETE
+      'property-0-field-property-address': '890 Spruce Way, Austin, TX 78710',
+      'property-0-field-property-bedrooms': '2',
+      'property-0-field-property-bathrooms': '1.5',
+      'property-0-field-square-footage': '1350',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '1900',
+      // Section 3: Management Preferences - COMPLETE (3/4 sections complete)
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '500'
     },
     timeline: [
       {
@@ -1083,21 +1449,23 @@ export const mockLeads = [
     notes: 'Townhouse near university area'
   },
 
-  // APPROVED LEADS (not yet in onboarding) (4 examples)
+  // APPROVED LEADS - Now moved to onboarding (3 examples)
   {
     id: 'lead-019',
     firstName: 'Jennifer',
     lastName: 'Lewis',
     email: 'jlewis@email.com',
     phone: '(555) 901-5678',
-    status: 'awaiting approval',
-    stage: 'Approved',
+    status: 'onboarding',
+    stage: 'Onboarding',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-16T09:00:00Z',
     updatedAt: '2025-10-22T11:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    onboardingStatus: 'in_progress',
+    onboardingCompletion: 25,
     properties: [
       {
         id: 'prop-012',
@@ -1122,6 +1490,13 @@ export const mockLeads = [
       'property-0-field-bathrooms': '2.5',
       'property-0-field-currently-rented': 'Yes'
     },
+    onboardingAnswers: {
+      'field-legal-entity': 'Jennifer Lewis',
+      'field-tax-id': '11-2233445',
+      'field-mailing-address': '901 Hickory Blvd, Austin, TX 78711',
+      'field-business-structure': 'Individual'
+      // Only 25% complete - just started onboarding
+    },
     timeline: [
       {
         id: 'event-023',
@@ -1136,9 +1511,19 @@ export const mockLeads = [
         description: 'Lead approved by manager',
         timestamp: '2025-10-22T11:00:00Z',
         user: 'Sarah Johnson'
+      },
+      {
+        id: 'event-024-b',
+        type: 'onboarding_started',
+        description: 'Owner started onboarding process',
+        timestamp: '2025-10-22T14:00:00Z',
+        user: 'Jennifer Lewis'
       }
     ],
-    notes: 'Approved - awaiting onboarding invitation'
+    notes: 'Started onboarding - making progress',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: null
   },
   {
     id: 'lead-020',
@@ -1147,13 +1532,16 @@ export const mockLeads = [
     email: 'mwalker@email.com',
     phone: '(555) 012-6789',
     status: 'awaiting approval',
-    stage: 'Approved',
-    assignedTo: null,
+    stage: 'Awaiting Approval',
+    assignedTo: 'Mike Davis',
     createdAt: '2025-10-17T14:00:00Z',
-    updatedAt: '2025-10-23T16:00:00Z',
+    updatedAt: '2025-10-29T18:00:00Z',
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
+    onboardingStatus: 'in_progress',
+    onboardingCompletion: 100,
+    applicationStatus: 'pending_review', // Ready for manager approval
     properties: [
       {
         id: 'prop-013',
@@ -1165,9 +1553,41 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Matthew',
+      'field-lastname': 'Walker',
+      'field-email': 'mwalker@email.com',
+      'field-phone': '(555) 012-6789',
       'field-num-properties': '1',
       'field-timeline': 'Immediately',
-      'field-experience': 'No'
+      'field-experience': 'No',
+      'field-additional-info': 'First time landlord - looking for full service management',
+      'property-0-field-address': '123 Dogwood Dr, Austin, TX 78712',
+      'property-0-field-property-type': 'Single Family Home',
+      'property-0-field-bedrooms': '3',
+      'property-0-field-bathrooms': '2',
+      'property-0-field-currently-rented': 'No'
+    },
+    onboardingAnswers: {
+      'field-legal-entity': 'Matthew Walker',
+      'field-tax-id': '45-6789012',
+      'field-mailing-address': '123 Dogwood Dr, Austin, TX 78712',
+      'field-business-structure': 'Individual',
+      'field-emergency-contact': 'Sarah Walker',
+      'field-emergency-phone': '(555) 012-6790',
+      'property-0-field-property-address': '123 Dogwood Dr, Austin, TX 78712',
+      'property-0-field-property-bedrooms': '3',
+      'property-0-field-property-bathrooms': '2',
+      'property-0-field-square-footage': '1650',
+      'property-0-field-year-built': '2010',
+      'property-0-field-pets-allowed': 'No',
+      'property-0-field-min-rent': '2700',
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '500',
+      'field-showing-instructions': 'Property is vacant - lockbox on front door (code: 1234)',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Matthew Walker',
+      'field-signature-date': '2025-10-29'
     },
     timeline: [
       {
@@ -1183,9 +1603,26 @@ export const mockLeads = [
         description: 'Lead approved by manager',
         timestamp: '2025-10-23T16:00:00Z',
         user: 'Sarah Johnson'
+      },
+      {
+        id: 'event-026a',
+        type: 'onboarding_started',
+        description: 'Owner started onboarding application',
+        timestamp: '2025-10-24T09:00:00Z',
+        user: 'Matthew Walker'
+      },
+      {
+        id: 'event-026b',
+        type: 'application_completed',
+        description: 'Owner completed full onboarding application',
+        timestamp: '2025-10-29T18:00:00Z',
+        user: 'Matthew Walker'
       }
     ],
-    notes: 'Approved - onboarding email sent'
+    notes: 'Application completed - ready for final approval',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'First time landlord - looking for full service management'
   },
   {
     id: 'lead-021',
@@ -1194,13 +1631,16 @@ export const mockLeads = [
     email: 'dhall@email.com',
     phone: '(555) 123-7890',
     status: 'awaiting approval',
-    stage: 'Approved',
+    stage: 'Awaiting Approval',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-19T08:00:00Z',
-    updatedAt: '2025-10-24T10:00:00Z',
+    updatedAt: '2025-10-30T14:30:00Z',
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    onboardingStatus: 'in_progress',
+    onboardingCompletion: 100,
+    applicationStatus: 'pending_review', // Ready for manager approval
     properties: [
       {
         id: 'prop-014',
@@ -1212,9 +1652,41 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Dorothy',
+      'field-lastname': 'Hall',
+      'field-email': 'dhall@email.com',
+      'field-phone': '(555) 123-7890',
       'field-num-properties': '1',
       'field-timeline': '1-3 months',
-      'field-experience': 'Yes'
+      'field-experience': 'Yes',
+      'field-additional-info': 'Previously managed property myself. Ready for professional help.',
+      'property-0-field-address': '234 Magnolia Ln, Austin, TX 78713',
+      'property-0-field-property-type': 'Townhouse',
+      'property-0-field-bedrooms': '2',
+      'property-0-field-bathrooms': '2',
+      'property-0-field-currently-rented': 'Yes'
+    },
+    onboardingAnswers: {
+      'field-legal-entity': 'Dorothy Hall',
+      'field-tax-id': '67-8901234',
+      'field-mailing-address': '234 Magnolia Ln, Austin, TX 78713',
+      'field-business-structure': 'Individual',
+      'field-emergency-contact': 'Richard Hall',
+      'field-emergency-phone': '(555) 123-7891',
+      'property-0-field-property-address': '234 Magnolia Ln, Austin, TX 78713',
+      'property-0-field-property-bedrooms': '2',
+      'property-0-field-property-bathrooms': '2',
+      'property-0-field-square-footage': '1300',
+      'property-0-field-year-built': '2012',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '2100',
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '750',
+      'field-showing-instructions': 'Current tenant - requires 48 hours notice for showings',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Dorothy Hall',
+      'field-signature-date': '2025-10-30'
     },
     timeline: [
       {
@@ -1230,9 +1702,26 @@ export const mockLeads = [
         description: 'Lead approved by manager',
         timestamp: '2025-10-24T10:00:00Z',
         user: 'Sarah Johnson'
+      },
+      {
+        id: 'event-028a',
+        type: 'onboarding_started',
+        description: 'Owner started onboarding application',
+        timestamp: '2025-10-25T11:00:00Z',
+        user: 'Dorothy Hall'
+      },
+      {
+        id: 'event-028b',
+        type: 'application_completed',
+        description: 'Owner completed full onboarding application',
+        timestamp: '2025-10-30T14:30:00Z',
+        user: 'Dorothy Hall'
       }
     ],
-    notes: 'Approved - waiting for owner to start onboarding'
+    notes: 'Experienced landlord - application completed quickly',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'Previously managed property myself. Ready for professional help.'
   },
   {
     id: 'lead-022',
@@ -1241,13 +1730,16 @@ export const mockLeads = [
     email: 'kyoung@email.com',
     phone: '(555) 234-8901',
     status: 'awaiting approval',
-    stage: 'Approved',
+    stage: 'Awaiting Approval',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-21T12:00:00Z',
-    updatedAt: '2025-10-26T09:00:00Z',
+    updatedAt: '2025-10-31T10:15:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
+    onboardingStatus: 'in_progress',
+    onboardingCompletion: 100,
+    applicationStatus: 'pending_review', // Ready for manager approval
     properties: [
       {
         id: 'prop-015',
@@ -1259,9 +1751,41 @@ export const mockLeads = [
       }
     ],
     questionnaireAnswers: {
+      'field-firstname': 'Kevin',
+      'field-lastname': 'Young',
+      'field-email': 'kyoung@email.com',
+      'field-phone': '(555) 234-8901',
       'field-num-properties': '1',
       'field-timeline': 'Within 1 month',
-      'field-experience': 'No'
+      'field-experience': 'No',
+      'field-additional-info': 'Relocating for work - need property managed ASAP',
+      'property-0-field-address': '345 Willow St, Austin, TX 78714',
+      'property-0-field-property-type': 'Single Family Home',
+      'property-0-field-bedrooms': '3',
+      'property-0-field-bathrooms': '2.5',
+      'property-0-field-currently-rented': 'Yes'
+    },
+    onboardingAnswers: {
+      'field-legal-entity': 'Kevin Young',
+      'field-tax-id': '89-0123456',
+      'field-mailing-address': '345 Willow St, Austin, TX 78714',
+      'field-business-structure': 'Individual',
+      'field-emergency-contact': 'Amanda Young',
+      'field-emergency-phone': '(555) 234-8902',
+      'property-0-field-property-address': '345 Willow St, Austin, TX 78714',
+      'property-0-field-property-bedrooms': '3',
+      'property-0-field-property-bathrooms': '2.5',
+      'property-0-field-square-footage': '2100',
+      'property-0-field-year-built': '2018',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '2850',
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '1000',
+      'field-showing-instructions': 'Current tenant moving out Nov 15 - can show after that date',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Kevin Young',
+      'field-signature-date': '2025-10-31'
     },
     timeline: [
       {
@@ -1277,12 +1801,31 @@ export const mockLeads = [
         description: 'Lead approved by manager',
         timestamp: '2025-10-26T09:00:00Z',
         user: 'Sarah Johnson'
+      },
+      {
+        id: 'event-030a',
+        type: 'onboarding_started',
+        description: 'Owner started onboarding application',
+        timestamp: '2025-10-27T08:30:00Z',
+        user: 'Kevin Young'
+      },
+      {
+        id: 'event-030b',
+        type: 'application_completed',
+        description: 'Owner completed full onboarding application',
+        timestamp: '2025-10-31T10:15:00Z',
+        user: 'Kevin Young'
       }
     ],
-    notes: 'Recently approved'
+    notes: 'Urgent - relocating for work, needs quick turnaround',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'Relocating for work - need property managed ASAP'
   },
 
   // ONBOARDING LEADS (approved + onboardingStatus: 'in_progress') (7 examples)
+  
+  // APPLICANT - Ready for Approval (100% complete, pending_review)
   {
     id: 'lead-003',
     firstName: 'Michael',
@@ -1290,7 +1833,7 @@ export const mockLeads = [
     email: 'mchen@email.com',
     phone: '(555) 345-6789',
     status: 'awaiting approval',
-    stage: 'Onboarding',
+    stage: 'Awaiting Approval',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-15T11:00:00Z',
     updatedAt: '2025-10-23T16:00:00Z',
@@ -1298,7 +1841,8 @@ export const mockLeads = [
     source: 'Website Form',
     leadSource: 'Email',
     onboardingStatus: 'in_progress',
-    onboardingCompletion: 60,
+    onboardingCompletion: 100,
+    applicationStatus: 'pending_review', // Ready for manager approval
     properties: [
       {
         id: 'prop-002',
@@ -1360,8 +1904,11 @@ export const mockLeads = [
       'property-1-field-min-rent': '1800',
       'field-lease-length': '12 months',
       'field-maintenance-limit': '500',
-      'field-showing-instructions': 'Property 1 is occupied - 24hr notice required. Property 2 is vacant - lockbox on door.'
-      // Note: Documents section incomplete - that's why this is 60% complete
+      'field-showing-instructions': 'Property 1 is occupied - 24hr notice required. Property 2 is vacant - lockbox on door.',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Michael Chen',
+      'field-signature-date': '2025-10-23'
     },
     timeline: [
       {
@@ -1405,6 +1952,8 @@ export const mockLeads = [
     hasBeenContacted: true,
     initialMessage: 'Previous PM company did not handle maintenance well. Looking for better service.'
   },
+  
+  // APPLICANT - Ready for Approval (100% complete, pending_review)
   {
     id: 'lead-023',
     firstName: 'Jessica',
@@ -1412,15 +1961,16 @@ export const mockLeads = [
     email: 'jking@email.com',
     phone: '(555) 345-9012',
     status: 'awaiting approval',
-    stage: 'Onboarding',
+    stage: 'Awaiting Approval',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-14T10:00:00Z',
-    updatedAt: '2025-10-25T14:00:00Z',
+    updatedAt: '2025-10-30T16:45:00Z',
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
     onboardingStatus: 'in_progress',
-    onboardingCompletion: 45,
+    onboardingCompletion: 100,
+    applicationStatus: 'pending_review', // Ready for manager approval
     properties: [
       {
         id: 'prop-016',
@@ -1439,6 +1989,7 @@ export const mockLeads = [
       'field-num-properties': '1',
       'field-timeline': 'Within 1 month',
       'field-experience': 'No',
+      'field-additional-info': 'Inherited property - need guidance on management',
       'property-0-field-address': '456 Poplar Rd, Austin, TX 78715',
       'property-0-field-property-type': 'Single Family Home',
       'property-0-field-bedrooms': '3',
@@ -1456,9 +2007,16 @@ export const mockLeads = [
       'property-0-field-property-bedrooms': '3',
       'property-0-field-property-bathrooms': '2',
       'property-0-field-square-footage': '1800',
+      'property-0-field-year-built': '2005',
       'property-0-field-pets-allowed': 'Yes',
-      'property-0-field-min-rent': '2650'
-      // Note: Preferences and Documents sections incomplete - that's why this is 45% complete
+      'property-0-field-min-rent': '2650',
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '500',
+      'field-showing-instructions': 'Property is vacant - key available at office',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Jessica King',
+      'field-signature-date': '2025-10-30'
     },
     timeline: [
       {
@@ -1481,17 +2039,29 @@ export const mockLeads = [
         description: 'Owner started onboarding application',
         timestamp: '2025-10-22T11:00:00Z',
         user: 'Jessica King'
+      },
+      {
+        id: 'event-033a',
+        type: 'application_completed',
+        description: 'Owner completed full onboarding application',
+        timestamp: '2025-10-30T16:45:00Z',
+        user: 'Jessica King'
       }
     ],
-    notes: 'In progress - completing property documents'
+    notes: 'Application completed - inherited property',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'Inherited property - need guidance on management'
   },
+  
+  // APPLICANT - Changes Requested (100% complete but manager asked for changes - back to applicant status)
   {
     id: 'lead-024',
     firstName: 'Brian',
     lastName: 'Wright',
     email: 'bwright@email.com',
     phone: '(555) 456-0123',
-    status: 'awaiting approval',
+    status: 'approved', // Back to applicant status after changes requested
     stage: 'Onboarding',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-12T15:00:00Z',
@@ -1500,7 +2070,8 @@ export const mockLeads = [
     source: 'Referral',
     leadSource: 'Word of Mouth',
     onboardingStatus: 'in_progress',
-    onboardingCompletion: 80,
+    onboardingCompletion: 100,
+    applicationStatus: 'changes_requested', // Manager requested changes
     properties: [
       {
         id: 'prop-017',
@@ -1583,15 +2154,16 @@ export const mockLeads = [
     email: 'slopez@email.com',
     phone: '(555) 567-1234',
     status: 'awaiting approval',
-    stage: 'Onboarding',
+    stage: 'Awaiting Approval',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-13T11:00:00Z',
-    updatedAt: '2025-10-26T15:00:00Z',
+    updatedAt: '2025-10-31T13:20:00Z',
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
     onboardingStatus: 'in_progress',
-    onboardingCompletion: 35,
+    onboardingCompletion: 100,
+    applicationStatus: 'pending_review', // Ready for manager approval
     properties: [
       {
         id: 'prop-018',
@@ -1610,6 +2182,7 @@ export const mockLeads = [
       'field-num-properties': '1',
       'field-timeline': '1-3 months',
       'field-experience': 'No',
+      'field-additional-info': 'Investment property - looking for hands-off management',
       'property-0-field-address': '678 Redwood Ct, Austin, TX 78717',
       'property-0-field-property-type': 'Townhouse',
       'property-0-field-bedrooms': '2',
@@ -1621,9 +2194,22 @@ export const mockLeads = [
       'field-tax-id': '55-4433221',
       'field-mailing-address': '678 Redwood Ct, Austin, TX 78717',
       'field-business-structure': 'Individual',
+      'field-emergency-contact': 'Carlos Lopez',
+      'field-emergency-phone': '(555) 567-1235',
       'property-0-field-property-address': '678 Redwood Ct, Austin, TX 78717',
       'property-0-field-property-bedrooms': '2',
-      'property-0-field-property-bathrooms': '1.5'
+      'property-0-field-property-bathrooms': '1.5',
+      'property-0-field-square-footage': '1250',
+      'property-0-field-year-built': '2016',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '1950',
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '500',
+      'field-showing-instructions': 'Vacant townhouse - lockbox code 9876',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Susan Lopez',
+      'field-signature-date': '2025-10-31'
     },
     timeline: [
       {
@@ -1646,17 +2232,29 @@ export const mockLeads = [
         description: 'Owner started onboarding application',
         timestamp: '2025-10-21T13:00:00Z',
         user: 'Susan Lopez'
+      },
+      {
+        id: 'event-039a',
+        type: 'application_completed',
+        description: 'Owner completed full onboarding application',
+        timestamp: '2025-10-31T13:20:00Z',
+        user: 'Susan Lopez'
       }
     ],
-    notes: 'Slow progress on onboarding - may need reminder'
+    notes: 'Application completed after reminder - ready for approval',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'Investment property - looking for hands-off management'
   },
+  
+  // ONBOARDING - Approved and completing final onboarding (100% complete, in final review)
   {
     id: 'lead-026',
     firstName: 'George',
     lastName: 'Hill',
     email: 'ghill@email.com',
     phone: '(555) 678-2345',
-    status: 'awaiting approval',
+    status: 'onboarding',
     stage: 'Onboarding',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-11T09:00:00Z',
@@ -1666,6 +2264,7 @@ export const mockLeads = [
     leadSource: 'Phone',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
+    applicationStatus: 'approved', // Approved and in onboarding phase
     properties: [
       {
         id: 'prop-019',
@@ -1766,7 +2365,7 @@ export const mockLeads = [
     lastName: 'Scott',
     email: 'cscott@email.com',
     phone: '(555) 789-3456',
-    status: 'awaiting approval',
+    status: 'onboarding',
     stage: 'Onboarding',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-16T13:00:00Z',
@@ -1841,13 +2440,15 @@ export const mockLeads = [
     ],
     notes: 'Making good progress on onboarding'
   },
+  
+  // ONBOARDING - Application approved, now in property onboarding phase
   {
     id: 'lead-027-b',
     firstName: 'Margaret',
     lastName: 'Foster',
     email: 'mfoster@email.com',
     phone: '(555) 901-7890',
-    status: 'awaiting approval',
+    status: 'onboarding', // New onboarding status
     stage: 'Onboarding',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-15T14:00:00Z',
@@ -1857,6 +2458,7 @@ export const mockLeads = [
     leadSource: 'PMW',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
+    applicationStatus: 'approved', // Application approved, now in onboarding phase
     properties: [
       {
         id: 'prop-022-a',
@@ -1988,7 +2590,7 @@ export const mockLeads = [
     lastName: 'Green',
     email: 'egreen@email.com',
     phone: '(555) 890-4567',
-    status: 'awaiting approval',
+    status: 'onboarding',
     stage: 'Onboarding',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-14T08:00:00Z',
