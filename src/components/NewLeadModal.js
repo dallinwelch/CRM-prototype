@@ -130,7 +130,6 @@ const NewLeadModal = ({ isOpen, onClose, onSave }) => {
       updatedAt: new Date().toISOString(),
       completionPercentage: formData.properties.length > 0 ? 100 : 50,
       source: formData.source,
-      isDuplicate: false,
       properties: formData.properties,
       formAnswers: {},
       timeline: [

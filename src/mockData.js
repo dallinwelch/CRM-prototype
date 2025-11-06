@@ -6,12 +6,430 @@ const addDefaultValues = (lead) => ({
   hasBeenContacted: lead.hasBeenContacted !== undefined ? lead.hasBeenContacted : false,
   initialMessage: lead.initialMessage || null,
   sourceMetadata: lead.sourceMetadata || null,
-  isDuplicate: lead.isDuplicate !== undefined ? lead.isDuplicate : false,
-  duplicateOf: lead.duplicateOf || null,
   lastReachedOut: lead.lastReachedOut || null
 });
 
 export const mockLeads = [
+  // ONYX PROPERTY MANAGEMENT FORM LEADS
+  // Qualified lead with 2 complete properties
+  {
+    id: 'lead-onyx-001',
+    firstName: 'Sarah',
+    lastName: 'Martinez',
+    email: 'sarah.martinez@email.com',
+    phone: '(555) 401-2345',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Sarah Smith',
+    createdAt: '2025-11-01T10:30:00Z',
+    updatedAt: '2025-11-01T10:30:00Z',
+    lastReachedOut: null,
+    completionPercentage: 100,
+    source: 'Onyx Property Management Form',
+    leadSource: 'Onyx Website',
+    properties: [
+      {
+        id: 'prop-onyx-001-1',
+        address: '456 Riverside Drive, Austin, TX 78704',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '1850',
+        minRentPrice: '2400',
+        agreementLength: '1',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      },
+      {
+        id: 'prop-onyx-001-2',
+        address: '789 Elm Street, Austin, TX 78705',
+        bedrooms: '2',
+        bathrooms: '1.5',
+        sqft: '1200',
+        minRentPrice: '1800',
+        agreementLength: '2',
+        homeType: 'condo',
+        furnished: 'furnished',
+        repairLimit: '750',
+        currentlyLiveInHome: 'no',
+        petsAllowed: false
+      }
+    ],
+    questionnaireAnswers: {
+      'field-name': 'Sarah Martinez',
+      'field-email': 'sarah.martinez@email.com',
+      'field-phone': '(555) 401-2345',
+      'field-num-properties': '2'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-001',
+        type: 'lead_created',
+        description: 'Lead submitted via Onyx Property Management Form',
+        timestamp: '2025-11-01T10:30:00Z',
+        user: 'System'
+      }
+    ],
+    notes: 'Complete application with 2 properties. Ready for approval.',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: 'I am interested in learning more about your property management services for my rental properties. I have two properties in Austin that I would like to have professionally managed.',
+    sourceMetadata: {
+      formName: 'Onyx Property Management Lead Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
+  // Qualified lead with 1 property - townhouse
+  {
+    id: 'lead-onyx-002',
+    firstName: 'Michael',
+    lastName: 'Chen',
+    email: 'michael.chen@email.com',
+    phone: '(555) 402-3456',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-11-02T14:15:00Z',
+    updatedAt: '2025-11-02T14:15:00Z',
+    lastReachedOut: '2025-11-02T16:30:00Z',
+    completionPercentage: 100,
+    source: 'Onyx Property Management Form',
+    leadSource: 'Onyx Website',
+    properties: [
+      {
+        id: 'prop-onyx-002-1',
+        address: '321 Park Avenue, Austin, TX 78701',
+        bedrooms: '3',
+        bathrooms: '2.5',
+        sqft: '2100',
+        minRentPrice: '2800',
+        agreementLength: '3',
+        homeType: 'townhouse',
+        furnished: 'unfurnished',
+        repairLimit: '1000',
+        currentlyLiveInHome: 'yes',
+        petsAllowed: true
+      }
+    ],
+    questionnaireAnswers: {
+      'field-name': 'Michael Chen',
+      'field-email': 'michael.chen@email.com',
+      'field-phone': '(555) 402-3456',
+      'field-num-properties': '1'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-002',
+        type: 'lead_created',
+        description: 'Lead submitted via Onyx Property Management Form',
+        timestamp: '2025-11-02T14:15:00Z',
+        user: 'System'
+      },
+      {
+        id: 'event-onyx-002-note',
+        type: 'note_added',
+        description: 'Called and confirmed interest. Property currently occupied by tenant until end of month.',
+        timestamp: '2025-11-02T16:30:00Z',
+        user: 'Mike Davis'
+      }
+    ],
+    notes: 'Currently occupied by tenant. Lease ends Nov 30th.',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'I have a townhouse that will be available soon. I\'m looking for a reliable property management company to handle tenant screening and maintenance.',
+    sourceMetadata: {
+      formName: 'Onyx Property Management Lead Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
+  // Partial lead - no properties added yet
+  {
+    id: 'lead-onyx-003',
+    firstName: 'Jennifer',
+    lastName: 'Williams',
+    email: 'jennifer.w@email.com',
+    phone: '(555) 403-4567',
+    status: 'partial',
+    stage: 'Lead Created',
+    assignedTo: null,
+    createdAt: '2025-11-03T09:45:00Z',
+    updatedAt: '2025-11-03T09:45:00Z',
+    lastReachedOut: null,
+    completionPercentage: 40,
+    source: 'Onyx Property Management Form',
+    leadSource: 'Onyx Website',
+    properties: [],
+    questionnaireAnswers: {
+      'field-name': 'Jennifer Williams',
+      'field-email': 'jennifer.w@email.com',
+      'field-phone': '(555) 403-4567',
+      'field-num-properties': '3'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-003',
+        type: 'lead_created',
+        description: 'Lead started Onyx Property Management Form but did not complete',
+        timestamp: '2025-11-03T09:45:00Z',
+        user: 'System'
+      }
+    ],
+    notes: 'Started form, indicated 3 properties but did not fill out details.',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: 'I\'m interested in property management services.',
+    sourceMetadata: {
+      formName: 'Onyx Property Management Lead Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
+  // Lead with no properties (just inquiry)
+  {
+    id: 'lead-onyx-004',
+    firstName: 'David',
+    lastName: 'Thompson',
+    email: 'david.thompson@email.com',
+    phone: '(555) 404-5678',
+    status: 'lead',
+    stage: 'Lead Created',
+    assignedTo: 'Sarah Smith',
+    createdAt: '2025-11-03T11:20:00Z',
+    updatedAt: '2025-11-03T11:20:00Z',
+    lastReachedOut: null,
+    completionPercentage: 100,
+    source: 'Onyx Contact Form',
+    leadSource: 'Onyx Website',
+    properties: [],
+    questionnaireAnswers: {
+      'field-name': 'David Thompson',
+      'field-email': 'david.thompson@email.com',
+      'field-phone': '(555) 404-5678',
+      'inquiry-type': 'Property Management Inquiry',
+      'comment': 'I\'m considering purchasing a rental property and want to understand your property management services and pricing before I make the purchase.'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-004',
+        type: 'lead_created',
+        description: 'Contact form inquiry from Owners page',
+        timestamp: '2025-11-03T11:20:00Z',
+        user: 'System'
+      }
+    ],
+    notes: 'Prospective property owner - considering purchase.',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: 'I\'m considering purchasing a rental property and want to understand your property management services and pricing before I make the purchase.',
+    sourceMetadata: {
+      formName: 'Onyx Contact Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
+  // Qualified lead with 3 properties - mix of types
+  {
+    id: 'lead-onyx-005',
+    firstName: 'Lisa',
+    lastName: 'Rodriguez',
+    email: 'lisa.rodriguez@email.com',
+    phone: '(555) 405-6789',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-11-04T13:00:00Z',
+    updatedAt: '2025-11-04T13:00:00Z',
+    lastReachedOut: null,
+    completionPercentage: 100,
+    source: 'Onyx Property Management Form',
+    leadSource: 'Onyx Website',
+    properties: [
+      {
+        id: 'prop-onyx-005-1',
+        address: '111 Main Street, Austin, TX 78701',
+        bedrooms: '4',
+        bathrooms: '3',
+        sqft: '2500',
+        minRentPrice: '3200',
+        agreementLength: '2',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      },
+      {
+        id: 'prop-onyx-005-2',
+        address: '222 Oak Boulevard, Austin, TX 78702',
+        bedrooms: '2',
+        bathrooms: '2',
+        sqft: '1400',
+        minRentPrice: '1900',
+        agreementLength: '1',
+        homeType: 'condo',
+        furnished: 'furnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: false
+      },
+      {
+        id: 'prop-onyx-005-3',
+        address: '333 Sunset Lane, Austin, TX 78703',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '1600',
+        minRentPrice: '2100',
+        agreementLength: '1',
+        homeType: 'townhouse',
+        furnished: 'partially-furnished',
+        repairLimit: '750',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      }
+    ],
+    questionnaireAnswers: {
+      'field-name': 'Lisa Rodriguez',
+      'field-email': 'lisa.rodriguez@email.com',
+      'field-phone': '(555) 405-6789',
+      'field-num-properties': '3'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-005',
+        type: 'lead_created',
+        description: 'Lead submitted via Onyx Property Management Form with 3 properties',
+        timestamp: '2025-11-04T13:00:00Z',
+        user: 'System'
+      }
+    ],
+    notes: 'Portfolio of 3 properties ready for management.',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: 'I have a portfolio of 3 rental properties in Austin that I need help managing. I\'m currently managing them myself but it\'s becoming too time-consuming.',
+    sourceMetadata: {
+      formName: 'Onyx Property Management Lead Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
+  // Partial lead - only 1 property filled out of 2
+  {
+    id: 'lead-onyx-006',
+    firstName: 'James',
+    lastName: 'Anderson',
+    email: 'james.anderson@email.com',
+    phone: '(555) 406-7890',
+    status: 'partial',
+    stage: 'Lead Created',
+    assignedTo: 'Sarah Smith',
+    createdAt: '2025-11-04T16:30:00Z',
+    updatedAt: '2025-11-04T16:30:00Z',
+    lastReachedOut: null,
+    completionPercentage: 70,
+    source: 'Onyx Property Management Form',
+    leadSource: 'Onyx Website',
+    properties: [
+      {
+        id: 'prop-onyx-006-1',
+        address: '555 Cedar Drive, Austin, TX 78704',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '1750',
+        minRentPrice: '2300',
+        agreementLength: '1',
+        homeType: 'house',
+        furnished: 'unfurnished',
+        repairLimit: '500',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      }
+    ],
+    questionnaireAnswers: {
+      'field-name': 'James Anderson',
+      'field-email': 'james.anderson@email.com',
+      'field-phone': '(555) 406-7890',
+      'field-num-properties': '2'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-006',
+        type: 'lead_created',
+        description: 'Lead submitted via Onyx Property Management Form - incomplete',
+        timestamp: '2025-11-04T16:30:00Z',
+        user: 'System'
+      }
+    ],
+    notes: 'Filled out 1 of 2 properties. Follow up to complete second property.',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: 'I have two properties that need management.',
+    sourceMetadata: {
+      formName: 'Onyx Property Management Lead Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
+  // Qualified lead - single mobile home
+  {
+    id: 'lead-onyx-007',
+    firstName: 'Patricia',
+    lastName: 'Davis',
+    email: 'patricia.davis@email.com',
+    phone: '(555) 407-8901',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-11-05T08:45:00Z',
+    updatedAt: '2025-11-05T08:45:00Z',
+    lastReachedOut: null,
+    completionPercentage: 100,
+    source: 'Onyx Property Management Form',
+    leadSource: 'Onyx Website',
+    properties: [
+      {
+        id: 'prop-onyx-007-1',
+        address: '777 Hillside Court, Austin, TX 78745',
+        bedrooms: '2',
+        bathrooms: '2',
+        sqft: '1100',
+        minRentPrice: '1400',
+        agreementLength: '1',
+        homeType: 'mobile-home',
+        furnished: 'unfurnished',
+        repairLimit: '300',
+        currentlyLiveInHome: 'no',
+        petsAllowed: true
+      }
+    ],
+    questionnaireAnswers: {
+      'field-name': 'Patricia Davis',
+      'field-email': 'patricia.davis@email.com',
+      'field-phone': '(555) 407-8901',
+      'field-num-properties': '1'
+    },
+    timeline: [
+      {
+        id: 'event-onyx-007',
+        type: 'lead_created',
+        description: 'Lead submitted via Onyx Property Management Form',
+        timestamp: '2025-11-05T08:45:00Z',
+        user: 'System'
+      }
+    ],
+    notes: 'Mobile home property - verify coverage area.',
+    noteCount: 1,
+    hasBeenContacted: false,
+    initialMessage: 'I have a mobile home that I\'d like to rent out. Looking for management services.',
+    sourceMetadata: {
+      formName: 'Onyx Property Management Lead Form',
+      referrerUrl: 'https://onyxpm.com/owners'
+    }
+  },
+
   // PARTIAL LEADS (8 examples)
   {
     id: 'lead-002',
@@ -28,7 +446,6 @@ export const mockLeads = [
     completionPercentage: 45,
     source: 'Word of Mouth',
     leadSource: 'Word of Mouth',
-    isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
       'field-firstname': 'Emily',
@@ -67,14 +484,13 @@ export const mockLeads = [
     phone: '(555) 678-9012',
     status: 'lead',
     stage: 'Lead Created',
-    assignedTo: 'Jessica Martinez',
+    assignedTo: null,
     createdAt: '2025-10-25T14:20:00Z',
     updatedAt: '2025-10-25T14:20:00Z',
     lastReachedOut: null,
     completionPercentage: 30,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     emailBounced: true, // Example of bounced email
     phoneInvalid: false,
     properties: [],
@@ -112,7 +528,6 @@ export const mockLeads = [
     completionPercentage: 60,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
       'field-num-properties': '1',
@@ -147,7 +562,6 @@ export const mockLeads = [
     completionPercentage: 25,
     source: 'Phone Call',
     leadSource: 'Phone',
-    isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
       'field-num-properties': '3'
@@ -174,13 +588,12 @@ export const mockLeads = [
     phone: '(555) 901-2345',
     status: 'lead',
     stage: 'Lead Created',
-    assignedTo: 'Jessica Martinez',
+    assignedTo: null,
     createdAt: '2025-10-23T16:30:00Z',
     updatedAt: '2025-10-23T16:30:00Z',
     completionPercentage: 50,
     source: 'Referral',
     leadSource: 'Email',
-    isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
       'field-num-properties': '1',
@@ -205,13 +618,12 @@ export const mockLeads = [
     phone: '(800) 555-0100', // Toll-free number - cannot text
     status: 'lead',
     stage: 'Lead Created',
-    assignedTo: 'Mike Davis',
+    assignedTo: null,
     createdAt: '2025-10-27T11:15:00Z',
     updatedAt: '2025-10-27T11:15:00Z',
     completionPercentage: 35,
     source: 'Website Form',
     leadSource: 'SMS',
-    isDuplicate: false,
     emailBounced: false,
     phoneInvalid: true, // Example of non-textable phone
     properties: [],
@@ -245,7 +657,6 @@ export const mockLeads = [
     completionPercentage: 70,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
       'field-num-properties': '2',
@@ -272,13 +683,12 @@ export const mockLeads = [
     phone: '(555) 234-8901',
     status: 'lead',
     stage: 'Lead Created',
-    assignedTo: 'Jessica Martinez',
+    assignedTo: null,
     createdAt: '2025-10-28T09:30:00Z',
     updatedAt: '2025-10-28T09:30:00Z',
     completionPercentage: 40,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [],
     questionnaireAnswers: {
       'field-num-properties': '1',
@@ -317,7 +727,6 @@ export const mockLeads = [
       userAgent: 'Mozilla/5.0...',
       ipAddress: '192.168.1.1'
     },
-    isDuplicate: false,
     hasBeenContacted: true,
     initialMessage: 'Looking for full-service property management. Currently self-managing but need help.',
     noteCount: 1,
@@ -385,7 +794,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-004',
@@ -436,7 +844,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-006',
@@ -481,13 +888,12 @@ export const mockLeads = [
     phone: '(555) 456-0123',
     status: 'application',
     stage: 'Qualified',
-    assignedTo: 'Jessica Martinez',
+    assignedTo: null,
     createdAt: '2025-10-25T12:00:00Z',
     updatedAt: '2025-10-25T16:45:00Z',
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-007',
@@ -529,7 +935,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'Email',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-008',
@@ -570,7 +975,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-009',
@@ -612,7 +1016,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-010',
@@ -653,7 +1056,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'SMS',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-011',
@@ -696,7 +1098,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-012',
@@ -747,13 +1148,12 @@ export const mockLeads = [
     phone: '(555) 012-6789',
     status: 'awaiting approval',
     stage: 'Approved',
-    assignedTo: 'Mike Davis',
+    assignedTo: null,
     createdAt: '2025-10-17T14:00:00Z',
     updatedAt: '2025-10-23T16:00:00Z',
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-013',
@@ -801,7 +1201,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-014',
@@ -849,7 +1248,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
-    isDuplicate: false,
     properties: [
       {
         id: 'prop-015',
@@ -899,7 +1297,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'Email',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 60,
     properties: [
@@ -962,7 +1359,9 @@ export const mockLeads = [
       'property-1-field-pets-allowed': 'Yes',
       'property-1-field-min-rent': '1800',
       'field-lease-length': '12 months',
-      'field-maintenance-limit': '500'
+      'field-maintenance-limit': '500',
+      'field-showing-instructions': 'Property 1 is occupied - 24hr notice required. Property 2 is vacant - lockbox on door.'
+      // Note: Documents section incomplete - that's why this is 60% complete
     },
     timeline: [
       {
@@ -1020,7 +1419,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 45,
     properties: [
@@ -1052,12 +1450,15 @@ export const mockLeads = [
       'field-tax-id': '98-7654321',
       'field-mailing-address': '456 Poplar Rd, Austin, TX 78715',
       'field-business-structure': 'Individual',
+      'field-emergency-contact': 'Mark King',
+      'field-emergency-phone': '(555) 345-9013',
       'property-0-field-property-address': '456 Poplar Rd, Austin, TX 78715',
       'property-0-field-property-bedrooms': '3',
       'property-0-field-property-bathrooms': '2',
       'property-0-field-square-footage': '1800',
       'property-0-field-pets-allowed': 'Yes',
       'property-0-field-min-rent': '2650'
+      // Note: Preferences and Documents sections incomplete - that's why this is 45% complete
     },
     timeline: [
       {
@@ -1098,7 +1499,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 80,
     properties: [
@@ -1141,12 +1541,15 @@ export const mockLeads = [
       'property-0-field-pets-allowed': 'No',
       'property-0-field-min-rent': '3800',
       'property-0-field-garage-code': '4567',
+      'property-0-field-hoa': 'Cypress Hills HOA',
+      'property-0-field-hoa-fee': '225',
       'field-lease-length': '12 months',
       'field-maintenance-limit': '1000',
       'field-showing-instructions': 'Tenant currently occupies - 24hr notice required',
       'field-management-agreement': 'true',
       'field-w9-upload': 'true',
-      'field-signature': 'Brian Wright'
+      'field-signature': 'Brian Wright',
+      'field-signature-date': '2025-10-24'
     },
     timeline: [
       {
@@ -1187,7 +1590,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 35,
     properties: [
@@ -1262,9 +1664,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
-    onboardingCompletion: 90,
+    onboardingCompletion: 100,
     properties: [
       {
         id: 'prop-019',
@@ -1373,7 +1774,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'SMS',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 55,
     properties: [
@@ -1442,6 +1842,147 @@ export const mockLeads = [
     notes: 'Making good progress on onboarding'
   },
   {
+    id: 'lead-027-b',
+    firstName: 'Margaret',
+    lastName: 'Foster',
+    email: 'mfoster@email.com',
+    phone: '(555) 901-7890',
+    status: 'awaiting approval',
+    stage: 'Onboarding',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-10-15T14:00:00Z',
+    updatedAt: '2025-10-27T10:00:00Z',
+    completionPercentage: 100,
+    source: 'Website Form',
+    leadSource: 'PMW',
+    onboardingStatus: 'in_progress',
+    onboardingCompletion: 100,
+    properties: [
+      {
+        id: 'prop-022-a',
+        address: '123 Maple Street, Austin, TX 78701',
+        bedrooms: 3,
+        bathrooms: 2,
+        petsAllowed: true,
+        minRentPrice: 2500
+      },
+      {
+        id: 'prop-022-b',
+        address: '456 Oak Avenue, Austin, TX 78702',
+        bedrooms: 4,
+        bathrooms: 2.5,
+        petsAllowed: false,
+        minRentPrice: 3100
+      },
+      {
+        id: 'prop-022-c',
+        address: '789 Pine Boulevard, Austin, TX 78703',
+        bedrooms: 2,
+        bathrooms: 1.5,
+        petsAllowed: true,
+        minRentPrice: 1950
+      }
+    ],
+    questionnaireAnswers: {
+      'field-firstname': 'Margaret',
+      'field-lastname': 'Foster',
+      'field-email': 'mfoster@email.com',
+      'field-phone': '(555) 901-7890',
+      'field-num-properties': '3',
+      'field-timeline': 'Within 1 month',
+      'field-experience': 'Yes',
+      'field-additional-info': 'Managing 3 properties, looking for comprehensive management services',
+      'property-0-field-address': '123 Maple Street, Austin, TX 78701',
+      'property-0-field-property-type': 'Single Family Home',
+      'property-0-field-bedrooms': '3',
+      'property-0-field-bathrooms': '2',
+      'property-0-field-currently-rented': 'Yes',
+      'property-1-field-address': '456 Oak Avenue, Austin, TX 78702',
+      'property-1-field-property-type': 'Single Family Home',
+      'property-1-field-bedrooms': '4',
+      'property-1-field-bathrooms': '2.5',
+      'property-1-field-currently-rented': 'Yes',
+      'property-2-field-address': '789 Pine Boulevard, Austin, TX 78703',
+      'property-2-field-property-type': 'Condo',
+      'property-2-field-bedrooms': '2',
+      'property-2-field-bathrooms': '1.5',
+      'property-2-field-currently-rented': 'Vacant'
+    },
+    onboardingAnswers: {
+      'field-legal-entity': 'Foster Properties LLC',
+      'field-tax-id': '22-3344556',
+      'field-mailing-address': '123 Maple Street, Austin, TX 78701',
+      'field-business-structure': 'LLC',
+      'field-emergency-contact': 'Robert Foster',
+      'field-emergency-phone': '(555) 901-7891',
+      'property-0-field-property-address': '123 Maple Street, Austin, TX 78701',
+      'property-0-field-property-bedrooms': '3',
+      'property-0-field-property-bathrooms': '2',
+      'property-0-field-square-footage': '1800',
+      'property-0-field-year-built': '2010',
+      'property-0-field-pets-allowed': 'Yes',
+      'property-0-field-min-rent': '2500',
+      'property-0-field-garage-code': '1234',
+      'property-1-field-property-address': '456 Oak Avenue, Austin, TX 78702',
+      'property-1-field-property-bedrooms': '4',
+      'property-1-field-property-bathrooms': '2.5',
+      'property-1-field-square-footage': '2400',
+      'property-1-field-year-built': '2015',
+      'property-1-field-pets-allowed': 'No',
+      'property-1-field-min-rent': '3100',
+      'property-1-field-hoa': 'Oak Avenue HOA',
+      'property-1-field-hoa-fee': '150',
+      'property-2-field-property-address': '789 Pine Boulevard, Austin, TX 78703',
+      'property-2-field-property-bedrooms': '2',
+      'property-2-field-property-bathrooms': '1.5',
+      'property-2-field-square-footage': '1200',
+      'property-2-field-year-built': '2018',
+      'property-2-field-pets-allowed': 'Yes',
+      'property-2-field-min-rent': '1950',
+      'field-lease-length': '12 months',
+      'field-maintenance-limit': '750',
+      'field-showing-instructions': 'Properties 1 & 2 are occupied. Property 3 is vacant with lockbox.',
+      'field-management-agreement': 'true',
+      'field-w9-upload': 'true',
+      'field-signature': 'Margaret Foster',
+      'field-signature-date': '2025-10-27'
+    },
+    timeline: [
+      {
+        id: 'event-046-a',
+        type: 'lead_created',
+        description: 'Lead created from website form',
+        timestamp: '2025-10-15T14:00:00Z',
+        user: 'System'
+      },
+      {
+        id: 'event-047-a',
+        type: 'lead_approved',
+        description: 'Lead approved by manager',
+        timestamp: '2025-10-20T09:00:00Z',
+        user: 'Sarah Johnson'
+      },
+      {
+        id: 'event-048-a',
+        type: 'onboarding_started',
+        description: 'Owner started onboarding application',
+        timestamp: '2025-10-21T11:00:00Z',
+        user: 'Margaret Foster'
+      },
+      {
+        id: 'event-049-a',
+        type: 'onboarding_completed',
+        description: 'Owner completed full onboarding application',
+        timestamp: '2025-10-27T10:00:00Z',
+        user: 'Margaret Foster'
+      }
+    ],
+    notes: 'Multiple properties - high value client. All onboarding complete and ready for final review.',
+    noteCount: 1,
+    hasBeenContacted: true,
+    initialMessage: 'Managing 3 properties, looking for comprehensive management services'
+  },
+  {
     id: 'lead-028',
     firstName: 'Edward',
     lastName: 'Green',
@@ -1455,7 +1996,6 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Email',
-    isDuplicate: false,
     onboardingStatus: 'in_progress',
     onboardingCompletion: 70,
     properties: [
@@ -1542,7 +2082,6 @@ export const mockLeads = [
     updatedAt: '2025-10-18T11:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
-    isDuplicate: false,
     denialReason: 'Property not in service area',
     properties: [
       {
@@ -1585,7 +2124,6 @@ export const mockLeads = [
     updatedAt: '2025-10-15T14:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
-    isDuplicate: false,
     denialReason: 'Property does not meet minimum requirements',
     properties: [
       {
@@ -1628,7 +2166,6 @@ export const mockLeads = [
     updatedAt: '2025-10-12T09:00:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
-    isDuplicate: false,
     denialReason: 'Lead no longer interested',
     properties: [
       {
@@ -1671,7 +2208,6 @@ export const mockLeads = [
     updatedAt: '2025-10-05T16:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
-    isDuplicate: false,
     denialReason: 'Property condition issues',
     properties: [
       {
@@ -1714,7 +2250,6 @@ export const mockLeads = [
     updatedAt: '2025-10-10T13:00:00Z',
     completionPercentage: 70,
     source: 'Referral',
-    isDuplicate: false,
     denialReason: 'No response from lead',
     properties: [],
     timeline: [

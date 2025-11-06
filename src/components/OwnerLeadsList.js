@@ -12,9 +12,12 @@ import {
   UserCheck,
   XCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
 } from 'lucide-react';
-import { currentUser } from '../mockData';
+import { currentUser, mockLeadQuestionnaireForm, mockOnboardingForm } from '../mockData';
 
 const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +26,80 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [openDropdown, setOpenDropdown] = useState(null);
+
+  // Calculate section completion for a lead in onboarding
+  const calculateSectionCompletion = (lead) => {
+    // Only calculate for leads with application status or those in onboarding
+    const isApplication = lead.status === 'application' || lead.status === 'qualified';
+    const isInOnboarding = lead.onboardingStatus === 'in_progress';
+    
+    if (!isApplication && !isInOnboarding) {
+      return null;
+    }
+
+    const sections = mockOnboardingForm.sections;
+    let completedSections = 0;
+
+    // If they haven't started onboarding yet, return 0/4
+    if (!lead.onboardingAnswers) {
+      return { completed: 0, total: sections.length };
+    }
+
+    // Calculate actual completion from onboarding answers
+    sections.forEach(section => {
+      const sectionFields = section.fields;
+      
+      if (section.repeatable) {
+        // For repeatable property sections, check if at least one property has required fields filled
+        const propertyCount = lead.properties?.length || 0;
+        if (propertyCount > 0) {
+          // Check if first property has required onboarding fields filled
+          const requiredFields = sectionFields.filter(f => f.required);
+          const allRequiredFilled = requiredFields.every(field => {
+            // For repeatable sections, check property-0-field-* pattern
+            const fieldId = `property-0-${field.id}`;
+            return lead.onboardingAnswers[fieldId] !== undefined && lead.onboardingAnswers[fieldId] !== '';
+          });
+          if (allRequiredFilled) completedSections++;
+        }
+      } else {
+        // For non-repeatable sections, check if all required fields are filled
+        const requiredFields = sectionFields.filter(f => f.required);
+        
+        if (requiredFields.length === 0) {
+          // If no required fields, check if any field is filled
+          const anyFilled = sectionFields.some(field => {
+            const fieldId = field.id;
+            return lead.onboardingAnswers[fieldId] !== undefined && lead.onboardingAnswers[fieldId] !== '';
+          });
+          if (anyFilled) completedSections++;
+        } else {
+          // Check if all required fields are filled
+          const allRequiredFilled = requiredFields.every(field => {
+            const fieldId = field.id;
+            return lead.onboardingAnswers[fieldId] !== undefined && 
+                   lead.onboardingAnswers[fieldId] !== '' &&
+                   lead.onboardingAnswers[fieldId] !== null;
+          });
+          if (allRequiredFilled) completedSections++;
+        }
+      }
+    });
+
+    return { completed: completedSections, total: sections.length };
+  };
+
+  // Handle column sorting
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      // Toggle sort order if clicking the same column
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new column and default to descending
+      setSortBy(column);
+      setSortOrder('desc');
+    }
+  };
 
   // Filter and sort leads
   const getFilteredLeads = () => {
@@ -53,14 +130,45 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
 
     // Sort
     filtered.sort((a, b) => {
-      let aVal = a[sortBy];
-      let bVal = b[sortBy];
+      let aVal, bVal;
 
-      if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
-        aVal = new Date(aVal);
-        bVal = new Date(bVal);
+      // Handle different column types
+      switch(sortBy) {
+        case 'name':
+          aVal = `${a.firstName} ${a.lastName}`.toLowerCase();
+          bVal = `${b.firstName} ${b.lastName}`.toLowerCase();
+          break;
+        case 'contact':
+          aVal = a.email.toLowerCase();
+          bVal = b.email.toLowerCase();
+          break;
+        case 'status':
+          aVal = a.status;
+          bVal = b.status;
+          break;
+        case 'properties':
+          aVal = a.properties?.length || 0;
+          bVal = b.properties?.length || 0;
+          break;
+        case 'assignedTo':
+          aVal = a.assignedTo || '';
+          bVal = b.assignedTo || '';
+          break;
+        case 'createdAt':
+        case 'updatedAt':
+        case 'lastReachedOut':
+          // Handle dates, treating null/undefined as very old dates for sorting
+          aVal = a[sortBy] ? new Date(a[sortBy]) : new Date(0);
+          bVal = b[sortBy] ? new Date(b[sortBy]) : new Date(0);
+          break;
+        default:
+          aVal = a[sortBy];
+          bVal = b[sortBy];
       }
 
+      // Compare values
+      if (aVal === bVal) return 0;
+      
       if (sortOrder === 'asc') {
         return aVal > bVal ? 1 : -1;
       } else {
@@ -116,26 +224,79 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
   };
 
   const getStatusBadge = (lead) => {
-    const configs = {
-      lead: { color: '#f59e0b', label: 'Lead', icon: AlertCircle },
-      application: { color: '#3b82f6', label: 'Application', icon: Clock },
-      'awaiting approval': { color: '#8b5cf6', label: 'Awaiting Approval', icon: UserCheck },
-      archived: { color: '#6b7280', label: 'Archived', icon: Archive }
-    };
+    const completion = calculateSectionCompletion(lead);
+    
+    // Determine actual display status based on simplified logic
+    let displayLabel = 'Lead';
+    let displayColor = '#f59e0b';
+    let displayIcon = AlertCircle;
+    let showCompletion = false;
+    
+    // Special handling for archived
+    if (lead.status === 'archived') {
+      displayLabel = 'Archived';
+      displayColor = '#6b7280';
+      displayIcon = Archive;
+    }
+    // If status is 'awaiting approval'
+    else if (lead.status === 'awaiting approval') {
+      displayLabel = 'Awaiting Approval';
+      displayColor = '#8b5cf6';
+      displayIcon = UserCheck;
+      showCompletion = false;
+    }
+    // If status is 'application' or 'qualified' (these show as "Application")
+    else if (lead.status === 'application' || lead.status === 'qualified') {
+      // Check if they've completed all sections (4/4)
+      if (completion && completion.completed === completion.total) {
+        displayLabel = 'Awaiting Approval';
+        displayColor = '#8b5cf6';
+        displayIcon = UserCheck;
+        showCompletion = false; // Don't show (4/4) for awaiting approval
+      } else {
+        // Still working on application (could be 0/4, 1/4, 2/4, 3/4)
+        displayLabel = 'Application';
+        displayColor = '#3b82f6';
+        displayIcon = Clock;
+        showCompletion = true; // Show (X/4)
+      }
+    }
+    // Everything else is a Lead (lead, partial, etc.)
+    else {
+      displayLabel = 'Lead';
+      displayColor = '#f59e0b';
+      displayIcon = AlertCircle;
+    }
 
-    const config = configs[lead.status] || configs.lead;
-    const Icon = config.icon;
+    const Icon = displayIcon;
 
     return (
       <span 
         className="status-badge"
         style={{ 
-          backgroundColor: `${config.color}20`,
-          color: config.color
+          backgroundColor: `${displayColor}20`,
+          color: displayColor,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
         }}
       >
         <Icon size={14} />
-        {config.label}
+        <span>{displayLabel}</span>
+        {/* Only show completion for Application status (X/4) */}
+        {showCompletion && completion && completion.total > 0 && (
+          <span 
+            style={{ 
+              fontSize: '11px',
+              fontWeight: '600',
+              opacity: 0.8,
+              marginLeft: '2px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            ({completion.completed}/{completion.total})
+          </span>
+        )}
       </span>
     );
   };
@@ -152,6 +313,41 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+  // Sortable header component
+  const SortableHeader = ({ column, children, width }) => {
+    const isActive = sortBy === column;
+    const SortIcon = isActive 
+      ? (sortOrder === 'asc' ? ArrowUp : ArrowDown)
+      : ArrowUpDown;
+    
+    return (
+      <th 
+        width={width}
+        onClick={() => handleSort(column)}
+        style={{ 
+          cursor: 'pointer',
+          userSelect: 'none'
+        }}
+      >
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '4px',
+          justifyContent: 'space-between'
+        }}>
+          <span>{children}</span>
+          <SortIcon 
+            size={14} 
+            style={{ 
+              opacity: isActive ? 1 : 0.3,
+              flexShrink: 0
+            }} 
+          />
+        </div>
+      </th>
+    );
   };
 
   return (
@@ -261,14 +457,14 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
                   onChange={toggleAllLeads}
                 />
               </th>
-              <th>Name</th>
-              <th>Contact</th>
-              <th>Status</th>
-              <th>Properties</th>
-              <th>Assigned To</th>
-              <th>Created</th>
-              <th>Updated</th>
-              <th>Last Reached Out</th>
+              <SortableHeader column="name">Name</SortableHeader>
+              <SortableHeader column="contact">Contact</SortableHeader>
+              <SortableHeader column="status">Status</SortableHeader>
+              <SortableHeader column="properties">Properties</SortableHeader>
+              <SortableHeader column="assignedTo">Assigned To</SortableHeader>
+              <SortableHeader column="createdAt">Created</SortableHeader>
+              <SortableHeader column="updatedAt">Updated</SortableHeader>
+              <SortableHeader column="lastReachedOut">Last Reached Out</SortableHeader>
               <th width="60"></th>
             </tr>
           </thead>
@@ -304,9 +500,6 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
                       </div>
                       <div>
                         <div className="lead-name">{lead.firstName} {lead.lastName}</div>
-                        {lead.isDuplicate && (
-                          <span className="duplicate-tag">Duplicate</span>
-                        )}
                       </div>
                     </div>
                   </td>

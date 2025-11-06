@@ -24,50 +24,7 @@ function App() {
   const [editingFormType, setEditingFormType] = useState(null); // 'lead-questionnaire' or 'onboarding-application'
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
-  const [leads, setLeads] = useState(() => {
-    // Detect duplicates on initial load
-    return detectAndMarkDuplicates(mockLeads);
-  });
-
-  // Duplicate detection helper
-  function detectAndMarkDuplicates(leadsArray) {
-    const emailMap = {};
-    const phoneMap = {};
-    const updatedLeads = leadsArray.map(lead => ({ ...lead, isDuplicate: false, duplicateOf: null }));
-
-    // First pass: find duplicates
-    updatedLeads.forEach((lead, index) => {
-      if (lead.status === 'archived') return; // Skip archived leads
-
-      // Check email duplicates
-      if (lead.email) {
-        const email = lead.email.toLowerCase();
-        if (emailMap[email] !== undefined) {
-          // This is a duplicate
-          updatedLeads[index].isDuplicate = true;
-          updatedLeads[index].duplicateOf = emailMap[email];
-        } else {
-          emailMap[email] = lead.id;
-        }
-      }
-
-      // Check phone duplicates
-      if (lead.phone) {
-        const phone = lead.phone.replace(/\D/g, ''); // Remove non-digits
-        if (phoneMap[phone] !== undefined) {
-          // This is a duplicate
-          if (!updatedLeads[index].isDuplicate) {
-            updatedLeads[index].isDuplicate = true;
-            updatedLeads[index].duplicateOf = phoneMap[phone];
-          }
-        } else {
-          phoneMap[phone] = lead.id;
-        }
-      }
-    });
-
-    return updatedLeads;
-  }
+  const [leads, setLeads] = useState(mockLeads);
 
   // Check if we're on the example site route
   const isExampleSite = currentPath === '/example-site';
@@ -117,23 +74,18 @@ function App() {
   };
 
   const handleSaveNewLead = (newLead) => {
-    setLeads(prevLeads => {
-      const updatedLeads = [newLead, ...prevLeads];
-      return detectAndMarkDuplicates(updatedLeads);
-    });
+    setLeads(prevLeads => [newLead, ...prevLeads]);
     setShowNewLeadModal(false);
     // Show success message or navigate to the new lead
     console.log('New lead created:', newLead);
   };
 
   const handleArchiveLead = (leadId) => {
-    setLeads(prevLeads => {
-      const updatedLeads = prevLeads.map(lead => 
+    setLeads(prevLeads => 
+      prevLeads.map(lead => 
         lead.id === leadId ? { ...lead, status: 'archived' } : lead
-      );
-      // Re-detect duplicates after archiving
-      return detectAndMarkDuplicates(updatedLeads);
-    });
+      )
+    );
   };
 
   // Automatic status progression - when onboarding is completed and approved

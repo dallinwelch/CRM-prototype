@@ -273,7 +273,7 @@ const OnyxPropertyManagement = () => {
           // Detailed Owner Form Page
           <div className="content-container owner-form-page">
             <div className="form-content-full">
-              <h2 className="section-title">Property Management Application</h2>
+              <h2 className="section-title">Property Management Lead Form</h2>
               <p className="section-subtitle">Tell us about your properties</p>
               
               <form onSubmit={handleDetailedFormSubmit} className="detailed-owner-form">
