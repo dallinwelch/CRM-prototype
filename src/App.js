@@ -11,6 +11,7 @@ import FormsBuilder from './components/FormsBuilder';
 import PropertyManagementSite from './components/PropertyManagementSite';
 import MobileOwnerQuestionnaire from './components/MobileOwnerQuestionnaire';
 import OnyxPropertyManagement from './components/OnyxPropertyManagement';
+import OwnerPortal from './components/OwnerPortal';
 import NewLeadModal from './components/NewLeadModal';
 import { mockLeads } from './mockData';
 import './index.css';
@@ -35,6 +36,9 @@ function App() {
   // Check if we're on the Onyx property management site route
   const isOnyxSite = currentPath === '/pmw';
   
+  // Check if we're on the owner portal route
+  const isOwnerPortal = currentPath === '/owner-portal';
+  
   if (isExampleSite) {
     return <PropertyManagementSite />;
   }
@@ -48,6 +52,10 @@ function App() {
 
   if (isOnyxSite) {
     return <OnyxPropertyManagement />;
+  }
+
+  if (isOwnerPortal) {
+    return <OwnerPortal />;
   }
 
   const handleNavigateToList = (filterStatus = null) => {
