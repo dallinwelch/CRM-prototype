@@ -9,6 +9,21 @@ const addDefaultValues = (lead) => ({
   lastReachedOut: lead.lastReachedOut || null
 });
 
+// Helper function to get property count (defaults to 1 if no properties)
+export const getPropertyCount = (lead) => {
+  if (lead.properties && lead.properties.length > 0) {
+    return lead.properties.length;
+  }
+  return 1;
+};
+
+// Helper function to calculate average properties per owner
+export const calculatePropertiesPerOwner = (leads) => {
+  if (leads.length === 0) return 0;
+  const totalProperties = leads.reduce((sum, lead) => sum + getPropertyCount(lead), 0);
+  return (totalProperties / leads.length).toFixed(1);
+};
+
 export const mockLeads = [
   // ONYX PROPERTY MANAGEMENT FORM LEADS
   // LEAD - Just filled out questionnaire, no application yet
@@ -27,6 +42,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Onyx Property Management Form',
     leadSource: 'Onyx Website',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Direct Website',
     properties: [
       {
         id: 'prop-onyx-001-1',
@@ -100,7 +117,7 @@ export const mockLeads = [
     initialMessage: 'I am interested in learning more about your property management services for my rental properties. I have two properties in Austin that I would like to have professionally managed.',
     sourceMetadata: {
       formName: 'Onyx Property Management Lead Form',
-      referrerUrl: 'https://onyxpm.com/owners'
+      referrerUrl: 'https://theonyx.nesthub.com/owners'
     }
   },
 
@@ -171,7 +188,7 @@ export const mockLeads = [
     initialMessage: 'I have a townhouse that will be available soon. I\'m looking for a reliable property management company to handle tenant screening and maintenance.',
     sourceMetadata: {
       formName: 'Onyx Property Management Lead Form',
-      referrerUrl: 'https://onyxpm.com/owners'
+      referrerUrl: 'https://theonyx.nesthub.com/market-property-management'
     }
   },
 
@@ -191,6 +208,8 @@ export const mockLeads = [
     completionPercentage: 40,
     source: 'Onyx Property Management Form',
     leadSource: 'Onyx Website',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Direct Website',
     properties: [],
     questionnaireAnswers: {
       'field-name': 'Jennifer Williams',
@@ -233,6 +252,8 @@ export const mockLeads = [
     completionPercentage: 55,
     source: 'Onyx Contact Form',
     leadSource: 'Onyx Website',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Direct Website',
     properties: [],
     questionnaireAnswers: {
       'field-name': 'David Thompson',
@@ -254,7 +275,7 @@ export const mockLeads = [
     initialMessage: 'I\'m considering purchasing a rental property and want to understand your property management services.',
     sourceMetadata: {
       formName: 'Onyx Contact Form',
-      referrerUrl: 'https://onyxpm.com/owners'
+      referrerUrl: 'https://theonyx.nesthub.com/contact'
     }
   },
 
@@ -505,6 +526,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Word of Mouth',
     leadSource: 'Word of Mouth',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Referral',
     properties: [
       {
         id: 'prop-002-1',
@@ -587,6 +610,8 @@ export const mockLeads = [
     completionPercentage: 20,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'Google',
     emailBounced: true, // Example of bounced email
     phoneInvalid: false,
     properties: [],
@@ -606,7 +631,11 @@ export const mockLeads = [
     notes: 'Minimal info provided',
     noteCount: 1,
     hasBeenContacted: false,
-    initialMessage: null
+    initialMessage: null,
+    sourceMetadata: {
+      formName: 'PMW Lead Form',
+      referrerUrl: 'https://theonyx.nesthub.com/owners'
+    }
   },
   {
     id: 'lead-007',
@@ -623,6 +652,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'Facebook',
     properties: [
       {
         id: 'prop-007-1',
@@ -667,7 +698,11 @@ export const mockLeads = [
     notes: 'Property details completed - ready for review',
     noteCount: 1,
     hasBeenContacted: true,
-    initialMessage: 'Looking into property management options'
+    initialMessage: 'Looking into property management options',
+    sourceMetadata: {
+      formName: 'PMW Lead Form',
+      referrerUrl: 'https://theonyx.nesthub.com/services'
+    }
   },
   {
     id: 'lead-008',
@@ -684,6 +719,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
     properties: [
       {
         id: 'prop-008-1',
@@ -772,6 +809,8 @@ export const mockLeads = [
     completionPercentage: 35,
     source: 'Referral',
     leadSource: 'Email',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Email',
     properties: [],
     questionnaireAnswers: {
       'field-email': 'pmoore@email.com',
@@ -806,6 +845,8 @@ export const mockLeads = [
     completionPercentage: 25,
     source: 'Website Form',
     leadSource: 'SMS',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'SMS',
     emailBounced: false,
     phoneInvalid: true, // Example of non-textable phone
     properties: [],
@@ -842,6 +883,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'Bing',
     properties: [
       {
         id: 'prop-011-1',
@@ -918,6 +961,8 @@ export const mockLeads = [
     completionPercentage: 30,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'Google Ads',
     properties: [],
     questionnaireAnswers: {
       'field-phone': '(555) 234-8901',
@@ -935,7 +980,11 @@ export const mockLeads = [
     notes: 'New lead - requires follow-up',
     noteCount: 1,
     hasBeenContacted: false,
-    initialMessage: null
+    initialMessage: null,
+    sourceMetadata: {
+      formName: 'PMW Lead Form',
+      referrerUrl: 'https://theonyx.nesthub.com/owners'
+    }
   },
 
   // QUALIFIED LEADS (8 examples)
@@ -953,6 +1002,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'ChatGPT',
     sourceMetadata: {
       formName: 'Owner Interest Form',
       referrerUrl: 'https://propertymanagement.com/services',
@@ -1033,6 +1084,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
     properties: [
       {
         id: 'prop-004',
@@ -1099,6 +1152,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'LinkedIn',
     properties: [
       {
         id: 'prop-006',
@@ -1152,6 +1207,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Referral',
     properties: [
       {
         id: 'prop-007',
@@ -1215,6 +1272,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'Email',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Email',
     properties: [
       {
         id: 'prop-008',
@@ -1271,6 +1330,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'Google',
     properties: [
       {
         id: 'prop-009',
@@ -1344,6 +1405,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
     properties: [
       {
         id: 'prop-010',
@@ -1396,6 +1459,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'SMS',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'SMS',
     properties: [
       {
         id: 'prop-011',
@@ -1464,6 +1529,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'Google Ads',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 25,
     properties: [
@@ -1539,6 +1606,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Referral',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'pending_review', // Ready for manager approval
@@ -1638,6 +1707,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'ChatGPT',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'pending_review', // Ready for manager approval
@@ -1737,6 +1808,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'pending_review', // Ready for manager approval
@@ -1840,6 +1913,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'Email',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Email',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'pending_review', // Ready for manager approval
@@ -1968,6 +2043,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'Facebook',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'pending_review', // Ready for manager approval
@@ -2069,6 +2146,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Word of Mouth',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Referral',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'changes_requested', // Manager requested changes
@@ -2161,6 +2240,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'Bing',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'pending_review', // Ready for manager approval
@@ -2262,6 +2343,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Phone Call',
     leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'approved', // Approved and in onboarding phase
@@ -2373,6 +2456,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'SMS',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'SMS',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 55,
     properties: [
@@ -2456,6 +2541,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Website Form',
     leadSource: 'PMW',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'LinkedIn',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 100,
     applicationStatus: 'approved', // Application approved, now in onboarding phase
@@ -2598,6 +2685,8 @@ export const mockLeads = [
     completionPercentage: 100,
     source: 'Referral',
     leadSource: 'Email',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Email',
     onboardingStatus: 'in_progress',
     onboardingCompletion: 70,
     properties: [
@@ -2684,6 +2773,8 @@ export const mockLeads = [
     updatedAt: '2025-10-18T11:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Direct Website',
     denialReason: 'Property not in service area',
     properties: [
       {
@@ -2726,6 +2817,8 @@ export const mockLeads = [
     updatedAt: '2025-10-15T14:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSourceCategory: 'organic',
+    leadSourceChannel: 'Google',
     denialReason: 'Property does not meet minimum requirements',
     properties: [
       {
@@ -2768,6 +2861,8 @@ export const mockLeads = [
     updatedAt: '2025-10-12T09:00:00Z',
     completionPercentage: 100,
     source: 'Phone Call',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
     denialReason: 'Lead no longer interested',
     properties: [
       {
@@ -2810,6 +2905,8 @@ export const mockLeads = [
     updatedAt: '2025-10-05T16:00:00Z',
     completionPercentage: 100,
     source: 'Website Form',
+    leadSourceCategory: 'paid',
+    leadSourceChannel: 'Google Ads',
     denialReason: 'Property condition issues',
     properties: [
       {
@@ -2852,6 +2949,8 @@ export const mockLeads = [
     updatedAt: '2025-10-10T13:00:00Z',
     completionPercentage: 70,
     source: 'Referral',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Referral',
     denialReason: 'No response from lead',
     properties: [],
     timeline: [
@@ -3579,51 +3678,98 @@ export const fibonacciCadence = [1, 2, 3, 5, 8, 13]; // Days
 
 // Generate time-series funnel data for the past year
 // Hard-coded with specific close rates by source:
-// PMW: 70% close rate | Phone: 60% | Email: 55% | SMS: 65% | Word of Mouth: 75%
+// Organic: Google (65%), Bing (60%), ChatGPT (70%)
+// Paid: Google Ads (55%), Facebook (60%), LinkedIn (50%)
+// Other: Phone (60%), Email (55%), SMS (65%), Referral (75%)
 // Target: ~150 leads/year → ~100 onboarded/year (overall ~67% close rate)
 const generateTimeSeriesData = () => {
   const data = [];
   const now = new Date();
-  const leadSources = ['PMW', 'Phone', 'Email', 'SMS', 'Word of Mouth'];
+  const organicChannels = ['Google', 'Bing', 'ChatGPT'];
+  const paidChannels = ['Google Ads', 'Facebook', 'LinkedIn'];
+  const otherChannels = ['Phone', 'Email', 'SMS', 'Referral'];
   
-  // Hard-coded conversion rates by source
-  // Lead → Application: 85% | Application → Onboarded: varies by source to hit target close rates
-  const sourceMetrics = {
-    'PMW': { 
-      targetLeadsPerYear: 90,  // 60% of total
-      leadToApp: 0.85,         // 85% become applications (77 apps)
-      appToOnboard: 0.82       // 82% of apps onboard (63 onboarded) → 70% close rate
+  // Hard-coded conversion rates by channel
+  // Lead → Application: 85% | Application → Onboarded: varies by channel to hit target close rates
+  const channelMetrics = {
+    // Organic Channels (50% of total leads)
+    'Google': { 
+      targetLeadsPerYear: 50,  // 33% of total
+      leadToApp: 0.85,         // 85% become applications
+      appToOnboard: 0.76,      // 65% close rate
+      category: 'organic'
     },
+    'Bing': { 
+      targetLeadsPerYear: 15,  // 10% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.71,      // 60% close rate
+      category: 'organic'
+    },
+    'ChatGPT': { 
+      targetLeadsPerYear: 10,  // 7% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.82,      // 70% close rate
+      category: 'organic'
+    },
+    // Paid Channels (25% of total leads)
+    'Google Ads': { 
+      targetLeadsPerYear: 20,  // 13% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.65,      // 55% close rate
+      category: 'paid'
+    },
+    'Facebook': { 
+      targetLeadsPerYear: 12,  // 8% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.71,      // 60% close rate
+      category: 'paid'
+    },
+    'LinkedIn': { 
+      targetLeadsPerYear: 6,   // 4% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.59,      // 50% close rate
+      category: 'paid'
+    },
+    // Other Channels (25% of total leads)
     'Phone': { 
-      targetLeadsPerYear: 23,  // 15% of total
-      leadToApp: 0.85,         // 85% become applications (20 apps)
-      appToOnboard: 0.71       // 71% of apps onboard (14 onboarded) → 60% close rate
+      targetLeadsPerYear: 15,  // 10% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.71,      // 60% close rate
+      category: 'other'
     },
     'Email': { 
-      targetLeadsPerYear: 18,  // 12% of total
-      leadToApp: 0.85,         // 85% become applications (15 apps)
-      appToOnboard: 0.65       // 65% of apps onboard (10 onboarded) → 55% close rate
+      targetLeadsPerYear: 10,  // 7% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.65,      // 55% close rate
+      category: 'other'
     },
     'SMS': { 
-      targetLeadsPerYear: 12,  // 8% of total
-      leadToApp: 0.85,         // 85% become applications (10 apps)
-      appToOnboard: 0.76       // 76% of apps onboard (8 onboarded) → 65% close rate
+      targetLeadsPerYear: 6,   // 4% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.76,      // 65% close rate
+      category: 'other'
     },
-    'Word of Mouth': { 
-      targetLeadsPerYear: 15,  // 10% of total
-      leadToApp: 0.85,         // 85% become applications (13 apps)
-      appToOnboard: 0.88       // 88% of apps onboard (11 onboarded) → 75% close rate
+    'Referral': { 
+      targetLeadsPerYear: 6,   // 4% of total
+      leadToApp: 0.85,
+      appToOnboard: 0.88,      // 75% close rate
+      category: 'other'
     }
   };
   
   // Generate hourly data for the last 24 hours
   // Hard-coded patterns for realistic hourly distribution
   const hourlyPatterns = {
-    'PMW': [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0],      // 4 leads in 24h
-    'Phone': [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0],    // 2 leads in 24h
-    'Email': [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],    // 1 lead in 24h
-    'SMS': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],      // 0 leads in 24h
-    'Word of Mouth': [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0] // 1 lead in 24h
+    'Google': [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],         // 3 leads
+    'Bing': [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],           // 1 lead
+    'ChatGPT': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0],        // 1 lead
+    'Google Ads': [0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],     // 2 leads
+    'Facebook': [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],       // 1 lead
+    'LinkedIn': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],       // 0 leads
+    'Phone': [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],          // 1 lead
+    'Email': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],          // 1 lead
+    'SMS': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],            // 0 leads
+    'Referral': [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]        // 1 lead
   };
   
   for (let i = 24; i >= 0; i--) {
@@ -3634,65 +3780,119 @@ const generateTimeSeriesData = () => {
     let totalLeads = 0;
     let totalApplications = 0;
     let totalOnboarded = 0;
+    let organicLeads = 0, organicApps = 0, organicOnboarded = 0;
+    let paidLeads = 0, paidApps = 0, paidOnboarded = 0;
+    let otherLeads = 0, otherApps = 0, otherOnboarded = 0;
     
-    leadSources.forEach((source) => {
-      const hourlyLeads = hourlyPatterns[source][i];
-      const applications = hourlyLeads > 0 ? (Math.random() < sourceMetrics[source].leadToApp ? 1 : 0) : 0;
-      const onboarded = applications > 0 ? (Math.random() < sourceMetrics[source].appToOnboard ? 1 : 0) : 0;
+    [...organicChannels, ...paidChannels, ...otherChannels].forEach((channel) => {
+      const hourlyLeads = hourlyPatterns[channel][i];
+      const applications = hourlyLeads > 0 ? (Math.random() < channelMetrics[channel].leadToApp ? 1 : 0) : 0;
+      const onboarded = applications > 0 ? (Math.random() < channelMetrics[channel].appToOnboard ? 1 : 0) : 0;
       
       totalLeads += hourlyLeads;
       totalApplications += applications;
       totalOnboarded += onboarded;
       
+      const category = channelMetrics[channel].category;
+      if (category === 'organic') {
+        organicLeads += hourlyLeads;
+        organicApps += applications;
+        organicOnboarded += onboarded;
+      } else if (category === 'paid') {
+        paidLeads += hourlyLeads;
+        paidApps += applications;
+        paidOnboarded += onboarded;
+      } else {
+        otherLeads += hourlyLeads;
+        otherApps += applications;
+        otherOnboarded += onboarded;
+      }
+      
       data.push({
         date: dateStr,
-        source,
+        channel,
+        category,
         leads: hourlyLeads,
         applications: applications,
         onboarded: onboarded
       });
     });
     
+    // Add aggregated data
     data.push({
       date: dateStr,
-      source: 'all',
+      channel: 'all',
+      category: 'all',
       leads: totalLeads,
       applications: totalApplications,
       onboarded: totalOnboarded
+    });
+    data.push({
+      date: dateStr,
+      channel: 'organic',
+      category: 'organic',
+      leads: organicLeads,
+      applications: organicApps,
+      onboarded: organicOnboarded
+    });
+    data.push({
+      date: dateStr,
+      channel: 'paid',
+      category: 'paid',
+      leads: paidLeads,
+      applications: paidApps,
+      onboarded: paidOnboarded
+    });
+    data.push({
+      date: dateStr,
+      channel: 'other',
+      category: 'other',
+      leads: otherLeads,
+      applications: otherApps,
+      onboarded: otherOnboarded
     });
   }
   
   // Generate daily data points for the past 365 days
   // Hard-coded patterns that sum to target annual totals with proper conversion rates
   const dailyPatterns = {
-    // PMW: 90 leads/year → 0.25 leads/day avg → pattern: mostly 0s, some 1s, occasional 2s
-    'PMW': Array(365).fill(0).map((_, i) => {
-      const pattern = i % 4; // Cycle: 0,1,2,3
-      if (pattern === 0) return 1;
-      if (pattern === 1) return 0;
-      if (pattern === 2) return 1;
-      return 0; // pattern === 3
-    }), // ~91 leads
+    // Organic Channels
+    'Google': Array(365).fill(0).map((_, i) => {
+      // ~50 leads/year → pattern: consistent distribution
+      const pattern = i % 7;
+      return pattern === 0 || pattern === 3 ? 1 : 0;
+    }), // ~52 leads
+    'Bing': Array(365).fill(0).map((_, i) => {
+      return i % 24 === 0 ? 1 : 0;
+    }), // ~15 leads
+    'ChatGPT': Array(365).fill(0).map((_, i) => {
+      return i % 36 === 0 ? 1 : 0;
+    }), // ~10 leads
     
-    // Phone: 23 leads/year → 0.06 leads/day avg → pattern: mostly 0s, rare 1s
-    'Phone': Array(365).fill(0).map((_, i) => {
-      return i % 16 === 0 ? 1 : 0;
-    }), // ~23 leads
-    
-    // Email: 18 leads/year → 0.05 leads/day avg → pattern: mostly 0s, rare 1s
-    'Email': Array(365).fill(0).map((_, i) => {
-      return i % 20 === 0 ? 1 : 0;
-    }), // ~18 leads
-    
-    // SMS: 12 leads/year → 0.03 leads/day avg → pattern: mostly 0s, very rare 1s
-    'SMS': Array(365).fill(0).map((_, i) => {
+    // Paid Channels
+    'Google Ads': Array(365).fill(0).map((_, i) => {
+      return i % 18 === 0 ? 1 : 0;
+    }), // ~20 leads
+    'Facebook': Array(365).fill(0).map((_, i) => {
       return i % 30 === 0 ? 1 : 0;
     }), // ~12 leads
+    'LinkedIn': Array(365).fill(0).map((_, i) => {
+      return i % 60 === 0 ? 1 : 0;
+    }), // ~6 leads
     
-    // Word of Mouth: 15 leads/year → 0.04 leads/day avg → pattern: mostly 0s, rare 1s
-    'Word of Mouth': Array(365).fill(0).map((_, i) => {
+    // Other Channels
+    'Phone': Array(365).fill(0).map((_, i) => {
       return i % 24 === 0 ? 1 : 0;
-    }) // ~15 leads
+    }), // ~15 leads
+    'Email': Array(365).fill(0).map((_, i) => {
+      return i % 36 === 0 ? 1 : 0;
+    }), // ~10 leads
+    'SMS': Array(365).fill(0).map((_, i) => {
+      return i % 60 === 0 ? 1 : 0;
+    }), // ~6 leads
+    'Referral': Array(365).fill(0).map((_, i) => {
+      return i % 60 === 0 ? 1 : 0;
+    }) // ~6 leads
   };
   
   for (let i = 365; i >= 0; i--) {
@@ -3704,9 +3904,12 @@ const generateTimeSeriesData = () => {
     let totalLeads = 0;
     let totalApplications = 0;
     let totalOnboarded = 0;
+    let organicLeads = 0, organicApps = 0, organicOnboarded = 0;
+    let paidLeads = 0, paidApps = 0, paidOnboarded = 0;
+    let otherLeads = 0, otherApps = 0, otherOnboarded = 0;
     
-    leadSources.forEach((source) => {
-      const dailyLeads = dailyPatterns[source][dayIndex] || 0;
+    [...organicChannels, ...paidChannels, ...otherChannels].forEach((channel) => {
+      const dailyLeads = dailyPatterns[channel][dayIndex] || 0;
       
       // Apply conversion rates deterministically based on cumulative progress
       let applications = 0;
@@ -3714,12 +3917,13 @@ const generateTimeSeriesData = () => {
       
       if (dailyLeads > 0) {
         // Use day index to deterministically convert leads
-        const conversionSeed = (dayIndex * 7 + leadSources.indexOf(source)) % 100;
-        applications = conversionSeed < (sourceMetrics[source].leadToApp * 100) ? dailyLeads : 0;
+        const channelIndex = [...organicChannels, ...paidChannels, ...otherChannels].indexOf(channel);
+        const conversionSeed = (dayIndex * 7 + channelIndex) % 100;
+        applications = conversionSeed < (channelMetrics[channel].leadToApp * 100) ? dailyLeads : 0;
         
         if (applications > 0) {
-          const onboardSeed = (dayIndex * 13 + leadSources.indexOf(source) * 3) % 100;
-          onboarded = onboardSeed < (sourceMetrics[source].appToOnboard * 100) ? applications : 0;
+          const onboardSeed = (dayIndex * 13 + channelIndex * 3) % 100;
+          onboarded = onboardSeed < (channelMetrics[channel].appToOnboard * 100) ? applications : 0;
         }
       }
       
@@ -3727,21 +3931,63 @@ const generateTimeSeriesData = () => {
       totalApplications += applications;
       totalOnboarded += onboarded;
       
+      const category = channelMetrics[channel].category;
+      if (category === 'organic') {
+        organicLeads += dailyLeads;
+        organicApps += applications;
+        organicOnboarded += onboarded;
+      } else if (category === 'paid') {
+        paidLeads += dailyLeads;
+        paidApps += applications;
+        paidOnboarded += onboarded;
+      } else {
+        otherLeads += dailyLeads;
+        otherApps += applications;
+        otherOnboarded += onboarded;
+      }
+      
       data.push({
         date: dateStr,
-        source,
+        channel,
+        category,
         leads: dailyLeads,
         applications: applications,
         onboarded: onboarded
       });
     });
     
+    // Add aggregated data
     data.push({
       date: dateStr,
-      source: 'all',
+      channel: 'all',
+      category: 'all',
       leads: totalLeads,
       applications: totalApplications,
       onboarded: totalOnboarded
+    });
+    data.push({
+      date: dateStr,
+      channel: 'organic',
+      category: 'organic',
+      leads: organicLeads,
+      applications: organicApps,
+      onboarded: organicOnboarded
+    });
+    data.push({
+      date: dateStr,
+      channel: 'paid',
+      category: 'paid',
+      leads: paidLeads,
+      applications: paidApps,
+      onboarded: paidOnboarded
+    });
+    data.push({
+      date: dateStr,
+      channel: 'other',
+      category: 'other',
+      leads: otherLeads,
+      applications: otherApps,
+      onboarded: otherOnboarded
     });
   }
   

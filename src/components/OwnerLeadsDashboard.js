@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { mockTasks, mockOnboardingForm, timeSeriesFunnelData } from '../mockData';
 import TasksWidget from './TasksWidget';
+import PMWAnalytics from './PMWAnalytics';
 
 const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCreateLead }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -378,8 +379,11 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
         </div>
       </div>
 
+      {/* PMW Analytics Dashboard */}
+      <PMWAnalytics leads={leads} />
 
-      {/* Time Series Line Graph - Pipeline Trends Over Time */}
+      {/* Time Series Line Graph - Pipeline Trends Over Time - REMOVED, now in PMW Analytics */}
+      {false && (
       <div style={{ 
         backgroundColor: 'white', 
         borderRadius: '8px', 
@@ -1165,8 +1169,10 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
           );
         })()}
       </div>
+      )}
 
-      {/* Lead Source Performance Comparison */}
+      {/* Lead Source Performance Comparison - REMOVED, now in PMW Analytics */}
+      {false && (
       <div style={{ 
         backgroundColor: 'white', 
         borderRadius: '8px', 
@@ -1388,8 +1394,10 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
           })}
         </div>
       </div>
+      )}
 
-      {/* Key Performance Metrics */}
+      {/* Key Performance Metrics - REMOVED, now in PMW Analytics */}
+      {false && (
       <div style={{ 
         backgroundColor: 'white', 
         borderRadius: '8px', 
@@ -1611,6 +1619,7 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
           </div>
         </div>
       </div>
+      )}
 
       {/* Stats Cards - Single Row */}
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '2rem' }}>
