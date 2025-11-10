@@ -48,7 +48,8 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
   const lead = leads.find(l => l.id === leadId);
   
   // Determine if this is a lead or applicant
-  const isApplicant = lead ? (lead.status === 'approved' || lead.onboardingStatus || lead.completionPercentage === 100) : false;
+  // Show as applicant UNLESS status is 'partial' (lead) or 'qualified' (qualified lead)
+  const isApplicant = lead ? (lead.status !== 'partial' && lead.status !== 'qualified') : false;
   
   // Default Lead Info: collapsed for applicants, expanded for leads
   const [isLeadInfoExpanded, setIsLeadInfoExpanded] = useState(!isApplicant);
@@ -436,9 +437,28 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
   };
 
   return (
-    <div className="lead-detail">
+    <div className="lead-detail" style={{ 
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 80px - 2 * var(--spacing-lg))',
+      overflow: 'hidden',
+      margin: 'calc(-1 * var(--spacing-lg))',
+      padding: 0
+    }}>
       {/* Header */}
-      <div className="detail-header">
+      <div 
+        className="detail-header" 
+        style={{
+          flexShrink: 0,
+          zIndex: 100,
+          backgroundColor: 'white',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          paddingLeft: 'var(--spacing-lg)',
+          paddingRight: 'var(--spacing-lg)',
+          paddingTop: 'var(--spacing-lg)',
+          paddingBottom: 'var(--spacing-lg)'
+        }}
+      >
         <button className="btn-back" onClick={onBack}>
           <ArrowLeft size={20} />
         </button>
@@ -531,18 +551,24 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
       </div>
 
       {/* Tabs */}
-      <div className="detail-tabs">
+      <div 
+        className="detail-tabs"
+        style={{
+          flexShrink: 0,
+          zIndex: 99,
+          backgroundColor: 'white',
+          paddingLeft: 'var(--spacing-lg)',
+          paddingRight: 'var(--spacing-lg)',
+          paddingTop: '12px',
+          paddingBottom: '12px',
+          borderBottom: '1px solid #e2e8f0'
+        }}
+      >
         <button
           className={`detail-tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           Overview
-        </button>
-        <button
-          className={`detail-tab ${activeTab === 'properties' ? 'active' : ''}`}
-          onClick={() => setActiveTab('properties')}
-        >
-          Properties ({lead.properties.length})
         </button>
         <button
           className={`detail-tab ${activeTab === 'timeline' ? 'active' : ''}`}
@@ -553,18 +579,17 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
             <span className="tab-badge">{lead.noteCount || 1}</span>
           )}
         </button>
-        {lead.onboardingStatus && (
-          <button
-            className={`detail-tab ${activeTab === 'onboarding' ? 'active' : ''}`}
-            onClick={() => setActiveTab('onboarding')}
-          >
-            Onboarding ({lead.onboardingCompletion}%)
-          </button>
-        )}
       </div>
 
       {/* Content */}
-      <div className="detail-content">
+      <div className="detail-content" style={{
+        flex: 1,
+        overflowY: 'auto',
+        paddingLeft: 'var(--spacing-lg)',
+        paddingRight: 'var(--spacing-lg)',
+        paddingTop: 'var(--spacing-lg)',
+        paddingBottom: 'var(--spacing-lg)'
+      }}>
         {activeTab === 'overview' && (
           <div className="detail-grid">
             {/* LEAD INFO SECTION */}
@@ -2224,271 +2249,6 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
           </div>
         )}
 
-        {activeTab === 'properties' && (
-          <div className="properties-view">
-            <div className="properties-header">
-              <h3>Properties ({displayData.properties.length})</h3>
-              {isEditing && (
-                <button className="btn btn-primary" onClick={addProperty}>
-                  <Plus size={18} />
-                  Add Property
-                </button>
-              )}
-            </div>
-            {displayData.properties.length > 0 ? (
-              <div className="properties-list">
-                {displayData.properties.map((property, index) => (
-                  <div key={property.id || index} className="property-card-lg" style={{
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    padding: '24px',
-                    marginBottom: '16px',
-                    background: 'white'
-                  }}>
-                    <div className="property-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div className="property-icon-lg" style={{ 
-                          width: '48px', 
-                          height: '48px', 
-                          background: 'var(--primary-light)', 
-                          borderRadius: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'var(--primary)'
-                        }}>
-                          <Home size={24} />
-                        </div>
-                        <div>
-                          <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Property {index + 1}</h4>
-                        </div>
-                      </div>
-                      {isEditing && displayData.properties.length > 1 && (
-                        <button 
-                          className="btn-icon"
-                          onClick={() => removeProperty(index)}
-                          style={{
-                            color: '#dc2626',
-                            padding: '8px',
-                            cursor: 'pointer',
-                            border: '1px solid #fee2e2',
-                            background: '#fef2f2',
-                            borderRadius: '6px'
-                          }}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      )}
-                    </div>
-                    
-                    {isEditing ? (
-                      <div className="form-grid" style={{ display: 'grid', gap: '16px' }}>
-                        <div className="form-group">
-                          <label className="form-label" style={{ fontWeight: '500', marginBottom: '6px', display: 'block' }}>Property Address *</label>
-                          <input
-                            type="text"
-                            value={property.address}
-                            onChange={(e) => handlePropertyChange(index, 'address', e.target.value)}
-                            className="form-input"
-                            placeholder="123 Main St, City, State, ZIP"
-                            style={{ width: '100%' }}
-                          />
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                          <div className="form-group">
-                            <label className="form-label">Bedrooms *</label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="1"
-                              value={property.bedrooms}
-                              onChange={(e) => handlePropertyChange(index, 'bedrooms', e.target.value)}
-                              className="form-input"
-                            />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Bathrooms *</label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.5"
-                              value={property.bathrooms}
-                              onChange={(e) => handlePropertyChange(index, 'bathrooms', e.target.value)}
-                              className="form-input"
-                            />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Square Feet *</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={property.sqft}
-                              onChange={(e) => handlePropertyChange(index, 'sqft', e.target.value)}
-                              className="form-input"
-                            />
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                          <div className="form-group">
-                            <label className="form-label">Minimum Rent ($/month) *</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={property.minRentPrice}
-                              onChange={(e) => handlePropertyChange(index, 'minRentPrice', e.target.value)}
-                              className="form-input"
-                            />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Agreement Length *</label>
-                            <select
-                              value={property.agreementLength || '1'}
-                              onChange={(e) => handlePropertyChange(index, 'agreementLength', e.target.value)}
-                              className="form-input"
-                            >
-                              <option value="1">1 year</option>
-                              <option value="2">2 years</option>
-                              <option value="3">3 years</option>
-                              <option value="4">4 years</option>
-                              <option value="5">5 years</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                          <div className="form-group">
-                            <label className="form-label">Type of Home *</label>
-                            <select
-                              value={property.homeType || 'house'}
-                              onChange={(e) => handlePropertyChange(index, 'homeType', e.target.value)}
-                              className="form-input"
-                            >
-                              <option value="house">House</option>
-                              <option value="condo">Condo</option>
-                              <option value="townhouse">Townhouse</option>
-                              <option value="mobile-home">Mobile Home</option>
-                            </select>
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Furnished *</label>
-                            <select
-                              value={property.furnished || 'unfurnished'}
-                              onChange={(e) => handlePropertyChange(index, 'furnished', e.target.value)}
-                              className="form-input"
-                            >
-                              <option value="unfurnished">Unfurnished</option>
-                              <option value="furnished">Furnished</option>
-                              <option value="partially-furnished">Partially Furnished</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                          <div className="form-group">
-                            <label className="form-label">Repair Authorization Limit ($) *</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={property.repairLimit || '500'}
-                              onChange={(e) => handlePropertyChange(index, 'repairLimit', e.target.value)}
-                              className="form-input"
-                            />
-                            <small style={{ fontSize: '12px', color: '#64748b' }}>
-                              Amount below which repairs can be made without your authorization
-                            </small>
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Currently Occupied? *</label>
-                            <select
-                              value={property.currentlyLiveInHome || 'no'}
-                              onChange={(e) => handlePropertyChange(index, 'currentlyLiveInHome', e.target.value)}
-                              className="form-input"
-                            >
-                              <option value="no">No</option>
-                              <option value="yes">Yes</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="form-group">
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                            <input
-                              type="checkbox"
-                              checked={property.petsAllowed || false}
-                              onChange={(e) => handlePropertyChange(index, 'petsAllowed', e.target.checked)}
-                            />
-                            <span style={{ fontWeight: '500' }}>Pets Allowed</span>
-                          </label>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="property-address-lg" style={{ fontSize: '16px', fontWeight: '500', marginBottom: '16px' }}>
-                          {property.address}
-                        </div>
-                        <div className="property-details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Bedrooms</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>{property.bedrooms}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Bathrooms</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>{property.bathrooms}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Square Feet</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>{property.sqft}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Min Rent</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>${property.minRentPrice}/month</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Agreement Length</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>{property.agreementLength || '1'} {property.agreementLength === '1' ? 'year' : 'years'}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Home Type</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500', textTransform: 'capitalize' }}>{(property.homeType || 'house').replace('-', ' ')}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Furnished</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500', textTransform: 'capitalize' }}>{(property.furnished || 'unfurnished').replace('-', ' ')}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Repair Limit</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>${property.repairLimit || '500'}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Currently Occupied</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>{property.currentlyLiveInHome === 'yes' ? 'Yes' : 'No'}</span>
-                          </div>
-                          <div className="property-detail-item">
-                            <span className="detail-label" style={{ fontSize: '12px', color: '#64748b' }}>Pets Allowed</span>
-                            <span className="detail-value" style={{ fontSize: '14px', fontWeight: '500' }}>{property.petsAllowed ? '✓ Yes' : '✗ No'}</span>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state" style={{ textAlign: 'center', padding: '60px' }}>
-                <Home size={64} style={{ opacity: 0.2, margin: '0 auto 16px' }} />
-                <p style={{ margin: '0 0 16px', color: '#64748b' }}>No properties added</p>
-                {isEditing && (
-                  <button className="btn btn-primary" onClick={addProperty}>
-                    <Plus size={18} />
-                    Add First Property
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
         {activeTab === 'timeline' && (
           <div className="timeline-view">
@@ -2554,84 +2314,6 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
           </div>
         )}
 
-        {activeTab === 'onboarding' && lead.onboardingStatus && (
-          <div className="onboarding-view">
-            <div className="onboarding-progress">
-              <div className="progress-header">
-                <h3>Onboarding Progress</h3>
-                <span className="progress-percentage">{lead.onboardingCompletion}%</span>
-              </div>
-              <div className="progress-bar-lg">
-                <div 
-                  className="progress-fill"
-                  style={{ width: `${lead.onboardingCompletion}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="onboarding-sections">
-              <div className="onboarding-section">
-                <CheckCircle size={20} style={{ color: '#10b981' }} />
-                <div>
-                  <div className="section-name">Owner Information</div>
-                  <div className="section-status">Completed</div>
-                </div>
-              </div>
-              <div className="onboarding-section">
-                <Clock size={20} style={{ color: '#f59e0b' }} />
-                <div>
-                  <div className="section-name">Property Information</div>
-                  <div className="section-status">In Progress</div>
-                </div>
-              </div>
-              <div className="onboarding-section">
-                <Clock size={20} style={{ color: '#6b7280' }} />
-                <div>
-                  <div className="section-name">Documents & Signatures</div>
-                  <div className="section-status">Pending</div>
-                </div>
-              </div>
-            </div>
-
-            {lead.onboardingCompletion === 100 ? (
-              // Onboarding is 100% complete - show approval/revision actions
-              currentUser.permissions.approveOwnerOnboarding && (
-                <div className="onboarding-actions">
-                  <button className="btn btn-success">
-                    <CheckCircle size={18} />
-                    Approve Onboarding
-                  </button>
-                  <button className="btn btn-warning">
-                    <Send size={18} />
-                    Send Back for Revisions
-                  </button>
-                  <button className="btn btn-danger">
-                    <XCircle size={18} />
-                    Deny Application
-                  </button>
-                </div>
-              )
-            ) : (
-              // Onboarding not complete - show message to follow up
-              <div style={{ 
-                marginTop: '1.5rem',
-                padding: '1rem', 
-                background: 'var(--warning-light)', 
-                borderRadius: 'var(--border-radius)',
-                border: '1px solid var(--warning)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <AlertCircle size={18} style={{ color: 'var(--warning)' }} />
-                  <strong style={{ color: 'var(--warning)' }}>Onboarding Not Complete</strong>
-                </div>
-                <p style={{ fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
-                  The owner is currently at <strong>{lead.onboardingCompletion}% completion</strong>. 
-                  Follow up to help them complete the remaining sections before final approval can be processed.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Section Edit Modal */}

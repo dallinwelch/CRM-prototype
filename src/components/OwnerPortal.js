@@ -35,6 +35,26 @@ const OwnerPortal = () => {
   const [selectedLead, setSelectedLead] = useState(null);
   const [testStage, setTestStage] = useState(0); // 0: awaiting approval, 1: signed agreement, 2: property setup, 3: onboarded
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [properties, setProperties] = useState([
+    {
+      id: 'prop-002',
+      address: '456 Oak Ave, Austin, TX 78702',
+      bedrooms: 4,
+      bathrooms: 3,
+      petsAllowed: false,
+      minRentPrice: 3200,
+      status: 'pending' // pending or active
+    },
+    {
+      id: 'prop-003',
+      address: '789 Pine St, Austin, TX 78703',
+      bedrooms: 2,
+      bathrooms: 1,
+      petsAllowed: true,
+      minRentPrice: 1800,
+      status: 'pending'
+    }
+  ]);
   const [documents, setDocuments] = useState([
     {
       id: 'doc-001',
@@ -64,6 +84,20 @@ const OwnerPortal = () => {
       size: '95 KB'
     }
   ]);
+  const [recentActivity, setRecentActivity] = useState([
+    {
+      id: 'activity-001',
+      icon: FileText,
+      title: 'Application Started',
+      time: '2 days ago'
+    },
+    {
+      id: 'activity-002',
+      icon: CheckCircle,
+      title: 'Owner Information Completed',
+      time: '2 days ago'
+    }
+  ]);
 
   // Map test stage to owner status and completion
   const getOwnerStatus = () => {
@@ -86,6 +120,18 @@ const OwnerPortal = () => {
       const newStage = testStage + 1;
       setTestStage(newStage);
       if (newStage === 3) {
+        // Activate all properties when onboarding is complete
+        setProperties(properties.map(prop => ({ ...prop, status: 'active' })));
+        // Add onboarding completion to recent activity
+        setRecentActivity([
+          {
+            id: 'activity-onboarded',
+            icon: CheckCircle,
+            title: 'Onboarding Completed! Properties Now Active',
+            time: 'Just now'
+          },
+          ...recentActivity
+        ]);
         // Show completion modal and confetti
         setTimeout(() => {
           setShowCompletionModal(true);
@@ -93,8 +139,26 @@ const OwnerPortal = () => {
         }, 500);
       }
     } else {
-      setTestStage(0); // Reset to beginning
+      // Reset to beginning
+      setTestStage(0);
       setShowCompletionModal(false);
+      // Reset properties back to pending
+      setProperties(properties.map(prop => ({ ...prop, status: 'pending' })));
+      // Reset activity
+      setRecentActivity([
+        {
+          id: 'activity-001',
+          icon: FileText,
+          title: 'Application Started',
+          time: '2 days ago'
+        },
+        {
+          id: 'activity-002',
+          icon: CheckCircle,
+          title: 'Owner Information Completed',
+          time: '2 days ago'
+        }
+      ]);
     }
   };
 
@@ -152,6 +216,27 @@ const OwnerPortal = () => {
 
   const ownerStatus = getOwnerStatus();
 
+  // Function to check missing property setup fields
+  const getMissingPropertyFields = (propertyIndex) => {
+    const optionalFields = [
+      `property-${propertyIndex}-field-square-footage`,
+      `property-${propertyIndex}-field-year-built`,
+      `property-${propertyIndex}-field-garage-code`,
+      `property-${propertyIndex}-field-hoa`,
+      `property-${propertyIndex}-field-hoa-fee`
+    ];
+    
+    return optionalFields.filter(fieldId => !currentOwner.onboardingAnswers?.[fieldId]);
+  };
+
+  const getTotalMissingFields = () => {
+    let total = 0;
+    currentOwner.properties.forEach((_, index) => {
+      total += getMissingPropertyFields(index).length;
+    });
+    return total;
+  };
+
   // Mock data for the logged-in owner
   // This would come from authentication/API in real app
   const currentOwner = {
@@ -163,26 +248,7 @@ const OwnerPortal = () => {
     status: ownerStatus.status, // Can be: qualified, application, awaiting approval, onboarding, completed
     stage: 'Awaiting Approval',
     onboardingCompletion: ownerStatus.onboardingCompletion, // Progress percentage
-    properties: [
-      {
-        id: 'prop-002',
-        address: '456 Oak Ave, Austin, TX 78702',
-        bedrooms: 4,
-        bathrooms: 3,
-        petsAllowed: false,
-        minRentPrice: 3200,
-        status: 'pending' // pending or active
-      },
-      {
-        id: 'prop-003',
-        address: '789 Pine St, Austin, TX 78703',
-        bedrooms: 2,
-        bathrooms: 1,
-        petsAllowed: true,
-        minRentPrice: 1800,
-        status: 'pending'
-      }
-    ],
+    properties: properties, // Use state for dynamic property updates
     onboardingAnswers: {
       'field-legal-entity': 'Chen Properties LLC',
       'field-tax-id': '12-3456789',
@@ -190,13 +256,23 @@ const OwnerPortal = () => {
       'field-business-structure': 'LLC',
       'field-emergency-contact': 'Lisa Chen',
       'field-emergency-phone': '(555) 345-6790',
+      // Property 0 - Complete with all optional fields
       'property-0-field-property-address': '456 Oak Ave, Austin, TX 78702',
       'property-0-field-property-bedrooms': '4',
       'property-0-field-property-bathrooms': '3',
       'property-0-field-square-footage': '2400',
+      'property-0-field-year-built': '2015',
       'property-0-field-pets-allowed': 'No',
-      'property-0-field-min-rent': '3200'
-      // Property 1 incomplete - needs to be filled out
+      'property-0-field-min-rent': '3200',
+      'property-0-field-garage-code': '4567',
+      'property-0-field-hoa': 'Oak Hills HOA',
+      'property-0-field-hoa-fee': '150',
+      // Property 1 - Missing optional fields (square-footage, year-built, garage-code, hoa, hoa-fee)
+      'property-1-field-property-address': '789 Pine St, Austin, TX 78703',
+      'property-1-field-property-bedrooms': '2',
+      'property-1-field-property-bathrooms': '1',
+      'property-1-field-pets-allowed': 'Yes',
+      'property-1-field-min-rent': '1800'
     }
   };
 
@@ -472,6 +548,17 @@ const OwnerPortal = () => {
                 )}
               </div>
 
+              {/* Missing Property Fields Warning */}
+              {(currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion >= 90) && getTotalMissingFields() > 0 && (
+                <div className="missing-fields-warning">
+                  <AlertCircle size={20} />
+                  <div className="warning-content">
+                    <strong>Optional Property Information</strong>
+                    <p>You have {getTotalMissingFields()} missing field{getTotalMissingFields() !== 1 ? 's' : ''} </p>
+                  </div>
+                </div>
+              )}
+
               {/* Documents to Sign */}
               {documents.filter(doc => doc.status === 'pending').length > 0 && 
                currentOwner.status === 'onboarding' && 
@@ -556,46 +643,77 @@ const OwnerPortal = () => {
                       >
                         COMPLETE APPLICATION
                       </button> */}
-                      <div className="property-rent-display">${property.minRentPrice}/mo</div>
+                      <div className="property-rent-display">
+                        ${property.minRentPrice}/mo
+                        {getMissingPropertyFields(index).length > 0 && (
+                          <div className="property-missing-info">
+                            <AlertCircle size={14} />
+                            <span>Missing info</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Active Properties - Empty State */}
+              {/* Active Properties */}
               <div className="section-container">
                 <h2 className="section-title">Active Properties</h2>
                 <p className="section-subtitle">PROPERTIES FULLY ONBOARDED AND UNDER MANAGEMENT</p>
                 
-                <div className="empty-state">
-                  <Home size={64} className="empty-icon" />
-                  <h3>No Active Properties Yet</h3>
-                  <p>Complete your application to get your properties under management</p>
-                </div>
+                {currentOwner.properties.filter(p => p.status === 'active').length > 0 ? (
+                  <div className="properties-grid">
+                    {currentOwner.properties.filter(p => p.status === 'active').map((property, index) => (
+                      <div 
+                        key={property.id} 
+                        className="property-card-portal active"
+                      >
+                        <div className="property-card-icon-wrapper">
+                          <Home size={32} className="property-card-icon-large" />
+                          <span className="property-badge-active">Active</span>
+                        </div>
+                        <div className="property-card-details">
+                          <h3 className="property-card-address">{property.address}</h3>
+                          <div className="property-card-specs">
+                            <span>{property.bedrooms} bed</span>
+                            <span>•</span>
+                            <span>{property.bathrooms} bath</span>
+                          </div>
+                        </div>
+                        <div className="property-rent-display">
+                          ${property.minRentPrice}/mo
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <Home size={64} className="empty-icon" />
+                    <h3>No Active Properties Yet</h3>
+                    <p>Complete your application to get your properties under management</p>
+                  </div>
+                )}
               </div>
 
               {/* Recent Activity */}
               <div className="section-container">
                 <h2 className="section-title">Recent Activity</h2>
                 <div className="activity-list">
-                  <div className="activity-item">
-                    <div className="activity-icon">
-                      <FileText size={16} />
-                    </div>
-                    <div className="activity-content">
-                      <p className="activity-title">Application Started</p>
-                      <p className="activity-time">2 days ago</p>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <div className="activity-icon">
-                      <CheckCircle size={16} />
-                    </div>
-                    <div className="activity-content">
-                      <p className="activity-title">Owner Information Completed</p>
-                      <p className="activity-time">2 days ago</p>
-                    </div>
-                  </div>
+                  {recentActivity.map((activity) => {
+                    const IconComponent = activity.icon;
+                    return (
+                      <div key={activity.id} className="activity-item">
+                        <div className="activity-icon">
+                          <IconComponent size={16} />
+                        </div>
+                        <div className="activity-content">
+                          <p className="activity-title">{activity.title}</p>
+                          <p className="activity-time">{activity.time}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </>
