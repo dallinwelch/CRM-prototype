@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TrendingUp, BarChart3, Clock, Target, X } from 'lucide-react';
 import { timeSeriesFunnelData, getPropertyCount } from '../mockData';
+import PMWLogo from '../assets/PMW logo.png';
 
 const PMWAnalytics = ({ leads }) => {
   const [viewMode, setViewMode] = useState('owners'); // 'owners' or 'properties'
@@ -9,6 +10,12 @@ const PMWAnalytics = ({ leads }) => {
   const [paidChannel, setPaidChannel] = useState('all'); // 'all', 'Google Ads', 'Facebook', 'LinkedIn'
   const [hoveredDataPoint, setHoveredDataPoint] = useState(null);
   const [hoveredGraph, setHoveredGraph] = useState(null); // 'organic' or 'paid'
+  
+  // Section collapse state
+  const [showPipelineTrends, setShowPipelineTrends] = useState(true);
+  const [showLeadSourcePerformance, setShowLeadSourcePerformance] = useState(true);
+  const [showLandingPagePerformance, setShowLandingPagePerformance] = useState(true);
+  const [showKeyMetrics, setShowKeyMetrics] = useState(true);
 
   // Filter time-series data based on selected period
   const getFilteredTimeSeriesData = () => {
@@ -741,16 +748,26 @@ const PMWAnalytics = ({ leads }) => {
       padding: '1.5rem',
       marginBottom: '2rem'
     }}>
-      {/* Header with Toggle */}
+      {/* Header with Logo and Toggle */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
-          <h2 style={{ margin: '0 0 0.25rem 0', fontSize: '1.5rem', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BarChart3 size={28} style={{ color: '#3b82f6' }} />
-            PMW Analytics Dashboard
-          </h2>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
-            Track organic and paid channel performance
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <img 
+            src={PMWLogo} 
+            alt="PMW Logo" 
+            style={{ 
+              width: '60px', 
+              height: '60px',
+              objectFit: 'contain'
+            }} 
+          />
+          <div>
+            <h2 style={{ margin: '0 0 0.25rem 0', fontSize: '1.5rem', fontWeight: '800', color: '#1e293b' }}>
+              PMW Analytics Dashboard
+            </h2>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
+              Track organic and paid channel performance
+            </p>
+          </div>
         </div>
 
         {/* View Mode Toggle */}
@@ -813,16 +830,75 @@ const PMWAnalytics = ({ leads }) => {
       </div>
 
       {/* Pipeline Trends - Organic and Paid Side by Side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        {renderPipelineGraph(organicDataSets, 'Organic Channels Pipeline', organicChannels, organicChannel, setOrganicChannel, '#10b981', 'organic')}
-        {renderPipelineGraph(paidDataSets, 'Paid Channels Pipeline', paidChannels, paidChannel, setPaidChannel, '#f59e0b', 'paid')}
+      <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            marginBottom: showPipelineTrends ? '1rem' : '0'
+          }}
+          onClick={() => setShowPipelineTrends(!showPipelineTrends)}
+        >
+          <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
+            Pipeline Trends Over Time
+          </h3>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '0.25rem',
+              lineHeight: 1
+            }}
+          >
+            {showPipelineTrends ? '−' : '+'}
+          </button>
+        </div>
+        
+        {showPipelineTrends && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            {renderPipelineGraph(organicDataSets, 'Organic Channels Pipeline', organicChannels, organicChannel, setOrganicChannel, '#10b981', 'organic')}
+            {renderPipelineGraph(paidDataSets, 'Paid Channels Pipeline', paidChannels, paidChannel, setPaidChannel, '#f59e0b', 'paid')}
+          </div>
+        )}
       </div>
 
       {/* Lead Source Performance */}
       <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
-        <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
-          Lead Source Performance
-        </h3>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            marginBottom: showLeadSourcePerformance ? '1.5rem' : '0'
+          }}
+          onClick={() => setShowLeadSourcePerformance(!showLeadSourcePerformance)}
+        >
+          <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
+            Lead Source Performance
+          </h3>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '0.25rem',
+              lineHeight: 1
+            }}
+          >
+            {showLeadSourcePerformance ? '−' : '+'}
+          </button>
+        </div>
+        
+        {showLeadSourcePerformance && (<>
+
 
         {/* Summary Cards - All PMW, All Organic, All Paid */}
         <div style={{ marginBottom: '2rem' }}>
@@ -1046,16 +1122,46 @@ const PMWAnalytics = ({ leads }) => {
             </div>
           </div>
         </div>
+        </>)}
       </div>
 
       {/* Landing Page Performance */}
       <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
-        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
-          Landing Page Performance
-        </h3>
-        <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.875rem', color: '#64748b' }}>
-          Compare which pages on your PMW site are driving the most leads
-        </p>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            marginBottom: showLandingPagePerformance ? '1rem' : '0'
+          }}
+          onClick={() => setShowLandingPagePerformance(!showLandingPagePerformance)}
+        >
+          <div>
+            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
+              Landing Page Performance
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>
+              Compare which pages on your PMW site are driving the most leads
+            </p>
+          </div>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '0.25rem',
+              lineHeight: 1
+            }}
+          >
+            {showLandingPagePerformance ? '−' : '+'}
+          </button>
+        </div>
+        
+        {showLandingPagePerformance && (
+          <div style={{ marginTop: '1.5rem' }}>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
           {landingPageMetrics.map(page => (
@@ -1143,13 +1249,41 @@ const PMWAnalytics = ({ leads }) => {
             </div>
           ))}
         </div>
+          </div>
+        )}
       </div>
 
       {/* Key Performance Metrics */}
       <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
-        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
-          Key Performance Metrics
-        </h3>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            marginBottom: showKeyMetrics ? '1rem' : '0'
+          }}
+          onClick={() => setShowKeyMetrics(!showKeyMetrics)}
+        >
+          <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
+            Key Performance Metrics
+          </h3>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '0.25rem',
+              lineHeight: 1
+            }}
+          >
+            {showKeyMetrics ? '−' : '+'}
+          </button>
+        </div>
+        
+        {showKeyMetrics && (<>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
           {/* Lead → Application Time */}
@@ -1213,6 +1347,7 @@ const PMWAnalytics = ({ leads }) => {
             )}
           </div>
         </div>
+        </>)}
       </div>
     </div>
   );
