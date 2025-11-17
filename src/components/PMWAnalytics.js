@@ -6,13 +6,12 @@ import PMWLogo from '../assets/PMW logo.png';
 const PMWAnalytics = ({ leads }) => {
   const [viewMode, setViewMode] = useState('owners'); // 'owners' or 'properties'
   const [timePeriod, setTimePeriod] = useState('month'); // 'day', 'week', 'month', 'year', 'all'
-  const [organicChannel, setOrganicChannel] = useState('all'); // 'all', 'Google', 'Bing', 'ChatGPT'
-  const [paidChannel, setPaidChannel] = useState('all'); // 'all', 'Google Ads', 'Facebook', 'LinkedIn'
+  const [selectedChannel, setSelectedChannel] = useState('all'); // 'all', 'all-organic', 'all-paid', or specific channel
   const [hoveredDataPoint, setHoveredDataPoint] = useState(null);
-  const [hoveredGraph, setHoveredGraph] = useState(null); // 'organic' or 'paid'
   
   // Section collapse state
   const [showPipelineTrends, setShowPipelineTrends] = useState(true);
+  const [showPhoneTracking, setShowPhoneTracking] = useState(true);
   const [showLeadSourcePerformance, setShowLeadSourcePerformance] = useState(true);
   const [showLandingPagePerformance, setShowLandingPagePerformance] = useState(true);
   const [showKeyMetrics, setShowKeyMetrics] = useState(true);
@@ -50,6 +49,84 @@ const PMWAnalytics = ({ leads }) => {
   // Get unique channels
   const organicChannels = ['Google', 'Bing', 'ChatGPT'];
   const paidChannels = ['Google Ads', 'Facebook', 'LinkedIn'];
+  const allChannels = [...organicChannels, ...paidChannels];
+
+  // Calculate phone call metrics
+  const calculatePhoneMetrics = () => {
+    const phoneLeads = leads.filter(l => l.leadSourceChannel === 'Phone' && l.status !== 'archived');
+    const totalCalls = phoneLeads.length;
+    const answeredCalls = phoneLeads.filter(l => l.sourceMetadata?.callAnswered === true).length;
+    const answerRate = totalCalls > 0 ? ((answeredCalls / totalCalls) * 100).toFixed(1) : '0.0';
+    
+    return {
+      totalCalls,
+      answeredCalls,
+      unansweredCalls: totalCalls - answeredCalls,
+      answerRate
+    };
+  };
+
+  const phoneMetrics = calculatePhoneMetrics();
+
+  // Aggregate phone calls over time
+  const aggregatePhoneCallsOverTime = () => {
+    const phoneLeads = leads.filter(l => l.leadSourceChannel === 'Phone' && l.status !== 'archived');
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch (timePeriod) {
+      case 'day': startDate.setDate(now.getDate() - 1); break;
+      case 'week': startDate.setDate(now.getDate() - 7); break;
+      case 'month': startDate.setMonth(now.getMonth() - 1); break;
+      case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
+      case 'all': startDate = new Date(0); break;
+      default: startDate.setMonth(now.getMonth() - 1);
+    }
+    
+    const filteredPhoneLeads = phoneLeads.filter(l => new Date(l.createdAt) >= startDate);
+    
+    // Group by date
+    const grouped = {};
+    filteredPhoneLeads.forEach(lead => {
+      const date = new Date(lead.createdAt);
+      let key;
+      
+      switch (timePeriod) {
+        case 'day':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
+          break;
+        case 'week':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          break;
+        case 'month': {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
+          break;
+        }
+        case 'year':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        case 'all':
+          key = `${date.getFullYear()}`;
+          break;
+        default:
+          key = lead.createdAt;
+      }
+      
+      if (!grouped[key]) {
+        grouped[key] = { date: key, totalCalls: 0, answeredCalls: 0 };
+      }
+      grouped[key].totalCalls += 1;
+      if (lead.sourceMetadata?.callAnswered === true) {
+        grouped[key].answeredCalls += 1;
+      }
+    });
+    
+    return Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
+  };
+
+  const phoneCallsOverTime = aggregatePhoneCallsOverTime();
 
   // Calculate metrics based on view mode
   const getCount = (lead) => {
@@ -219,8 +296,81 @@ const PMWAnalytics = ({ leads }) => {
   };
 
   // Enhance aggregated data with property counts
-  const enhanceDataWithProperties = (aggregatedData, category, channel) => {
-    const propertiesData = aggregatePropertiesFromLeads(category, channel);
+  const enhanceDataWithProperties = (aggregatedData, category = null, channel = null) => {
+    // Special handling for "All PMW" - aggregate properties from both organic and paid
+    let propertyLeads;
+    if (category === null && channel === null) {
+      // This is "All PMW" - combine organic and paid
+      propertyLeads = leads.filter(l => 
+        (l.leadSourceCategory === 'organic' || l.leadSourceCategory === 'paid') && 
+        l.status !== 'archived'
+      );
+    } else if (category && channel === 'all') {
+      // This is "All Organic" or "All Paid"
+      propertyLeads = leads.filter(l => 
+        l.leadSourceCategory === category && 
+        l.status !== 'archived'
+      );
+    } else if (channel) {
+      // This is a specific channel
+      propertyLeads = leads.filter(l => 
+        l.leadSourceChannel === channel && 
+        l.status !== 'archived'
+      );
+    } else {
+      return aggregatedData;
+    }
+    
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch (timePeriod) {
+      case 'day': startDate.setDate(now.getDate() - 1); break;
+      case 'week': startDate.setDate(now.getDate() - 7); break;
+      case 'month': startDate.setMonth(now.getMonth() - 1); break;
+      case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
+      case 'all': startDate = new Date(0); break;
+      default: startDate.setMonth(now.getMonth() - 1);
+    }
+    
+    const filteredLeads = propertyLeads.filter(l => new Date(l.createdAt) >= startDate);
+    
+    // Group by date
+    const grouped = {};
+    filteredLeads.forEach(lead => {
+      const date = new Date(lead.createdAt);
+      let key;
+      
+      switch (timePeriod) {
+        case 'day':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
+          break;
+        case 'week':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          break;
+        case 'month': {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
+          break;
+        }
+        case 'year':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        case 'all':
+          key = `${date.getFullYear()}`;
+          break;
+        default:
+          key = lead.createdAt;
+      }
+      
+      if (!grouped[key]) {
+        grouped[key] = { date: key, properties: 0 };
+      }
+      grouped[key].properties += getPropertyCount(lead);
+    });
+    
+    const propertiesData = Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
     
     // Create a map of date -> properties for quick lookup
     const propertiesMap = {};
@@ -235,42 +385,75 @@ const PMWAnalytics = ({ leads }) => {
     }));
   };
 
-  // Get data for all channels when "All" is selected, or just the single channel
-  const getMultiChannelData = (category, selectedChannel, channels) => {
-    if (selectedChannel === 'all') {
-      // Return data for combined total and each individual channel
-      const combinedBase = aggregateTimeSeriesData(category, 'all');
-      const combined = enhanceDataWithProperties(combinedBase, category, 'all');
+  // Prepare combined data for all channels
+  const channelDataSets = (() => {
+    const allTimeSeriesData = filteredTimeSeriesData;
+    
+    // All PMW (organic + paid combined)
+    const allPMWData = allTimeSeriesData.filter(d => d.category === 'organic' || d.category === 'paid');
+    const grouped = {};
+    allPMWData.forEach(d => {
+      const date = new Date(d.date);
+      let key;
       
-      const channelData = channels.map(ch => {
-        const chDataBase = aggregateTimeSeriesData(category, ch);
-        const chData = enhanceDataWithProperties(chDataBase, category, ch);
-        return {
-          channel: ch,
-          data: chData
-        };
-      });
+      switch (timePeriod) {
+        case 'day':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
+          break;
+        case 'week':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          break;
+        case 'month':
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
+          break;
+        case 'year':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        case 'all':
+          key = `${date.getFullYear()}`;
+          break;
+        default:
+          key = d.date;
+      }
       
-      return {
-        combined,
-        channels: channelData,
-        isMulti: true
-      };
-    } else {
-      // Return data for just the selected channel
-      const combinedBase = aggregateTimeSeriesData(category, selectedChannel);
-      const combined = enhanceDataWithProperties(combinedBase, category, selectedChannel);
-      
-      return {
-        combined,
-        channels: [],
-        isMulti: false
-      };
-    }
-  };
-
-  const organicDataSets = getMultiChannelData('organic', organicChannel, organicChannels);
-  const paidDataSets = getMultiChannelData('paid', paidChannel, paidChannels);
+      if (!grouped[key]) {
+        grouped[key] = { date: key, leads: 0, applications: 0, onboarded: 0 };
+      }
+      grouped[key].leads += d.leads || 0;
+      grouped[key].applications += d.applications || 0;
+      grouped[key].onboarded += d.onboarded || 0;
+    });
+    
+    const allPMWAggregated = Object.values(grouped)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    
+    // Enhanced with properties for all PMW (combined organic + paid)
+    const enhancedAllPMW = enhanceDataWithProperties(allPMWAggregated, null, null);
+    
+    // All Organic
+    const allOrganicData = aggregateTimeSeriesData('organic', 'all');
+    const enhancedAllOrganic = enhanceDataWithProperties(allOrganicData, 'organic', 'all');
+    
+    // All Paid
+    const allPaidData = aggregateTimeSeriesData('paid', 'all');
+    const enhancedAllPaid = enhanceDataWithProperties(allPaidData, 'paid', 'all');
+    
+    // Individual channels
+    const individualChannels = {};
+    allChannels.forEach(channel => {
+      const channelData = aggregateTimeSeriesData(null, channel);
+      individualChannels[channel] = enhanceDataWithProperties(channelData, null, channel);
+    });
+    
+    return {
+      'all': enhancedAllPMW,
+      'all-organic': enhancedAllOrganic,
+      'all-paid': enhancedAllPaid,
+      ...individualChannels
+    };
+  })();
 
   // Format date label based on time period and aggregation
   const formatDateLabel = (dateStr) => {
@@ -323,40 +506,73 @@ const PMWAnalytics = ({ leads }) => {
   };
 
   // Render pipeline graph
-  const renderPipelineGraph = (dataSets, title, channels, selectedChannel, setSelectedChannel, color, graphId) => {
-    if (!dataSets.combined || dataSets.combined.length === 0) return null;
-    
-    const data = dataSets.combined;
-    const channelDataSets = dataSets.channels;
-    const isMultiChannel = dataSets.isMulti;
+  const renderPipelineGraph = () => {
+    const data = channelDataSets[selectedChannel];
+    if (!data || data.length === 0) return null;
     
     // Determine which metric to display based on viewMode
     const metricKey = viewMode === 'properties' ? 'properties' : 'leads';
     const metricLabel = viewMode === 'properties' ? 'Properties' : 'Owners';
 
-    // Calculate max value across all data series
-    let maxValue = Math.max(...data.map(d => d[metricKey]), 1);
-    if (isMultiChannel) {
-      channelDataSets.forEach(chData => {
-        const chMax = Math.max(...chData.data.map(d => d[metricKey]), 1);
-        maxValue = Math.max(maxValue, chMax);
-      });
-    }
-    const width = 480;
-    const height = 280;
-    const padding = { top: 20, right: 20, bottom: 40, left: 50 };
-    const graphWidth = width - padding.left - padding.right;
-    const graphHeight = height - padding.top - padding.bottom;
-
-    // Color mappings for individual channels
+    // Color mappings for channels
     const channelColors = {
       'Google': '#4285F4',
       'Bing': '#008373',
       'ChatGPT': '#10a37f',
       'Google Ads': '#FBBC04',
       'Facebook': '#1877F2',
-      'LinkedIn': '#0A66C2'
+      'LinkedIn': '#0A66C2',
+      'all': '#3b82f6',
+      'all-organic': '#10b981',
+      'all-paid': '#f59e0b'
     };
+
+    // Determine which sub-lines to show
+    let subChannels = [];
+    if (selectedChannel === 'all') {
+      // Show All Organic and All Paid
+      subChannels = [
+        { key: 'all-organic', label: 'All Organic', color: '#10b981' },
+        { key: 'all-paid', label: 'All Paid', color: '#f59e0b' }
+      ];
+    } else if (selectedChannel === 'all-organic') {
+      // Show individual organic channels
+      subChannels = organicChannels.map(ch => ({
+        key: ch,
+        label: ch,
+        color: channelColors[ch] || '#10b981'
+      }));
+    } else if (selectedChannel === 'all-paid') {
+      // Show individual paid channels
+      subChannels = paidChannels.map(ch => ({
+        key: ch,
+        label: ch,
+        color: channelColors[ch] || '#f59e0b'
+      }));
+    }
+
+    // Get data for sub-channels
+    const subChannelData = subChannels.map(sub => ({
+      ...sub,
+      data: channelDataSets[sub.key] || []
+    }));
+
+    // Calculate max value including sub-channels
+    let maxValue = Math.max(...data.map(d => d[metricKey]), 1);
+    subChannelData.forEach(sub => {
+      if (sub.data.length > 0) {
+        const subMax = Math.max(...sub.data.map(d => d[metricKey]), 1);
+        maxValue = Math.max(maxValue, subMax);
+      }
+    });
+    
+    const width = 1100;
+    const height = 320;
+    const padding = { top: 20, right: 30, bottom: 40, left: 50 };
+    const graphWidth = width - padding.left - padding.right;
+    const graphHeight = height - padding.top - padding.bottom;
+    
+    const currentColor = channelColors[selectedChannel] || '#3b82f6';
 
     const xScale = (index, dataLength) => {
       if (dataLength === 1) return padding.left + graphWidth / 2;
@@ -392,9 +608,9 @@ const PMWAnalytics = ({ leads }) => {
       }));
 
     return (
-      <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '8px', padding: '1rem', border: '1px solid #e2e8f0', position: 'relative' }}>
+      <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', border: '1px solid #e2e8f0', position: 'relative' }}>
         {/* Tooltip */}
-        {hoveredDataPoint && hoveredGraph === graphId && (
+        {hoveredDataPoint && (
           <div style={{
             position: 'absolute',
             left: `${hoveredDataPoint.x}px`,
@@ -415,50 +631,50 @@ const PMWAnalytics = ({ leads }) => {
               {hoveredDataPoint.dateLabel}
             </div>
             
-            {/* Total count (owners or properties) */}
+            {/* Main Count (owners or properties) */}
             <div style={{ marginBottom: '0.5rem' }}>
-              <div style={{ fontSize: '0.6875rem', fontWeight: '700', color: '#374151', marginBottom: '0.375rem' }}>
-                Total {hoveredDataPoint.metricLabel} {hoveredDataPoint.isMulti ? '(All Channels)' : ''}
-              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-                  <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>{hoveredDataPoint.metricLabel}</span>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: hoveredDataPoint.color }}></div>
+                  <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '600' }}>
+                    {selectedChannel === 'all' ? 'All PMW' : selectedChannel === 'all-organic' ? 'All Organic' : selectedChannel === 'all-paid' ? 'All Paid' : selectedChannel}
+                  </span>
                 </div>
-                <span style={{ fontSize: '1.25rem', fontWeight: '700', color: '#10b981' }}>{hoveredDataPoint.data[hoveredDataPoint.metricKey]}</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: '700', color: hoveredDataPoint.color }}>{hoveredDataPoint.data[hoveredDataPoint.metricKey]}</span>
               </div>
             </div>
 
-            {/* Individual channels breakdown (if showing all) */}
-            {hoveredDataPoint.isMulti && hoveredDataPoint.channelDataSets && hoveredDataPoint.channelDataSets.length > 0 && (
-              <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #e5e7eb' }}>
-                <div style={{ fontSize: '0.6875rem', fontWeight: '700', color: '#374151', marginBottom: '0.375rem' }}>
-                  By Channel
+            {/* Sub-channels breakdown */}
+            {hoveredDataPoint.subChannelData && hoveredDataPoint.subChannelData.length > 0 && (
+              <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e5e7eb' }}>
+                <div style={{ fontSize: '0.6875rem', fontWeight: '700', color: '#374151', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                  Breakdown
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-                  {hoveredDataPoint.channelDataSets.map(chData => {
-                    const channelDataPoint = chData.data[hoveredDataPoint.dataIndex];
-                    if (!channelDataPoint) return null;
-                    const metricValue = channelDataPoint[hoveredDataPoint.metricKey];
-                    const totalValue = hoveredDataPoint.data[hoveredDataPoint.metricKey];
-                    const percentage = totalValue > 0 ? ((metricValue / totalValue) * 100).toFixed(0) : 0;
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {hoveredDataPoint.subChannelData.map(subData => {
+                    const subPoint = subData.data[hoveredDataPoint.dataIndex];
+                    if (!subPoint) return null;
+                    const value = subPoint[hoveredDataPoint.metricKey];
+                    const percentage = hoveredDataPoint.data[hoveredDataPoint.metricKey] > 0 
+                      ? ((value / hoveredDataPoint.data[hoveredDataPoint.metricKey]) * 100).toFixed(0) 
+                      : 0;
                     return (
-                      <div key={`tooltip-${chData.channel}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div key={`tooltip-sub-${subData.key}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                           <div style={{ 
-                            width: '16px', 
+                            width: '14px', 
                             height: '2px', 
-                            backgroundColor: channelColors[chData.channel] || '#10b981',
-                            opacity: 0.6,
+                            backgroundColor: subData.color,
                             borderTop: '1px dashed',
                             borderBottom: '1px dashed',
-                            borderColor: channelColors[chData.channel] || '#10b981'
+                            borderColor: subData.color,
+                            opacity: 0.8
                           }}></div>
-                          <span style={{ fontSize: '0.6875rem', color: '#6b7280' }}>{chData.channel}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{subData.label}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: '600', color: channelColors[chData.channel] || '#10b981' }}>
-                            {metricValue}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.875rem', fontWeight: '600', color: subData.color }}>
+                            {value}
                           </span>
                           <span style={{ fontSize: '0.6875rem', color: '#9ca3af' }}>
                             ({percentage}%)
@@ -473,48 +689,8 @@ const PMWAnalytics = ({ leads }) => {
           </div>
         )}
 
-        <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9375rem', fontWeight: '700', color: '#1e293b' }}>
-          {title}
-        </h4>
-
-        {/* Channel Filters */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setSelectedChannel('all')}
-            style={{
-              padding: '0.375rem 0.75rem',
-              borderRadius: '6px',
-              border: selectedChannel === 'all' ? `2px solid ${color}` : '1px solid #d1d5db',
-              backgroundColor: selectedChannel === 'all' ? `${color}15` : 'white',
-              color: selectedChannel === 'all' ? color : '#64748b',
-              fontSize: '0.75rem',
-              fontWeight: selectedChannel === 'all' ? '600' : '500',
-              cursor: 'pointer'
-            }}
-          >
-            All
-          </button>
-          {channels.map(channel => (
-            <button
-              key={channel}
-              onClick={() => setSelectedChannel(channel)}
-              style={{
-                padding: '0.375rem 0.75rem',
-                borderRadius: '6px',
-                border: selectedChannel === channel ? `2px solid ${color}` : '1px solid #d1d5db',
-                backgroundColor: selectedChannel === channel ? `${color}15` : 'white',
-                color: selectedChannel === channel ? color : '#64748b',
-                fontSize: '0.75rem',
-                fontWeight: selectedChannel === channel ? '600' : '500',
-                cursor: 'pointer'
-              }}
-            >
-              {channel}
-            </button>
-          ))}
-        </div>
-
         {/* Graph */}
+        <div>
         <svg width={width} height={height} style={{ display: 'block' }}>
           <rect x={padding.left} y={padding.top} width={graphWidth} height={graphHeight} fill="#fafbfc" />
 
@@ -546,15 +722,22 @@ const PMWAnalytics = ({ leads }) => {
             </text>
           ))}
 
-          {/* Individual channel lines (if showing all) - render first so they appear behind combined line */}
-          {isMultiChannel && channelDataSets.map(chData => (
-            <g key={`channel-${chData.channel}`} opacity="0.5">
-              <path d={generatePath(chData.data, metricKey)} fill="none" stroke={channelColors[chData.channel] || '#10b981'} strokeWidth="2" strokeLinecap="round" strokeDasharray="5 3" />
-            </g>
+          {/* Sub-channel dotted lines - render first so they appear behind */}
+          {subChannelData.map(sub => (
+            <path 
+              key={`sub-${sub.key}`}
+              d={generatePath(sub.data, metricKey)} 
+              fill="none" 
+              stroke={sub.color} 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeDasharray="5 3"
+              opacity="0.6"
+            />
           ))}
 
-          {/* Combined total line - bold and prominent */}
-          <path d={generatePath(data, metricKey)} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" />
+          {/* Main line - bold and prominent */}
+          <path d={generatePath(data, metricKey)} fill="none" stroke={currentColor} strokeWidth="3.5" strokeLinecap="round" />
 
           {/* Interactive hover areas and data points */}
           {data.map((d, i) => {
@@ -575,55 +758,57 @@ const PMWAnalytics = ({ leads }) => {
                       y: padding.top + 50,
                       data: d,
                       dateLabel: formatTooltipDateLabel(d.date),
-                      isMulti: isMultiChannel,
-                      channelDataSets: channelDataSets,
-                      dataIndex: i,
                       metricKey: metricKey,
-                      metricLabel: metricLabel
+                      metricLabel: metricLabel,
+                      color: currentColor,
+                      dataIndex: i,
+                      subChannelData: subChannelData
                     });
-                    setHoveredGraph(graphId);
                   }}
                   onMouseLeave={() => {
                     setHoveredDataPoint(null);
-                    setHoveredGraph(null);
                   }}
                 />
                 
                 {/* Visual circle for total metric */}
-                <circle cx={x} cy={yScale(d[metricKey])} r="5" fill="#10b981" stroke="white" strokeWidth="2" style={{ pointerEvents: 'none' }} />
+                <circle cx={x} cy={yScale(d[metricKey])} r="5" fill={currentColor} stroke="white" strokeWidth="2" style={{ pointerEvents: 'none' }} />
               </g>
             );
           })}
         </svg>
 
         {/* Legend */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem', fontSize: '0.75rem' }}>
-          {/* Main metric legend */}
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-              <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-              <span style={{ fontWeight: '600' }}>Total {metricLabel}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem', fontSize: '0.875rem' }}>
+          {/* Main channel */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: '20px', height: '3px', backgroundColor: currentColor, borderRadius: '2px' }}></div>
+              <span style={{ color: '#64748b', fontWeight: '600' }}>
+                {selectedChannel === 'all' ? 'All PMW' : selectedChannel === 'all-organic' ? 'All Organic' : selectedChannel === 'all-paid' ? 'All Paid' : selectedChannel}
+              </span>
             </div>
           </div>
           
-          {/* Individual channels legend (if showing all) */}
-          {isMultiChannel && (
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', paddingTop: '0.5rem', borderTop: '1px solid #e5e7eb' }}>
-              {channelDataSets.map(chData => (
-                <div key={`legend-${chData.channel}`} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          {/* Sub-channels legend */}
+          {subChannels.length > 0 && (
+            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', paddingTop: '0.5rem', borderTop: '1px solid #e5e7eb' }}>
+              {subChannels.map(sub => (
+                <div key={`legend-${sub.key}`} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                   <div style={{ 
-                    width: '24px', 
+                    width: '16px', 
                     height: '2px', 
-                    backgroundColor: channelColors[chData.channel] || '#10b981',
-                    opacity: 0.5,
-                    border: '1px dashed',
-                    borderColor: channelColors[chData.channel] || '#10b981'
+                    backgroundColor: sub.color,
+                    borderTop: '1px dashed',
+                    borderBottom: '1px dashed',
+                    borderColor: sub.color,
+                    opacity: 0.6
                   }}></div>
-                  <span style={{ fontSize: '0.6875rem', color: '#6b7280' }}>{chData.channel}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{sub.label}</span>
                 </div>
               ))}
             </div>
           )}
+        </div>
         </div>
       </div>
     );
@@ -860,9 +1045,95 @@ const PMWAnalytics = ({ leads }) => {
         </div>
         
         {showPipelineTrends && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            {renderPipelineGraph(organicDataSets, 'Organic Channels Pipeline', organicChannels, organicChannel, setOrganicChannel, '#10b981', 'organic')}
-            {renderPipelineGraph(paidDataSets, 'Paid Channels Pipeline', paidChannels, paidChannel, setPaidChannel, '#f59e0b', 'paid')}
+          <div>
+            {/* Channel Filter Buttons */}
+            <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setSelectedChannel('all')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  border: selectedChannel === 'all' ? '2px solid #3b82f6' : '1px solid #d1d5db',
+                  backgroundColor: selectedChannel === 'all' ? '#3b82f615' : 'white',
+                  color: selectedChannel === 'all' ? '#3b82f6' : '#64748b',
+                  fontSize: '0.875rem',
+                  fontWeight: selectedChannel === 'all' ? '600' : '500',
+                  cursor: 'pointer'
+                }}
+              >
+                All PMW
+              </button>
+              <button
+                onClick={() => setSelectedChannel('all-organic')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  border: selectedChannel === 'all-organic' ? '2px solid #10b981' : '1px solid #d1d5db',
+                  backgroundColor: selectedChannel === 'all-organic' ? '#10b98115' : 'white',
+                  color: selectedChannel === 'all-organic' ? '#10b981' : '#64748b',
+                  fontSize: '0.875rem',
+                  fontWeight: selectedChannel === 'all-organic' ? '600' : '500',
+                  cursor: 'pointer'
+                }}
+              >
+                All Organic
+              </button>
+              <button
+                onClick={() => setSelectedChannel('all-paid')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  border: selectedChannel === 'all-paid' ? '2px solid #f59e0b' : '1px solid #d1d5db',
+                  backgroundColor: selectedChannel === 'all-paid' ? '#f59e0b15' : 'white',
+                  color: selectedChannel === 'all-paid' ? '#f59e0b' : '#64748b',
+                  fontSize: '0.875rem',
+                  fontWeight: selectedChannel === 'all-paid' ? '600' : '500',
+                  cursor: 'pointer'
+                }}
+              >
+                All Paid
+              </button>
+              <div style={{ width: '1px', backgroundColor: '#e5e7eb', margin: '0 0.25rem' }}></div>
+              {organicChannels.map(channel => (
+                <button
+                  key={channel}
+                  onClick={() => setSelectedChannel(channel)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    border: selectedChannel === channel ? '2px solid #10b981' : '1px solid #d1d5db',
+                    backgroundColor: selectedChannel === channel ? '#10b98115' : 'white',
+                    color: selectedChannel === channel ? '#10b981' : '#64748b',
+                    fontSize: '0.875rem',
+                    fontWeight: selectedChannel === channel ? '600' : '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {channel}
+                </button>
+              ))}
+              {paidChannels.map(channel => (
+                <button
+                  key={channel}
+                  onClick={() => setSelectedChannel(channel)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    border: selectedChannel === channel ? '2px solid #f59e0b' : '1px solid #d1d5db',
+                    backgroundColor: selectedChannel === channel ? '#f59e0b15' : 'white',
+                    color: selectedChannel === channel ? '#f59e0b' : '#64748b',
+                    fontSize: '0.875rem',
+                    fontWeight: selectedChannel === channel ? '600' : '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {channel}
+                </button>
+              ))}
+            </div>
+            
+            {/* Single Combined Graph */}
+            {renderPipelineGraph()}
           </div>
         )}
       </div>
@@ -1250,6 +1521,207 @@ const PMWAnalytics = ({ leads }) => {
           ))}
         </div>
           </div>
+        )}
+      </div>
+
+      {/* Phone Call Tracking */}
+      <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            marginBottom: showPhoneTracking ? '1.5rem' : '0'
+          }}
+          onClick={() => setShowPhoneTracking(!showPhoneTracking)}
+        >
+          <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: '#1e293b' }}>
+            Phone Call Tracking
+          </h3>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '0.25rem',
+              lineHeight: 1
+            }}
+          >
+            {showPhoneTracking ? '−' : '+'}
+          </button>
+        </div>
+        
+        {showPhoneTracking && (
+          <>
+            {/* Summary Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+              {/* Total Calls */}
+              <div style={{ backgroundColor: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '8px', padding: '1.25rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#1e40af', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  Total Calls
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#1e40af' }}>
+                  {phoneMetrics.totalCalls}
+                </div>
+              </div>
+
+              {/* Answered Calls */}
+              <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1.25rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#166534', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  Answered
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#166534' }}>
+                  {phoneMetrics.answeredCalls}
+                </div>
+              </div>
+
+              {/* Unanswered Calls */}
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '1.25rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#991b1b', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  Unanswered
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#991b1b' }}>
+                  {phoneMetrics.unansweredCalls}
+                </div>
+              </div>
+
+              {/* Answer Rate */}
+              <div style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '1.25rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b21a8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  Answer Rate
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#6b21a8' }}>
+                  {phoneMetrics.answerRate}%
+                </div>
+              </div>
+            </div>
+
+            {/* Phone Calls Graph */}
+            <div>
+              <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#1e293b' }}>
+                Call Volume Over Time
+              </h4>
+              
+              {phoneCallsOverTime.length === 0 ? (
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '3rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                    No phone call data available for the selected time period
+                  </div>
+                </div>
+              ) : (
+                <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
+                  {(() => {
+                    const data = phoneCallsOverTime;
+                    const maxValue = Math.max(...data.map(d => d.totalCalls), 1);
+                    const width = 1100;
+                    const height = 280;
+                    const padding = { top: 20, right: 30, bottom: 40, left: 50 };
+                    const graphWidth = width - padding.left - padding.right;
+                    const graphHeight = height - padding.top - padding.bottom;
+
+                    const xScale = (index, dataLength) => {
+                      if (dataLength === 1) return padding.left + graphWidth / 2;
+                      return padding.left + (index / (dataLength - 1)) * graphWidth;
+                    };
+                    const yScale = (value) => {
+                      return padding.top + graphHeight - (value / maxValue) * graphHeight;
+                    };
+
+                    const generatePath = (dataArray, key) => {
+                      if (dataArray.length === 0) return '';
+                      let path = '';
+                      dataArray.forEach((d, i) => {
+                        const x = xScale(i, dataArray.length);
+                        const y = yScale(d[key]);
+                        if (i === 0) {
+                          path = `M ${x} ${y}`;
+                        } else {
+                          const prevX = xScale(i - 1, dataArray.length);
+                          const prevY = yScale(dataArray[i - 1][key]);
+                          const cpX1 = prevX + (x - prevX) * 0.5;
+                          const cpX2 = x - (x - prevX) * 0.5;
+                          path += ` C ${cpX1} ${prevY}, ${cpX2} ${y}, ${x} ${y}`;
+                        }
+                      });
+                      return path;
+                    };
+
+                    const dateLabels = data.length <= 7 ? data.map((d, i) => ({ index: i, label: formatDateLabel(d.date) })) : 
+                      data.filter((_, i) => i % Math.floor(data.length / 7) === 0).map((d, i) => ({ 
+                        index: i * Math.floor(data.length / 7), 
+                        label: formatDateLabel(d.date) 
+                      }));
+
+                    return (
+                      <svg width={width} height={height} style={{ display: 'block' }}>
+                        <rect x={padding.left} y={padding.top} width={graphWidth} height={graphHeight} fill="#fafbfc" />
+
+                        {/* Grid lines */}
+                        {[0, 0.25, 0.5, 0.75, 1].map((percent) => {
+                          const value = maxValue * percent;
+                          const y = yScale(value);
+                          return (
+                            <g key={percent}>
+                              <line x1={padding.left} y1={y} x2={padding.left + graphWidth} y2={y} stroke="#e5e7eb" strokeWidth="1" />
+                              <text x={padding.left - 10} y={y + 4} textAnchor="end" fontSize="10" fill="#9ca3af">
+                                {Math.round(value)}
+                              </text>
+                            </g>
+                          );
+                        })}
+
+                        {/* X-axis labels */}
+                        {dateLabels.map(({ index, label }) => (
+                          <text
+                            key={`x-${index}`}
+                            x={xScale(index, data.length)}
+                            y={height - 10}
+                            textAnchor="middle"
+                            fontSize="10"
+                            fill="#9ca3af"
+                          >
+                            {label}
+                          </text>
+                        ))}
+
+                        {/* Answered calls line */}
+                        <path d={generatePath(data, 'answeredCalls')} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
+
+                        {/* Total calls line */}
+                        <path d={generatePath(data, 'totalCalls')} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
+
+                        {/* Data points */}
+                        {data.map((d, i) => {
+                          const x = xScale(i, data.length);
+                          return (
+                            <g key={`points-${i}`}>
+                              <circle cx={x} cy={yScale(d.totalCalls)} r="5" fill="#3b82f6" stroke="white" strokeWidth="2" />
+                              <circle cx={x} cy={yScale(d.answeredCalls)} r="4" fill="#10b981" stroke="white" strokeWidth="2" />
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    );
+                  })()}
+
+                  {/* Legend */}
+                  <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', fontSize: '0.875rem', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ width: '20px', height: '3px', backgroundColor: '#3b82f6', borderRadius: '2px' }}></div>
+                      <span style={{ color: '#64748b' }}>Total Calls</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ width: '20px', height: '3px', backgroundColor: '#10b981', borderRadius: '2px' }}></div>
+                      <span style={{ color: '#64748b' }}>Answered Calls</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 

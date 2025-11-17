@@ -387,6 +387,16 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
     return requiredFields.every(field => lead.onboardingAnswers[field.id]);
   };
 
+  // Helper function to check if all application sections (1-3) are complete
+  const isApplicationComplete = () => {
+    return mockOnboardingForm.applicationSections.every(section => isSectionComplete(section));
+  };
+
+  // Helper function to check if all onboarding sections (documents) are complete
+  const isOnboardingComplete = () => {
+    return mockOnboardingForm.onboardingSections.every(section => isSectionComplete(section));
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
       month: 'short',
@@ -473,16 +483,7 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
             </h1>
             <div className="detail-meta">
               {/* Lead/Applicant Type Badge */}
-              <span 
-                className="status-badge"
-                style={{ 
-                  backgroundColor: isApplicant ? '#8b5cf620' : '#3b82f620',
-                  color: isApplicant ? '#8b5cf6' : '#3b82f6',
-                  fontWeight: '600'
-                }}
-              >
-                {/* {isApplicant ? '📋 Applicant' : '🎯 Lead'} */}
-              </span>
+              
               {/* <span className="detail-separator">•</span> */}
               {/* Status Badge */}
               <span 
@@ -515,14 +516,128 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
           </div>
         </div>
 
-        <div className="detail-actions">
-          {/* Add to Portfolio button - shows when application is approved and onboarding complete */}
-          {lead.status === 'onboarding' && lead.applicationStatus === 'approved' && (
+        <div className="detail-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* QUICK ACTION BUTTONS - Conditional based on stage */}
+          
+          {/* LEAD STAGE - Approve & Deny */}
+          {(lead.status === 'partial' || lead.status === 'qualified') && currentUser.permissions.approveOwnerLeads && (
+            <>
             <button 
               className="btn btn-success"
-              onClick={handleAddToPortfolio}
+                onClick={() => setShowApprovalModal(true)}
               style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+              }}
+              >
+                <CheckCircle size={18} />
+                Approve & Send Application
+              </button>
+              <button 
+                className="btn btn-danger"
+                onClick={() => setShowDenyModal(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+              }}
+            >
+                <XCircle size={18} />
+                Deny Lead
+            </button>
+            </>
+          )}
+
+          {/* APPLICATION STAGE - Submit for Approval (always show, disabled until all 3 application sections complete) */}
+          {(lead.status === 'approved' || lead.status === 'application') && !lead.applicationStatus && (
+            <button 
+              className="btn btn-success"
+              onClick={() => isApplicationComplete() && setShowSubmitForApprovalModal(true)}
+              disabled={!isApplicationComplete()}
+        style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                fontSize: '14px',
+                fontWeight: '600',
+                opacity: isApplicationComplete() ? 1 : 0.5,
+                cursor: isApplicationComplete() ? 'pointer' : 'not-allowed'
+              }}
+            >
+              <Send size={18} />
+              Submit for Approval
+        </button>
+          )}
+
+          {/* UNDER REVIEW STAGE - Approve, Request Changes, & Deny */}
+          {lead.applicationStatus === 'pending_review' && currentUser.permissions.approveOwnerOnboarding && (
+            <>
+              <button 
+                className="btn btn-success"
+                onClick={() => setShowApproveApplicationModal(true)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                <CheckCircle size={18} />
+                Approve
+              </button>
+              <button 
+                className="btn btn-warning"
+                onClick={() => setShowRequestChangesModal(true)}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                  gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                <Edit size={18} />
+                Request Changes
+              </button>
+              <button 
+                className="btn btn-danger"
+                onClick={() => setShowDenyApplicationModal(true)}
+                    style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                    }}
+                  >
+                <XCircle size={18} />
+                Deny
+              </button>
+            </>
+          )}
+
+          {/* ONBOARDING STAGE - Add to Portfolio (disabled until documents are complete) */}
+          {lead.status === 'onboarding' && lead.applicationStatus === 'approved' && (
+                      <button 
+                        className="btn btn-success"
+              onClick={() => isOnboardingComplete() && handleAddToPortfolio()}
+              disabled={!isOnboardingComplete()}
+              style={{
+                background: isOnboardingComplete() 
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                  : 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
                 color: 'white',
                 fontWeight: '600',
                 padding: '12px 24px',
@@ -530,23 +645,206 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                boxShadow: isOnboardingComplete() 
+                  ? '0 4px 12px rgba(16, 185, 129, 0.3)'
+                  : '0 4px 12px rgba(107, 114, 128, 0.3)',
                 border: 'none',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                cursor: isOnboardingComplete() ? 'pointer' : 'not-allowed',
+                opacity: isOnboardingComplete() ? 1 : 0.6
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+                if (isOnboardingComplete()) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                if (isOnboardingComplete()) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                }
               }}
             >
               <CheckCircle size={20} />
               Add to Portfolio
-            </button>
+                      </button>
           )}
+
+          {/* THREE-DOT MENU - Always visible, conditional content */}
+          <div style={{ position: 'relative' }}>
+                      <span
+                        data-dropdown-trigger
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMoreMenu(!showMoreMenu);
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          color: '#64748b',
+                padding: '8px 12px',
+                          lineHeight: 1,
+                          userSelect: 'none',
+                transition: 'color 0.2s',
+                display: 'block'
+                        }}
+                        onMouseEnter={(e) => e.target.style.color = '#334155'}
+                        onMouseLeave={(e) => e.target.style.color = '#64748b'}
+                      >
+                        •••
+                      </span>
+                      
+                      {/* Dropdown Menu */}
+                      {showMoreMenu && (
+                        <div 
+                          className="dropdown-menu" 
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: '100%',
+                            marginTop: '8px',
+                            background: 'white',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            zIndex: 1000,
+                  minWidth: '200px',
+                            overflow: 'hidden'
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                {/* LEAD/QUALIFIED LEAD STAGE */}
+                {(lead.status === 'partial' || lead.status === 'qualified') && (
+                  <>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => {
+                              setIsEditing(true);
+                              setShowMoreMenu(false);
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '12px 16px',
+                              border: 'none',
+                              background: 'none',
+                              textAlign: 'left',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              fontSize: '14px',
+                              color: '#334155',
+                              fontWeight: '500'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                          >
+                            <Edit size={16} />
+                            Edit Lead Info
+                          </button>
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+                  </>
+                )}
+
+                {/* APPLICATION STAGE */}
+                {(lead.status === 'approved' || lead.status === 'application') && !lead.applicationStatus && (
+                            <>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                        console.log('Re-send application email');
+                                  setShowMoreMenu(false);
+                        // In real app, would trigger re-send application email
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '12px 16px',
+                                  border: 'none',
+                                  background: 'none',
+                                  textAlign: 'left',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '10px',
+                                  fontSize: '14px',
+                        color: '#334155',
+                                  fontWeight: '500'
+                                }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                              >
+                      <Send size={16} />
+                      Re-send Application
+                              </button>
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+                  </>
+                )}
+
+                {/* UNDER REVIEW STAGE */}
+                {lead.applicationStatus === 'pending_review' && currentUser.permissions.approveOwnerOnboarding && (
+                  <>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                        setShowDenyApplicationModal(true);
+                                  setShowMoreMenu(false);
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '12px 16px',
+                                  border: 'none',
+                                  background: 'none',
+                                  textAlign: 'left',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '10px',
+                                  fontSize: '14px',
+                                  color: '#ef4444',
+                                  fontWeight: '500'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                              >
+                                <XCircle size={16} />
+                      Deny Application
+                              </button>
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+                            </>
+                          )}
+
+                {/* Archive - Always available */}
+                          <button
+                            className="dropdown-item"
+                            onClick={() => {
+                              handleArchive();
+                              setShowMoreMenu(false);
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '12px 16px',
+                              border: 'none',
+                              background: 'none',
+                              textAlign: 'left',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              fontSize: '14px',
+                              color: '#64748b',
+                              fontWeight: '500'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                          >
+                            <Archive size={16} />
+                            Archive Lead
+                          </button>
+                        </div>
+                      )}
+          </div>
         </div>
       </div>
 
@@ -579,7 +877,7 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
             <span className="tab-badge">{lead.noteCount || 1}</span>
           )}
         </button>
-      </div>
+                </div>
 
       {/* Content */}
       <div className="detail-content" style={{
@@ -609,218 +907,51 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                   borderBottom: isLeadInfoExpanded ? '1px solid #e2e8f0' : 'none'
                 }}
               >
-                <div 
-                  style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '12px',
-                    cursor: 'pointer',
-                    flex: 1
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+                onClick={() => setIsLeadInfoExpanded(!isLeadInfoExpanded)}
+              >
+                <h3 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <User size={20} />
+                  Lead Info
+                </h3>
+                <span 
+                  style={{
+                    color: '#64748b',
+                    fontSize: '16px',
+                    transition: 'transform 0.2s'
                   }}
-                  onClick={() => setIsLeadInfoExpanded(!isLeadInfoExpanded)}
                 >
-                  <h3 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <User size={20} />
-                    Lead Info
-                  </h3>
-                  <span 
-                    style={{
-                      color: '#64748b',
-                      fontSize: '16px',
-                      transition: 'transform 0.2s'
-                    }}
+                  {isLeadInfoExpanded ? '▼' : '▶'}
+                </span>
+              </div>
+
+              {/* Save/Cancel buttons when editing */}
+              {isEditing && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <button 
+                    className="btn btn-success"
+                    onClick={handleSaveEdit}
+                    style={{ fontSize: '14px', padding: '6px 16px' }}
                   >
-                    {isLeadInfoExpanded ? '▼' : '▶'}
-                  </span>
+                    <Save size={16} />
+                    Save
+                  </button>
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={handleCancelEdit}
+                    style={{ fontSize: '14px', padding: '6px 16px' }}
+                  >
+                    Cancel
+                  </button>
                 </div>
-
-                {/* Actions Menu */}
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  {/* Save/Cancel buttons when editing */}
-                  {isEditing ? (
-                    <>
-                      <button 
-                        className="btn btn-success"
-                        onClick={handleSaveEdit}
-                        style={{ fontSize: '14px', padding: '6px 16px' }}
-                      >
-                        <Save size={16} />
-                        Save
-                      </button>
-                      <button 
-                        className="btn btn-secondary"
-                        onClick={handleCancelEdit}
-                        style={{ fontSize: '14px', padding: '6px 16px' }}
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {/* 3-dot menu as clickable text */}
-                      <span
-                        data-dropdown-trigger
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowMoreMenu(!showMoreMenu);
-                        }}
-                        style={{
-                          cursor: 'pointer',
-                          fontSize: '20px',
-                          fontWeight: '700',
-                          color: '#64748b',
-                          padding: '4px 8px',
-                          lineHeight: 1,
-                          userSelect: 'none',
-                          transition: 'color 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.target.style.color = '#334155'}
-                        onMouseLeave={(e) => e.target.style.color = '#64748b'}
-                      >
-                        •••
-                      </span>
-                      
-                      {/* Dropdown Menu */}
-                      {showMoreMenu && (
-                        <div 
-                          className="dropdown-menu" 
-                          style={{
-                            position: 'absolute',
-                            right: 0,
-                            top: '100%',
-                            marginTop: '8px',
-                            background: 'white',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                            zIndex: 1000,
-                            minWidth: '180px',
-                            overflow: 'hidden'
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {/* Edit */}
-                          <button
-                            className="dropdown-item"
-                            onClick={() => {
-                              setIsEditing(true);
-                              setShowMoreMenu(false);
-                            }}
-                            style={{
-                              width: '100%',
-                              padding: '12px 16px',
-                              border: 'none',
-                              background: 'none',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '10px',
-                              fontSize: '14px',
-                              color: '#334155',
-                              fontWeight: '500'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                          >
-                            <Edit size={16} />
-                            Edit Lead Info
-                          </button>
-
-                          {/* Approve (only for qualifying leads) */}
-                          {currentUser.permissions.approveOwnerLeads && lead.status !== 'approved' && lead.status !== 'denied' && (
-                            <>
-                              <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
-                              <button
-                                className="dropdown-item"
-                                onClick={() => {
-                                  setShowApprovalModal(true);
-                                  setShowMoreMenu(false);
-                                }}
-                                style={{
-                                  width: '100%',
-                                  padding: '12px 16px',
-                                  border: 'none',
-                                  background: 'none',
-                                  textAlign: 'left',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '10px',
-                                  fontSize: '14px',
-                                  color: '#10b981',
-                                  fontWeight: '500'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = '#ecfdf5'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                              >
-                                <CheckCircle size={16} />
-                                Approve & Send Application
-                              </button>
-
-                              {/* Deny */}
-                              <button
-                                className="dropdown-item"
-                                onClick={() => {
-                                  setShowDenyModal(true);
-                                  setShowMoreMenu(false);
-                                }}
-                                style={{
-                                  width: '100%',
-                                  padding: '12px 16px',
-                                  border: 'none',
-                                  background: 'none',
-                                  textAlign: 'left',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '10px',
-                                  fontSize: '14px',
-                                  color: '#ef4444',
-                                  fontWeight: '500'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                              >
-                                <XCircle size={16} />
-                                Deny Lead
-                              </button>
-                            </>
-                          )}
-
-                          {/* Archive */}
-                          <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
-                          <button
-                            className="dropdown-item"
-                            onClick={() => {
-                              handleArchive();
-                              setShowMoreMenu(false);
-                            }}
-                            style={{
-                              width: '100%',
-                              padding: '12px 16px',
-                              border: 'none',
-                              background: 'none',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '10px',
-                              fontSize: '14px',
-                              color: '#64748b',
-                              fontWeight: '500'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                          >
-                            <Archive size={16} />
-                            Archive Lead
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+              )}
               </div>
 
               {/* Lead Info Body */}
@@ -1325,19 +1456,19 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                   </h3>
                   <span style={{
                     padding: '4px 12px',
-                    background: lead.onboardingStatus === 'in_progress' ? '#3b82f6' : '#10b981',
+                    background: isApplicationComplete() ? '#10b981' : '#3b82f6',
                     color: 'white',
                     borderRadius: '12px',
                     fontSize: '12px',
                     fontWeight: '600'
                   }}>
-                    {lead.onboardingStatus === 'in_progress' ? `${lead.onboardingCompletion}% Complete` : 'Ready for Review'}
+                    {isApplicationComplete() ? 'Complete - Ready for Review' : 'In Progress'}
                   </span>
                 </div>
 
-                {/* Application Sections */}
+                {/* Application Sections (Sections 1-3 only) */}
                 <div style={{ padding: '20px' }}>
-                  {mockOnboardingForm.sections.map((section, index) => {
+                  {mockOnboardingForm.applicationSections.map((section, index) => {
                     const isComplete = isSectionComplete(section);
                     
                     return (
@@ -1414,7 +1545,7 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                   })}
 
                   {/* Overall Progress Note */}
-                  {lead.onboardingStatus === 'in_progress' && lead.onboardingCompletion < 100 && (
+                  {lead.onboardingStatus === 'in_progress' && !isApplicationComplete() && (
                     <div style={{
                       marginTop: '20px',
                       padding: '14px 18px',
@@ -1427,14 +1558,13 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                     }}>
                       <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
                       <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#92400e' }}>
-                        <strong>Application In Progress:</strong> The applicant is currently at {lead.onboardingCompletion}% completion. 
-                        They will need to finish all required sections before you can approve.
+                        <strong>Application In Progress:</strong> The applicant needs to complete all required sections before submitting for approval.
                       </div>
                     </div>
                   )}
 
-                  {/* Application Actions Based on Status */}
-                  {lead.onboardingCompletion === 100 && !lead.applicationStatus && (
+                  {/* Application Status Messages (no action buttons - those are in header) */}
+                  {isApplicationComplete() && !lead.applicationStatus && (
                     <div style={{
                       marginTop: '20px',
                       padding: '18px',
@@ -1442,20 +1572,12 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                       border: '1px solid #bbf7d0',
                       borderRadius: '8px'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <CheckCircle size={20} style={{ color: '#10b981', flexShrink: 0 }} />
                         <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#166534' }}>
-                          <strong>Application Complete:</strong> All required sections have been completed.
+                          <strong>Application Complete:</strong> All required sections have been completed. Ready to submit for approval.
                         </div>
                       </div>
-                      <button
-                        onClick={() => setShowSubmitForApprovalModal(true)}
-                        className="btn btn-success"
-                        style={{ width: '100%' }}
-                      >
-                        <Send size={18} />
-                        Submit for Approval
-                      </button>
                     </div>
                   )}
 
@@ -1468,41 +1590,12 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                       border: '1px solid #dbeafe',
                       borderRadius: '8px'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <Clock size={20} style={{ color: '#3b82f6', flexShrink: 0 }} />
-                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#1e40af', flex: 1 }}>
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#1e40af' }}>
                           <strong>Pending Manager Review:</strong> This application is awaiting manager approval.
                         </div>
                       </div>
-
-                      {/* Manager Actions */}
-                      {currentUser.permissions.approveOwnerOnboarding && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => setShowApproveApplicationModal(true)}
-                            className="btn btn-success"
-                            style={{ flex: 1 }}
-                          >
-                            <CheckCircle size={18} />
-                            Approve & Send to Onboarding
-                          </button>
-                          <button
-                            onClick={() => setShowRequestChangesModal(true)}
-                            className="btn btn-warning"
-                            style={{ flex: 1 }}
-                          >
-                            <AlertCircle size={18} />
-                            Request Changes
-                          </button>
-                          <button
-                            onClick={() => setShowDenyApplicationModal(true)}
-                            className="btn btn-danger"
-                          >
-                            <XCircle size={18} />
-                            Deny
-                          </button>
-                        </div>
-                      )}
                     </div>
                   )}
 
@@ -1579,8 +1672,8 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                 </div>
 
                 <div style={{ padding: '24px' }}>
-                  {/* Non-repeatable sections (Owner Information, Management Preferences, Documents) */}
-                  {mockOnboardingForm.sections
+                  {/* Non-repeatable APPLICATION sections (Owner Information, Management Preferences) */}
+                  {mockOnboardingForm.applicationSections
                     .filter(section => !section.repeatable)
                     .map((section, sectionIndex) => {
                       // Calculate completion for this section
@@ -1955,6 +2048,188 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {/* ONBOARDING sections (Documents & Signatures) */}
+                  <div style={{ marginTop: '32px' }}>
+                    <h4 style={{ 
+                      margin: '0 0 16px 0', 
+                      fontSize: '15px', 
+                      fontWeight: '600', 
+                      color: '#374151',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <FileText size={18} />
+                      Documents & Signatures
+                    </h4>
+                    {mockOnboardingForm.onboardingSections.map((section) => {
+                      // Calculate completion for this section
+                      const requiredFields = section.fields.filter(f => f.required);
+                      const completedFields = requiredFields.filter(f => lead.onboardingAnswers?.[f.id]);
+                      const isComplete = requiredFields.length === 0 || completedFields.length === requiredFields.length;
+                      
+                      return (
+                        <div 
+                          key={section.id}
+                          style={{
+                            marginBottom: '24px',
+                            padding: '20px',
+                            background: 'white',
+                            borderRadius: '8px',
+                            border: '1px solid #d1d5db',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onClick={() => handleOpenSectionModal(section)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '16px'
+                          }}>
+                            <h4 style={{ 
+                              margin: 0, 
+                              fontSize: '14px', 
+                              fontWeight: '600', 
+                              color: '#374151',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              {section.title}
+                            </h4>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenSectionModal(section);
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: '#3b82f6',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = '#2563eb';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '#3b82f6';
+                                }}
+                              >
+                                <Edit size={14} />
+                                Edit
+                              </button>
+                              {isComplete && (
+                                <span style={{ 
+                                  fontSize: '12px', 
+                                  fontWeight: '600',
+                                  color: '#10b981',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  <CheckCircle size={14} />
+                                  Complete
+                                </span>
+                  )}
+                </div>
+              </div>
+                          <div style={{ display: 'grid', gap: '12px' }}>
+                            {section.fields.map((field) => {
+                              const hasValue = lead.onboardingAnswers?.[field.id];
+                              return (
+                                <div 
+                                  key={field.id}
+                                  style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '8px',
+                                    padding: '8px 12px',
+                                    background: hasValue ? '#f0fdf4' : '#f9fafb',
+                                    borderRadius: '6px',
+                                    fontSize: '13px'
+                                  }}
+                                >
+                                  <CheckCircle 
+                                    size={16} 
+                                    style={{ 
+                                      color: hasValue ? '#10b981' : '#d1d5db',
+                                      flexShrink: 0 
+                                    }} 
+                                  />
+                                  <span style={{ color: '#374151', flex: 1 }}>
+                                    {field.label}
+                                  </span>
+                                  {hasValue && (
+                                    <span style={{ 
+                                      color: '#6b7280', 
+                                      fontSize: '12px',
+                                      fontStyle: 'italic'
+                                    }}>
+                                      {String(lead.onboardingAnswers[field.id]).substring(0, 40)}
+                                      {String(lead.onboardingAnswers[field.id]).length > 40 ? '...' : ''}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Status message based on onboarding completion */}
+                  {isOnboardingComplete() ? (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '18px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <CheckCircle size={20} style={{ color: '#10b981', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#166534' }}>
+                          <strong>Onboarding Complete!</strong> All property information and documents have been completed. Ready to add to portfolio.
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '18px',
+                      background: '#fffbeb',
+                      border: '1px solid #fef3c7',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#92400e' }}>
+                          <strong>Documents Pending:</strong> Please complete all document signing and property details to finalize onboarding.
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

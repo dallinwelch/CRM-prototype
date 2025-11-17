@@ -24,9 +24,12 @@ import {
   ArrowLeft,
   PenTool,
   Download,
-  Eye
+  Eye,
+  Menu,
+  X
 } from 'lucide-react';
 import OwnerApplicationForm from './OwnerApplicationForm';
+import companyLogo from '../assets/companyLogo.png';
 
 const OwnerPortal = () => {
   const [activeNav, setActiveNav] = useState('properties');
@@ -35,6 +38,7 @@ const OwnerPortal = () => {
   const [selectedLead, setSelectedLead] = useState(null);
   const [testStage, setTestStage] = useState(0); // 0: awaiting approval, 1: signed agreement, 2: property setup, 3: onboarded
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [properties, setProperties] = useState([
     {
       id: 'prop-002',
@@ -389,15 +393,31 @@ const OwnerPortal = () => {
 
   return (
     <div className="owner-portal">
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-sidebar-overlay" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="owner-portal-sidebar">
+      <aside className={`owner-portal-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
-            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2"/>
-            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2"/>
-          </svg>
-          <span className="logo-text">rentvine</span>
+          <img 
+            src={companyLogo} 
+            alt="Company Logo" 
+            style={{ 
+              height: '32px',
+              width: 'auto'
+            }} 
+          />
+          <button 
+            className="mobile-close-button"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <X size={20} />
+          </button>
         </div>
         
         <nav className="sidebar-nav">
@@ -407,7 +427,10 @@ const OwnerPortal = () => {
               <button
                 key={item.id}
                 className={`nav-item ${activeNav === item.id ? 'active' : ''}`}
-                onClick={() => setActiveNav(item.id)}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  setMobileMenuOpen(false);
+                }}
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
@@ -427,6 +450,13 @@ const OwnerPortal = () => {
       <div className="owner-portal-main">
         {/* Header */}
         <header className="portal-header">
+          <button 
+            className="mobile-menu-toggle"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu size={24} />
+          </button>
+
           <div className="header-search">
             <Search size={18} />
             <input 
@@ -477,21 +507,21 @@ const OwnerPortal = () => {
                       <CheckCircle size={20} />
                     </div>
                     <div className="stage-content">
-                      <div className="stage-title">Lead Complete</div>
-                      <div className="stage-description">Initial information submitted</div>
+                      <div className="stage-title">Lead</div>
+                      <div className="stage-description">Lead Complete</div>
                     </div>
                   </div>
 
                   <div className="stage-connector"></div>
 
-                  <div className={`stage ${currentOwner.status === 'awaiting approval' ? 'current' : (currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'application' ? 'current' : currentOwner.status === 'awaiting approval' ? 'current' : (currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
                     <div className="stage-indicator">
-                      {currentOwner.status === 'awaiting approval' ? <Clock size={20} /> : <CheckCircle size={20} />}
+                      {currentOwner.status === 'application' || currentOwner.status === 'awaiting approval' ? <Clock size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
-                      <div className="stage-title">Application Awaiting Approval</div>
+                      <div className="stage-title">Application</div>
                       <div className="stage-description">
-                        {currentOwner.status === 'awaiting approval' ? 'Under review by our team' : 'Application reviewed'}
+                        {currentOwner.status === 'application' ? 'In Progress' : currentOwner.status === 'awaiting approval' ? 'Awaiting Approval' : 'Complete'}
                       </div>
                     </div>
                   </div>
@@ -503,8 +533,10 @@ const OwnerPortal = () => {
                       {currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 75 ? <FileText size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
-                      <div className="stage-title">Signed Agreement</div>
-                      <div className="stage-description">Management agreement signed</div>
+                      <div className="stage-title">Signed Agreements</div>
+                      <div className="stage-description">
+                        {(currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion > 75) || currentOwner.status === 'completed' ? 'Signed Agreements Completed' : 'Management agreement pending'}
+                      </div>
                     </div>
                   </div>
 

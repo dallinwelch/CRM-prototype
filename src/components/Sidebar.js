@@ -13,6 +13,7 @@ import {
   Briefcase,
   X
 } from 'lucide-react';
+import companyLogo from '../assets/companyLogo.png';
 
 const Sidebar = ({ activeTab, setActiveTab, activeSubTab, setActiveSubTab, isOpen, onClose }) => {
   const [expandedSection, setExpandedSection] = useState('portfolio');
@@ -68,6 +69,19 @@ const Sidebar = ({ activeTab, setActiveTab, activeSubTab, setActiveSubTab, isOpe
             <X size={24} />
           </button>
         )}
+
+        {/* Logo */}
+        {/* <div style={{ padding: '24px 16px', borderBottom: '1px solid #e5e7eb' }}>
+          <img 
+            src={companyLogo} 
+            alt="Company Logo" 
+            style={{ 
+              width: '100%',
+              height: 'auto',
+              maxWidth: '180px'
+            }} 
+          />
+        </div> */}
 
         <nav className="sidebar-nav">
         {/* Portfolio Section with Sub-nav */}

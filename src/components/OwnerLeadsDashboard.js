@@ -368,10 +368,7 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
           <p className="dashboard-subtitle">Manage and track your owner lead pipeline</p>
         </div>
         <div className="dashboard-actions">
-          <button className="btn btn-secondary">
-            <Filter size={18} />
-            Filter
-          </button>
+         
           <button className="btn btn-primary" onClick={onCreateLead}>
             <UserPlus size={18} />
             New Lead

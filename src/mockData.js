@@ -721,6 +721,7 @@ export const mockLeads = [
     leadSource: 'Phone',
     leadSourceCategory: 'other',
     leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
     properties: [
       {
         id: 'prop-008-1',
@@ -1086,6 +1087,7 @@ export const mockLeads = [
     leadSource: 'Phone',
     leadSourceCategory: 'other',
     leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
     properties: [
       {
         id: 'prop-004',
@@ -1407,6 +1409,7 @@ export const mockLeads = [
     leadSource: 'Phone',
     leadSourceCategory: 'other',
     leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
     properties: [
       {
         id: 'prop-010',
@@ -2970,6 +2973,140 @@ export const mockLeads = [
       }
     ],
     notes: 'Could not reach after 5 attempts - archived'
+  },
+  // Additional recent phone leads for better time period coverage
+  {
+    id: 'lead-phone-nov-1',
+    firstName: 'Karen',
+    lastName: 'Smith',
+    email: 'karen.smith@email.com',
+    phone: '(555) 430-1111',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Sarah Johnson',
+    createdAt: '2025-11-09T14:30:00Z',
+    updatedAt: '2025-11-09T14:30:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
+    properties: []
+  },
+  {
+    id: 'lead-phone-nov-2',
+    firstName: 'David',
+    lastName: 'Wilson',
+    email: 'david.wilson@email.com',
+    phone: '(555) 430-2222',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-11-08T10:15:00Z',
+    updatedAt: '2025-11-08T10:15:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: false },
+    properties: []
+  },
+  {
+    id: 'lead-phone-nov-3',
+    firstName: 'Lisa',
+    lastName: 'Taylor',
+    email: 'lisa.taylor@email.com',
+    phone: '(555) 430-3333',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Sarah Johnson',
+    createdAt: '2025-11-07T16:45:00Z',
+    updatedAt: '2025-11-07T16:45:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
+    properties: []
+  },
+  {
+    id: 'lead-phone-nov-4',
+    firstName: 'Robert',
+    lastName: 'Brown',
+    email: 'robert.brown@email.com',
+    phone: '(555) 430-4444',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-11-06T11:20:00Z',
+    updatedAt: '2025-11-06T11:20:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
+    properties: []
+  },
+  {
+    id: 'lead-phone-nov-5',
+    firstName: 'Nancy',
+    lastName: 'Miller',
+    email: 'nancy.miller@email.com',
+    phone: '(555) 430-5555',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Sarah Johnson',
+    createdAt: '2025-11-05T09:00:00Z',
+    updatedAt: '2025-11-05T09:00:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: false },
+    properties: []
+  },
+  {
+    id: 'lead-phone-nov-6',
+    firstName: 'Thomas',
+    lastName: 'Garcia',
+    email: 'thomas.garcia@email.com',
+    phone: '(555) 430-6666',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Mike Davis',
+    createdAt: '2025-11-04T15:30:00Z',
+    updatedAt: '2025-11-04T15:30:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: true },
+    properties: []
+  },
+  {
+    id: 'lead-phone-nov-7',
+    firstName: 'Patricia',
+    lastName: 'Martinez',
+    email: 'patricia.martinez@email.com',
+    phone: '(555) 430-7777',
+    status: 'qualified',
+    stage: 'Qualified',
+    assignedTo: 'Sarah Johnson',
+    createdAt: '2025-11-03T13:45:00Z',
+    updatedAt: '2025-11-03T13:45:00Z',
+    completionPercentage: 100,
+    source: 'Phone Call',
+    leadSource: 'Phone',
+    leadSourceCategory: 'other',
+    leadSourceChannel: 'Phone',
+    sourceMetadata: { callAnswered: false },
+    properties: []
   }
 ];
 
@@ -3454,11 +3591,12 @@ export const mockOnboardingForm = {
   description: 'Complete application for approved owner leads',
   version: '1.5',
   type: 'onboarding-application',
-  sections: [
+  applicationSections: [ // Sections 1-3: Must be completed before approval
     {
       id: 'section-owner',
       title: 'Owner Information',
       order: 1,
+      stage: 'application',
       fields: [
         {
           id: 'field-legal-entity',
@@ -3515,6 +3653,7 @@ export const mockOnboardingForm = {
       id: 'section-property',
       title: 'Property Information',
       order: 2,
+      stage: 'application',
       repeatable: true,
       fields: [
         {
@@ -3604,6 +3743,7 @@ export const mockOnboardingForm = {
       id: 'section-preferences',
       title: 'Management Preferences',
       order: 3,
+      stage: 'application',
       fields: [
         {
           id: 'field-lease-length',
@@ -3631,11 +3771,14 @@ export const mockOnboardingForm = {
           helpText: 'Special instructions for showing the property'
         }
       ]
-    },
+    }
+  ],
+  onboardingSections: [ // Section 4: Completed after application approval
     {
       id: 'section-documents',
       title: 'Documents & Signatures',
       order: 4,
+      stage: 'onboarding',
       fields: [
         {
           id: 'field-management-agreement',
@@ -3671,7 +3814,11 @@ export const mockOnboardingForm = {
         }
       ]
     }
-  ]
+  ],
+  // Helper: All sections combined (for backward compatibility)
+  get sections() {
+    return [...this.applicationSections, ...this.onboardingSections];
+  }
 };
 
 export const fibonacciCadence = [1, 2, 3, 5, 8, 13]; // Days

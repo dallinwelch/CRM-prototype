@@ -6953,8 +6953,9 @@ tr.contacted {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 12px;
-  flex: 1;
+  flex: 0 0 auto;
   max-width: 140px;
   opacity: 0.4;
   transition: opacity 0.3s;
@@ -6975,6 +6976,10 @@ tr.contacted {
 .stage-indicator {
   width: 48px;
   height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -6983,6 +6988,17 @@ tr.contacted {
   color: #9ca3af;
   transition: all 0.3s;
   border: 3px solid #e5e7eb;
+  flex-shrink: 0;
+  flex-grow: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+.stage-indicator svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .stage.completed .stage-indicator {
@@ -7002,6 +7018,16 @@ tr.contacted {
 .stage-indicator.large {
   width: 64px;
   height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  aspect-ratio: 1 / 1;
+}
+
+.stage-indicator.large svg {
+  width: 32px;
+  height: 32px;
 }
 
 .stage.final.completed .stage-indicator {
@@ -8243,19 +8269,79 @@ textarea.form-input {
   color: #6366f1;
 }
 
+/* Mobile Menu Styles */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.mobile-menu-toggle:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.mobile-close-button {
+  display: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.mobile-close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.mobile-sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+
   .owner-portal-sidebar {
     position: fixed;
     left: -220px;
     top: 0;
     bottom: 0;
     z-index: 1000;
-    transition: left 0.3s;
+    transition: left 0.3s ease-in-out;
+    box-shadow: none;
   }
 
-  .owner-portal-sidebar.open {
+  .owner-portal-sidebar.mobile-open {
     left: 0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-close-button {
+    display: block;
+  }
+
+  .mobile-sidebar-overlay {
+    display: block;
   }
 
   .status-cards {
@@ -8289,12 +8375,55 @@ textarea.form-input {
 }
 
 @media (max-width: 768px) {
+  /* Portal Header */
   .portal-header {
     padding: 12px 16px;
+    gap: 12px;
   }
 
+  .header-search {
+    flex: 1;
+    max-width: none;
+  }
+
+  .search-kbd {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .test-advance-button {
+    font-size: 12px;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+
+  .icon-button {
+    padding: 8px;
+  }
+
+  .profile-button {
+    padding: 4px;
+  }
+
+  .profile-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Portal Content */
   .portal-content {
     padding: 16px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .page-subtitle {
+    font-size: 14px;
   }
 
   .content-header {
@@ -8312,11 +8441,233 @@ textarea.form-input {
     flex: 1;
   }
 
+  /* Onboarding Stages */
+  .onboarding-stages-title {
+    font-size: 18px;
+    margin-bottom: 24px;
+  }
+
+  .onboarding-stages {
+    flex-direction: column;
+    padding: 0 8px;
+    gap: 0;
+  }
+
+  .stage {
+    flex-direction: row;
+    max-width: none;
+    width: 100%;
+    padding: 16px 8px;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .stage.final {
+    max-width: none;
+  }
+
+  .stage-connector {
+    width: 3px;
+    height: 32px;
+    background: #e5e7eb;
+    margin: 0 auto;
+    margin-left: 23px;
+  }
+
+  .stage.completed .stage-connector {
+    background: #10b981;
+  }
+
+  .stage-indicator {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .stage-indicator svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stage-indicator.large {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    max-width: 48px;
+    max-height: 48px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .stage-indicator.large svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .stage-content {
+    text-align: left;
+    flex: 1;
+  }
+
+  .stage-title {
+    font-size: 14px;
+  }
+
+  .stage-description {
+    font-size: 12px;
+  }
+
+  /* Application Status Card */
+  .application-status-card {
+    padding: 20px 16px;
+  }
+
+  .action-message {
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  /* Missing Fields Warning */
+  .missing-fields-warning {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  /* Section Containers */
+  .section-container {
+    padding: 20px 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .section-subtitle {
+    font-size: 11px;
+  }
+
+  /* Properties Grid */
+  .properties-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .property-card-portal {
+    padding: 16px;
+  }
+
+  .property-card-address {
+    font-size: 14px;
+  }
+
+  .property-card-specs {
+    font-size: 13px;
+  }
+
+  .property-rent-display {
+    font-size: 14px;
+  }
+
+  .property-missing-info {
+    font-size: 11px;
+  }
+
+  /* Documents Grid */
+  .documents-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .document-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .document-card-header {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .document-icon-wrapper {
+    padding: 12px;
+  }
+
+  .document-info {
+    width: 100%;
+  }
+
+  .document-name {
+    font-size: 14px;
+  }
+
+  .document-description {
+    font-size: 13px;
+  }
+
+  .document-meta {
+    font-size: 11px;
+  }
+
+  .document-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-document-secondary,
+  .btn-document-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Recent Activity */
+  .activity-list {
+    gap: 8px;
+  }
+
+  .activity-item {
+    padding: 12px;
+  }
+
+  .activity-title {
+    font-size: 13px;
+  }
+
+  .activity-time {
+    font-size: 12px;
+  }
+
+  /* Empty State */
+  .empty-state h3 {
+    font-size: 16px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  .empty-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Status Cards */
   .status-cards {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 
+  /* Portal Table */
   .portal-table-container {
     overflow-x: auto;
   }
@@ -8325,6 +8676,7 @@ textarea.form-input {
     min-width: 800px;
   }
 
+  /* Application Form */
   .application-header {
     flex-direction: column;
     gap: 16px;
@@ -8361,5 +8713,80 @@ textarea.form-input {
   .property-title {
     font-size: 16px;
     margin-bottom: 20px;
+  }
+
+  /* Back Button */
+  .back-button {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  /* Completion Modal */
+  .completion-modal {
+    width: 90%;
+    margin: 0 20px;
+    padding: 32px 24px;
+  }
+
+  .completion-icon svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .completion-title {
+    font-size: 24px;
+  }
+
+  .completion-message {
+    font-size: 15px;
+  }
+
+  .completion-submessage {
+    font-size: 13px;
+  }
+
+  .completion-button {
+    padding: 12px 24px;
+    font-size: 15px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .portal-header {
+    padding: 10px 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .portal-content {
+    padding: 12px;
+  }
+
+  .section-container {
+    padding: 16px 12px;
+  }
+
+  .onboarding-stages-title {
+    font-size: 16px;
+  }
+
+  .test-advance-button {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  .notification-badge {
+    width: 6px;
+    height: 6px;
+  }
+
+  .status-cards {
+    grid-template-columns: 1fr;
   }
 }
