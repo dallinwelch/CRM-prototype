@@ -33,8 +33,8 @@ export const mockLeads = [
     lastName: 'Martinez',
     email: 'sarah.martinez@email.com',
     phone: '(555) 401-2345',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Smith',
     createdAt: '2025-11-01T10:30:00Z',
     updatedAt: '2025-11-01T10:30:00Z',
@@ -128,8 +128,8 @@ export const mockLeads = [
     lastName: 'Chen',
     email: 'michael.chen@email.com',
     phone: '(555) 402-3456',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-11-02T14:15:00Z',
     updatedAt: '2025-11-02T14:15:00Z',
@@ -199,8 +199,8 @@ export const mockLeads = [
     lastName: 'Williams',
     email: 'jennifer.w@email.com',
     phone: '(555) 403-4567',
-    status: 'partial',
-    stage: 'Lead Created',
+    status: 'lead',
+    stage: 'Lead',
     assignedTo: null,
     createdAt: '2025-11-03T09:45:00Z',
     updatedAt: '2025-11-03T09:45:00Z',
@@ -244,7 +244,7 @@ export const mockLeads = [
     email: 'david.thompson@email.com',
     phone: '(555) 404-5678',
     status: 'lead',
-    stage: 'Lead Created',
+    stage: 'Lead',
     assignedTo: 'Sarah Smith',
     createdAt: '2025-11-03T11:20:00Z',
     updatedAt: '2025-11-03T11:20:00Z',
@@ -286,8 +286,8 @@ export const mockLeads = [
     lastName: 'Rodriguez',
     email: 'lisa.rodriguez@email.com',
     phone: '(555) 405-6789',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-11-04T13:00:00Z',
     updatedAt: '2025-11-04T13:00:00Z',
@@ -403,8 +403,8 @@ export const mockLeads = [
     lastName: 'Anderson',
     email: 'james.anderson@email.com',
     phone: '(555) 406-7890',
-    status: 'partial',
-    stage: 'Lead Created',
+    status: 'lead',
+    stage: 'Lead',
     assignedTo: 'Sarah Smith',
     createdAt: '2025-11-04T16:30:00Z',
     updatedAt: '2025-11-04T16:30:00Z',
@@ -460,8 +460,8 @@ export const mockLeads = [
     lastName: 'Davis',
     email: 'patricia.davis@email.com',
     phone: '(555) 407-8901',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-11-05T08:45:00Z',
     updatedAt: '2025-11-05T08:45:00Z',
@@ -517,8 +517,8 @@ export const mockLeads = [
     lastName: 'Johnson',
     email: 'emily.j@email.com',
     phone: '(555) 234-5678',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-22T09:15:00Z',
     updatedAt: '2025-10-23T15:30:00Z',
@@ -602,7 +602,7 @@ export const mockLeads = [
     email: 'rtaylor@email.com',
     phone: '(555) 678-9012',
     status: 'lead',
-    stage: 'Lead Created',
+    stage: 'Lead',
     assignedTo: null,
     createdAt: '2025-10-25T14:20:00Z',
     updatedAt: '2025-10-25T14:20:00Z',
@@ -643,8 +643,8 @@ export const mockLeads = [
     lastName: 'Anderson',
     email: 'lisa.anderson@email.com',
     phone: '(555) 789-0123',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-26T10:45:00Z',
     updatedAt: '2025-10-28T11:15:00Z',
@@ -710,8 +710,8 @@ export const mockLeads = [
     lastName: 'Wilson',
     email: 'jwilson@email.com',
     phone: '(555) 890-1234',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-27T08:00:00Z',
     updatedAt: '2025-10-29T16:45:00Z',
@@ -802,7 +802,7 @@ export const mockLeads = [
     email: 'pmoore@email.com',
     phone: '(555) 901-2345',
     status: 'lead',
-    stage: 'Lead Created',
+    stage: 'Lead',
     assignedTo: null,
     createdAt: '2025-10-23T16:30:00Z',
     updatedAt: '2025-10-23T16:30:00Z',
@@ -838,7 +838,7 @@ export const mockLeads = [
     email: 'cbrown@email.com',
     phone: '(800) 555-0100', // Toll-free number - cannot text
     status: 'lead',
-    stage: 'Lead Created',
+    stage: 'Lead',
     assignedTo: null,
     createdAt: '2025-10-27T11:15:00Z',
     updatedAt: '2025-10-27T11:15:00Z',
@@ -875,8 +875,8 @@ export const mockLeads = [
     lastName: 'Davis',
     email: 'mdavis@email.com',
     phone: '(555) 123-7890',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-21T13:00:00Z',
     updatedAt: '2025-10-23T14:20:00Z',
@@ -954,7 +954,7 @@ export const mockLeads = [
     email: 'dgarcia@email.com',
     phone: '(555) 234-8901',
     status: 'lead',
-    stage: 'Lead Created',
+    stage: 'Lead',
     assignedTo: null,
     createdAt: '2025-10-28T09:30:00Z',
     updatedAt: '2025-10-28T09:30:00Z',
@@ -1601,8 +1601,8 @@ export const mockLeads = [
     lastName: 'Walker',
     email: 'mwalker@email.com',
     phone: '(555) 012-6789',
-    status: 'awaiting approval',
-    stage: 'Awaiting Approval',
+    status: 'under review',
+    stage: 'Under Review',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-17T14:00:00Z',
     updatedAt: '2025-10-29T18:00:00Z',
@@ -1702,8 +1702,8 @@ export const mockLeads = [
     lastName: 'Hall',
     email: 'dhall@email.com',
     phone: '(555) 123-7890',
-    status: 'awaiting approval',
-    stage: 'Awaiting Approval',
+    status: 'under review',
+    stage: 'Under Review',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-19T08:00:00Z',
     updatedAt: '2025-10-30T14:30:00Z',
@@ -1803,8 +1803,8 @@ export const mockLeads = [
     lastName: 'Young',
     email: 'kyoung@email.com',
     phone: '(555) 234-8901',
-    status: 'awaiting approval',
-    stage: 'Awaiting Approval',
+    status: 'under review',
+    stage: 'Under Review',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-21T12:00:00Z',
     updatedAt: '2025-10-31T10:15:00Z',
@@ -1908,8 +1908,8 @@ export const mockLeads = [
     lastName: 'Chen',
     email: 'mchen@email.com',
     phone: '(555) 345-6789',
-    status: 'awaiting approval',
-    stage: 'Awaiting Approval',
+    status: 'under review',
+    stage: 'Under Review',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-15T11:00:00Z',
     updatedAt: '2025-10-23T16:00:00Z',
@@ -2038,8 +2038,8 @@ export const mockLeads = [
     lastName: 'King',
     email: 'jking@email.com',
     phone: '(555) 345-9012',
-    status: 'awaiting approval',
-    stage: 'Awaiting Approval',
+    status: 'under review',
+    stage: 'Under Review',
     assignedTo: 'Mike Davis',
     createdAt: '2025-10-14T10:00:00Z',
     updatedAt: '2025-10-30T16:45:00Z',
@@ -2141,7 +2141,7 @@ export const mockLeads = [
     lastName: 'Wright',
     email: 'bwright@email.com',
     phone: '(555) 456-0123',
-    status: 'approved', // Back to applicant status after changes requested
+    status: 'onboarding', // Back to applicant status after changes requested
     stage: 'Onboarding',
     assignedTo: 'Jessica Martinez',
     createdAt: '2025-10-12T15:00:00Z',
@@ -2235,8 +2235,8 @@ export const mockLeads = [
     lastName: 'Lopez',
     email: 'slopez@email.com',
     phone: '(555) 567-1234',
-    status: 'awaiting approval',
-    stage: 'Awaiting Approval',
+    status: 'under review',
+    stage: 'Under Review',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-10-13T11:00:00Z',
     updatedAt: '2025-10-31T13:20:00Z',
@@ -2981,8 +2981,8 @@ export const mockLeads = [
     lastName: 'Smith',
     email: 'karen.smith@email.com',
     phone: '(555) 430-1111',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-11-09T14:30:00Z',
     updatedAt: '2025-11-09T14:30:00Z',
@@ -3000,8 +3000,8 @@ export const mockLeads = [
     lastName: 'Wilson',
     email: 'david.wilson@email.com',
     phone: '(555) 430-2222',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-11-08T10:15:00Z',
     updatedAt: '2025-11-08T10:15:00Z',
@@ -3019,8 +3019,8 @@ export const mockLeads = [
     lastName: 'Taylor',
     email: 'lisa.taylor@email.com',
     phone: '(555) 430-3333',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-11-07T16:45:00Z',
     updatedAt: '2025-11-07T16:45:00Z',
@@ -3038,8 +3038,8 @@ export const mockLeads = [
     lastName: 'Brown',
     email: 'robert.brown@email.com',
     phone: '(555) 430-4444',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-11-06T11:20:00Z',
     updatedAt: '2025-11-06T11:20:00Z',
@@ -3057,8 +3057,8 @@ export const mockLeads = [
     lastName: 'Miller',
     email: 'nancy.miller@email.com',
     phone: '(555) 430-5555',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-11-05T09:00:00Z',
     updatedAt: '2025-11-05T09:00:00Z',
@@ -3076,8 +3076,8 @@ export const mockLeads = [
     lastName: 'Garcia',
     email: 'thomas.garcia@email.com',
     phone: '(555) 430-6666',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Mike Davis',
     createdAt: '2025-11-04T15:30:00Z',
     updatedAt: '2025-11-04T15:30:00Z',
@@ -3095,8 +3095,8 @@ export const mockLeads = [
     lastName: 'Martinez',
     email: 'patricia.martinez@email.com',
     phone: '(555) 430-7777',
-    status: 'qualified',
-    stage: 'Qualified',
+    status: 'application',
+    stage: 'Application',
     assignedTo: 'Sarah Johnson',
     createdAt: '2025-11-03T13:45:00Z',
     updatedAt: '2025-11-03T13:45:00Z',
@@ -3411,179 +3411,6 @@ Best regards,
   ]
 };
 
-// Owner Lead Questionnaire - NOTE: Cannot have required fields per PRD
-export const mockLeadQuestionnaireForm = {
-  id: 'lead-questionnaire',
-  name: 'Owner Lead Questionnaire',
-  description: 'Qualifying questions for new owner leads',
-  version: '2.1',
-  type: 'lead-questionnaire',
-  sections: [
-    {
-      id: 'section-basic',
-      title: 'Basic Information',
-      order: 1,
-      fields: [
-        {
-          id: 'field-firstname',
-          label: 'First Name',
-          type: 'text',
-          required: false,
-          order: 1,
-          helpText: ''
-        },
-        {
-          id: 'field-lastname',
-          label: 'Last Name',
-          type: 'text',
-          required: false,
-          order: 2,
-          helpText: ''
-        },
-        {
-          id: 'field-email',
-          label: 'Email Address',
-          type: 'email',
-          required: false,
-          order: 3,
-          helpText: ''
-        },
-        {
-          id: 'field-phone',
-          label: 'Phone Number',
-          type: 'phone',
-          required: false,
-          order: 4,
-          helpText: ''
-        }
-      ]
-    },
-    {
-      id: 'section-interest',
-      title: 'Management Interest',
-      order: 2,
-      fields: [
-        {
-          id: 'field-num-properties',
-          label: 'How many properties do you want us to manage?',
-          type: 'number',
-          required: false,
-          order: 1,
-          helpText: ''
-        },
-        {
-          id: 'field-timeline',
-          label: 'When would you like to start management?',
-          type: 'select',
-          required: false,
-          order: 2,
-          options: ['Immediately', 'Within 1 month', '1-3 months', '3-6 months', 'Not sure yet'],
-          helpText: ''
-        },
-        {
-          id: 'field-experience',
-          label: 'Have you worked with a property manager before?',
-          type: 'select',
-          required: false,
-          order: 3,
-          options: ['Yes', 'No'],
-          helpText: ''
-        },
-        {
-          id: 'field-specific-needs',
-          label: 'What specific services are you looking for?',
-          type: 'select',
-          required: false,
-          order: 4,
-          options: [
-            'Full property management',
-            'Tenant placement only',
-            'Maintenance coordination',
-            'Lease renewals',
-            'Financial reporting',
-            'Other (specify below)'
-          ],
-          helpText: 'Select the main service you need'
-        },
-        {
-          id: 'field-current-situation',
-          label: 'Current Situation',
-          type: 'select',
-          required: false,
-          order: 5,
-          options: [
-            'Currently self-managing',
-            'Switching from another PM company',
-            'New property owner',
-            'Property currently vacant',
-            'Have existing tenants'
-          ],
-          helpText: 'This helps us understand your needs better'
-        },
-        {
-          id: 'field-additional-info',
-          label: 'Specific Questions or Additional Details',
-          type: 'textarea',
-          required: false,
-          order: 6,
-          helpText: 'Please be specific - e.g., "Need help finding quality tenants for my 3-bed house" or "Current PM not handling maintenance well"',
-          placeholder: 'Tell us more about what you\'re looking for...'
-        }
-      ]
-    },
-    {
-      id: 'section-property',
-      title: 'Property Details',
-      order: 3,
-      repeatable: true,
-      fields: [
-        {
-          id: 'field-address',
-          label: 'Property Address',
-          type: 'text',
-          required: false,
-          order: 1,
-          helpText: 'Full street address of the property'
-        },
-        {
-          id: 'field-property-type',
-          label: 'Property Type',
-          type: 'select',
-          required: false,
-          order: 2,
-          options: ['Single Family Home', 'Condo', 'Townhouse', 'Multi-Family', 'Other'],
-          helpText: ''
-        },
-        {
-          id: 'field-bedrooms',
-          label: 'Number of Bedrooms',
-          type: 'number',
-          required: false,
-          order: 3,
-          helpText: ''
-        },
-        {
-          id: 'field-bathrooms',
-          label: 'Number of Bathrooms',
-          type: 'number',
-          required: false,
-          order: 4,
-          helpText: ''
-        },
-        {
-          id: 'field-currently-rented',
-          label: 'Is the property currently rented?',
-          type: 'select',
-          required: false,
-          order: 5,
-          options: ['Yes', 'No', 'Vacant'],
-          helpText: ''
-        }
-      ]
-    }
-  ]
-};
-
 // Owner Onboarding Application - CAN have required fields
 export const mockOnboardingForm = {
   id: 'onboarding-application',
@@ -3773,48 +3600,7 @@ export const mockOnboardingForm = {
       ]
     }
   ],
-  onboardingSections: [ // Section 4: Completed after application approval
-    {
-      id: 'section-documents',
-      title: 'Documents & Signatures',
-      order: 4,
-      stage: 'onboarding',
-      fields: [
-        {
-          id: 'field-management-agreement',
-          label: 'Property Management Agreement',
-          type: 'checkbox',
-          required: true,
-          order: 1,
-          helpText: 'I have read and agree to the Property Management Agreement'
-        },
-        {
-          id: 'field-w9-upload',
-          label: 'W9 Tax Form',
-          type: 'checkbox',
-          required: true,
-          order: 2,
-          helpText: 'I have completed and uploaded my W9 form'
-        },
-        {
-          id: 'field-signature',
-          label: 'Electronic Signature',
-          type: 'text',
-          required: true,
-          order: 3,
-          helpText: 'Type your full legal name'
-        },
-        {
-          id: 'field-signature-date',
-          label: 'Signature Date',
-          type: 'date',
-          required: true,
-          order: 4,
-          helpText: ''
-        }
-      ]
-    }
-  ],
+  onboardingSections: [],
   // Helper: All sections combined (for backward compatibility)
   get sections() {
     return [...this.applicationSections, ...this.onboardingSections];

@@ -123,7 +123,7 @@ const NewLeadModal = ({ isOpen, onClose, onSave }) => {
       lastName: formData.lastName.trim(),
       email: formData.email.trim(),
       phone: formData.phone.trim(),
-      status: formData.properties.length > 0 ? 'qualified' : 'partial',
+      status: formData.properties.length > 0 ? 'application' : 'lead',
       stage: 'Lead Created',
       assignedTo: formData.assignedTo,
       createdAt: new Date().toISOString(),

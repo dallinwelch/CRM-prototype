@@ -8,7 +8,7 @@ const OwnerApplicationForm = ({ lead, onSave, onSubmitForReview }) => {
     'section-owner': true,
     'section-property': true,
     'section-preferences': true,
-    'section-documents': false
+    'section-documents': true
   });
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -250,7 +250,7 @@ const OwnerApplicationForm = ({ lead, onSave, onSubmitForReview }) => {
   );
 
   const canSubmit = overallProgress === 100;
-  const isAwaitingApproval = lead.status === 'awaiting approval' && lead.onboardingCompletion === 100;
+  const isAwaitingApproval = lead.status === 'under review' && lead.onboardingCompletion === 100;
 
   return (
     <div className="owner-application-form">
@@ -320,11 +320,11 @@ const OwnerApplicationForm = ({ lead, onSave, onSubmitForReview }) => {
         
         <button
           onClick={handleSubmit}
-          disabled={!canSubmit || isAwaitingApproval}
+          disabled={false}
           className="btn btn-primary"
         >
           <Send size={18} />
-          Submit for Review
+          Submit Application
         </button>
       </div>
 

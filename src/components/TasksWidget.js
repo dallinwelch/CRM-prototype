@@ -24,7 +24,7 @@ import {
   Edit,
   Plus
 } from 'lucide-react';
-import { mockTasks, currentUser, mockLeads, mockLeadQuestionnaireForm, mockUsers } from '../mockData';
+import { mockTasks, currentUser, mockLeads, mockUsers } from '../mockData';
 
 const TasksWidget = ({ onNavigateToLead }) => {
   const [activeTab, setActiveTab] = useState('follow-ups'); // 'follow-ups' or 'approvals'
@@ -289,11 +289,7 @@ const TasksWidget = ({ onNavigateToLead }) => {
   };
 
   const getFormFieldLabel = (fieldId) => {
-    // Find the field label from the form structure
-    for (const section of mockLeadQuestionnaireForm.sections) {
-      const field = section.fields.find(f => f.id === fieldId);
-      if (field) return field.label;
-    }
+    // Lead questionnaire form has been removed - return field ID as fallback
     return fieldId;
   };
 
@@ -1105,49 +1101,22 @@ const TasksWidget = ({ onNavigateToLead }) => {
                            </div>
                            <div className="form-answers-list">
                              {isEditingLead ? (
-                               // Show all form fields when editing
-                               mockLeadQuestionnaireForm.sections.map(section => 
-                                 section.fields.map(field => (
-                                   <div key={field.id} className="form-answer-item">
-                                     <div className="form-answer-label">{field.label}</div>
-                                     {field.type === 'textarea' ? (
-                                       <textarea
-                                         className="form-input form-input-sm"
-                                         value={displayData.formAnswers?.[field.id] || ''}
-                                         onChange={(e) => updateEditedFormAnswer(field.id, e.target.value)}
-                                         rows={2}
-                                       />
-                                     ) : field.type === 'select' ? (
-                                       <select
-                                         className="form-select form-input-sm"
-                                         value={displayData.formAnswers?.[field.id] || ''}
-                                         onChange={(e) => updateEditedFormAnswer(field.id, e.target.value)}
-                                       >
-                                         <option value="">Select...</option>
-                                         {field.options?.map(opt => (
-                                           <option key={opt} value={opt}>{opt}</option>
-                                         ))}
-                                       </select>
-                                     ) : (
-                                       <input
-                                         type={field.type}
-                                         className="form-input form-input-sm"
-                                         value={displayData.formAnswers?.[field.id] || ''}
-                                         onChange={(e) => updateEditedFormAnswer(field.id, e.target.value)}
-                                       />
-                                     )}
-                                   </div>
-                                 ))
-                               )
-                             ) : (
-                               // Show only filled answers when not editing
-                               lead.formAnswers && Object.entries(lead.formAnswers).map(([fieldId, value]) => (
+                               // Lead questionnaire form has been removed
+                               <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                                 Lead questionnaire has been removed. Use the application form instead.
+                               </div>
+                             ) : (displayData.formAnswers && Object.keys(displayData.formAnswers).length > 0 ? (
+                               Object.entries(displayData.formAnswers).map(([fieldId, value]) => value && (
                                  <div key={fieldId} className="form-answer-item">
                                    <div className="form-answer-label">{getFormFieldLabel(fieldId)}</div>
                                    <div className="form-answer-value">{value}</div>
                                  </div>
                                ))
-                             )}
+                             ) : (
+                               <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+                                 No form answers available
+                               </div>
+                             ))}
                            </div>
                          </div>
                        )}

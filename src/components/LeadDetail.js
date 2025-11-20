@@ -48,8 +48,8 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
   const lead = leads.find(l => l.id === leadId);
   
   // Determine if this is a lead or applicant
-  // Show as applicant UNLESS status is 'partial' (lead) or 'qualified' (qualified lead)
-  const isApplicant = lead ? (lead.status !== 'partial' && lead.status !== 'qualified') : false;
+  // Show as applicant UNLESS status is 'lead'
+  const isApplicant = lead ? (lead.status !== 'lead') : false;
   
   // Default Lead Info: collapsed for applicants, expanded for leads
   const [isLeadInfoExpanded, setIsLeadInfoExpanded] = useState(!isApplicant);
@@ -493,10 +493,12 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                   color: getStatusColor(lead.status)
                 }}
               >
-                {lead.status === 'partial' ? 'Partial Lead' : 
-                 lead.status === 'qualified' ? 'Qualified Lead' : 
-                 lead.status === 'approved' ? 'Approved' : 
-                 lead.status === 'denied' ? 'Denied' : 
+                {lead.status === 'lead' ? 'Lead' : 
+                 lead.status === 'application' ? 'Application' : 
+                 lead.status === 'sign docs' ? 'Sign Documents' :
+                 lead.status === 'under review' ? 'Under Review' :
+                 lead.status === 'onboarding' ? 'Onboarding' :
+                 lead.status === 'completed' ? 'Completed' :
                  lead.status === 'archived' ? 'Archived' : 
                  lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
               </span>
@@ -518,67 +520,9 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
 
         <div className="detail-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* QUICK ACTION BUTTONS - Conditional based on stage */}
-          
-          {/* LEAD STAGE - Approve & Deny */}
-          {(lead.status === 'partial' || lead.status === 'qualified') && currentUser.permissions.approveOwnerLeads && (
-            <>
-            <button 
-              className="btn btn-success"
-                onClick={() => setShowApprovalModal(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '600'
-              }}
-              >
-                <CheckCircle size={18} />
-                Approve & Send Application
-              </button>
-              <button 
-                className="btn btn-danger"
-                onClick={() => setShowDenyModal(true)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '600'
-              }}
-            >
-                <XCircle size={18} />
-                Deny Lead
-            </button>
-            </>
-          )}
-
-          {/* APPLICATION STAGE - Submit for Approval (always show, disabled until all 3 application sections complete) */}
-          {(lead.status === 'approved' || lead.status === 'application') && !lead.applicationStatus && (
-            <button 
-              className="btn btn-success"
-              onClick={() => isApplicationComplete() && setShowSubmitForApprovalModal(true)}
-              disabled={!isApplicationComplete()}
-        style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                fontSize: '14px',
-                fontWeight: '600',
-                opacity: isApplicationComplete() ? 1 : 0.5,
-                cursor: isApplicationComplete() ? 'pointer' : 'not-allowed'
-              }}
-            >
-              <Send size={18} />
-              Submit for Approval
-        </button>
-          )}
 
           {/* UNDER REVIEW STAGE - Approve, Request Changes, & Deny */}
-          {lead.applicationStatus === 'pending_review' && currentUser.permissions.approveOwnerOnboarding && (
+          {lead.status === 'under review' && currentUser.permissions.approveOwnerLeads && (
             <>
               <button 
                 className="btn btn-success"
@@ -715,8 +659,8 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
                           }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                {/* LEAD/QUALIFIED LEAD STAGE */}
-                {(lead.status === 'partial' || lead.status === 'qualified') && (
+                {/* LEAD STAGE */}
+                {lead.status === 'lead' && (
                   <>
                           <button
                             className="dropdown-item"

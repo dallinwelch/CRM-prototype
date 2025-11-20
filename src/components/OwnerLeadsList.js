@@ -15,14 +15,17 @@ import {
   AlertCircle,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  ChevronDown
 } from 'lucide-react';
-import { currentUser, mockLeadQuestionnaireForm, mockOnboardingForm } from '../mockData';
+import { currentUser, mockOnboardingForm } from '../mockData';
 
 const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLeads, setSelectedLeads] = useState(new Set());
   const [statusFilter, setStatusFilter] = useState(filterStatus || 'all');
+  const [assignedToFilter, setAssignedToFilter] = useState(new Set(['all'])); // Now a Set for multiple selections
+  const [showAssignedFilter, setShowAssignedFilter] = useState(false);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -101,6 +104,17 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
     }
   };
 
+  // Get unique list of people assigned to leads
+  const getAssignedToOptions = () => {
+    const assignedSet = new Set();
+    leads.forEach(lead => {
+      if (lead.assignedTo) {
+        assignedSet.add(lead.assignedTo);
+      }
+    });
+    return Array.from(assignedSet).sort();
+  };
+
   // Filter and sort leads
   const getFilteredLeads = () => {
     let filtered = leads;
@@ -109,17 +123,25 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
     if (statusFilter !== 'all') {
       if (statusFilter === 'archived') {
         filtered = filtered.filter(l => l.status === 'archived' || l.status === 'completed');
-      } else if (statusFilter === 'onboarding') {
-        filtered = filtered.filter(l => l.status === 'onboarding');
-      } else if (statusFilter === 'lead') {
-        // Lead filter includes both 'lead' and 'qualified' status
-        filtered = filtered.filter(l => l.status === 'lead' || l.status === 'qualified');
+      } else if (statusFilter === 'application') {
+        // Include both 'application' and 'sign docs' in application filter
+        filtered = filtered.filter(l => l.status === 'application' || l.status === 'sign docs');
       } else {
         filtered = filtered.filter(l => l.status === statusFilter);
       }
     } else {
       // Don't show archived or completed in "all" view
       filtered = filtered.filter(l => l.status !== 'archived' && l.status !== 'completed');
+    }
+
+    // Assigned To filter (multi-select)
+    if (!assignedToFilter.has('all')) {
+      filtered = filtered.filter(l => {
+        if (assignedToFilter.has('unassigned') && !l.assignedTo) return true;
+        if (assignedToFilter.has('me') && l.assignedTo === currentUser.name) return true;
+        if (assignedToFilter.has(l.assignedTo)) return true;
+        return false;
+      });
     }
 
     // Search filter
@@ -192,7 +214,7 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
       all: 0,
       lead: 0,
       application: 0,
-      'awaiting approval': 0,
+      'under review': 0,
       onboarding: 0,
       archived: 0
     };
@@ -203,19 +225,19 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
         counts.all++;
       }
 
-      // Count for "Lead" - includes both 'lead' and 'qualified' status
-      if (lead.status === 'lead' || lead.status === 'qualified') {
+      // Count for "Lead"
+      if (lead.status === 'lead') {
         counts.lead++;
       }
 
       // Count for "Application"
-      if (lead.status === 'application') {
+      if (lead.status === 'application' || lead.status === 'sign docs') {
         counts.application++;
       }
 
-      // Count for "Awaiting Approval"
-      if (lead.status === 'awaiting approval') {
-        counts['awaiting approval']++;
+      // Count for "Under Review"
+      if (lead.status === 'under review') {
+        counts['under review']++;
       }
 
       // Count for "Onboarding"
@@ -302,30 +324,28 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
       displayIcon = CheckCircle;
       showCompletion = false;
     }
-    // If status is 'awaiting approval'
-    else if (lead.status === 'awaiting approval') {
-      displayLabel = 'Awaiting Approval';
+    // If status is 'under review'
+    else if (lead.status === 'under review') {
+      displayLabel = 'Under Review';
       displayColor = '#8b5cf6';
       displayIcon = UserCheck;
       showCompletion = false;
     }
+    // If status is 'sign docs'
+    else if (lead.status === 'sign docs') {
+      displayLabel = 'Sign Docs';
+      displayColor = '#f59e0b';
+      displayIcon = Clock;
+      showCompletion = false;
+    }
     // If status is 'application' (actively working on application)
     else if (lead.status === 'application') {
-      // Check if they've completed all sections (4/4)
-      if (completion && completion.completed === completion.total) {
-        displayLabel = 'Awaiting Approval';
-        displayColor = '#8b5cf6';
-        displayIcon = UserCheck;
-        showCompletion = false; // Don't show (4/4) for awaiting approval
-      } else {
-        // Still working on application (could be 0/4, 1/4, 2/4, 3/4)
-        displayLabel = 'Application';
-        displayColor = '#3b82f6';
-        displayIcon = Clock;
-        showCompletion = true; // Show (X/4)
-      }
+      displayLabel = 'Application';
+      displayColor = '#3b82f6';
+      displayIcon = Clock;
+      showCompletion = true; // Show (X/4)
     }
-    // Everything else is a Lead (lead, qualified, partial, etc.)
+    // Everything else is a Lead
     else {
       displayLabel = 'Lead';
       displayColor = '#f59e0b';
@@ -443,6 +463,185 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
           />
         </div>
 
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowAssignedFilter(!showAssignedFilter)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 12px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              backgroundColor: assignedToFilter.has('all') ? 'white' : '#eff6ff',
+              cursor: 'pointer',
+              minWidth: '150px',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Filter size={18} style={{ color: '#6b7280' }} />
+              <span>
+                {assignedToFilter.has('all') 
+                  ? 'All Assigned' 
+                  : `${assignedToFilter.size} selected`}
+              </span>
+            </div>
+            <ChevronDown size={16} style={{ color: '#6b7280' }} />
+          </button>
+
+          {showAssignedFilter && (
+            <>
+              <div 
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 999
+                }}
+                onClick={() => setShowAssignedFilter(false)}
+              />
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                marginTop: '4px',
+                backgroundColor: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                minWidth: '200px',
+                zIndex: 1000,
+                padding: '8px'
+              }}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <input
+                    type="checkbox"
+                    checked={assignedToFilter.has('all')}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setAssignedToFilter(new Set(['all']));
+                      } else {
+                        setAssignedToFilter(new Set());
+                      }
+                    }}
+                  />
+                  All Assigned
+                </label>
+                <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }} />
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <input
+                    type="checkbox"
+                    checked={assignedToFilter.has('me')}
+                    onChange={(e) => {
+                      const newFilter = new Set(assignedToFilter);
+                      newFilter.delete('all');
+                      if (e.target.checked) {
+                        newFilter.add('me');
+                      } else {
+                        newFilter.delete('me');
+                      }
+                      if (newFilter.size === 0) newFilter.add('all');
+                      setAssignedToFilter(newFilter);
+                    }}
+                  />
+                  Assigned to Me
+                </label>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <input
+                    type="checkbox"
+                    checked={assignedToFilter.has('unassigned')}
+                    onChange={(e) => {
+                      const newFilter = new Set(assignedToFilter);
+                      newFilter.delete('all');
+                      if (e.target.checked) {
+                        newFilter.add('unassigned');
+                      } else {
+                        newFilter.delete('unassigned');
+                      }
+                      if (newFilter.size === 0) newFilter.add('all');
+                      setAssignedToFilter(newFilter);
+                    }}
+                  />
+                  Unassigned
+                </label>
+                {getAssignedToOptions().length > 0 && (
+                  <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }} />
+                )}
+                {getAssignedToOptions().map(person => (
+                  <label 
+                    key={person}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px',
+                      cursor: 'pointer',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={assignedToFilter.has(person)}
+                      onChange={(e) => {
+                        const newFilter = new Set(assignedToFilter);
+                        newFilter.delete('all');
+                        if (e.target.checked) {
+                          newFilter.add(person);
+                        } else {
+                          newFilter.delete(person);
+                        }
+                        if (newFilter.size === 0) newFilter.add('all');
+                        setAssignedToFilter(newFilter);
+                      }}
+                    />
+                    {person}
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="filter-tabs">
           <button
             className={`filter-tab ${statusFilter === 'all' ? 'active' : ''}`}
@@ -463,10 +662,10 @@ const OwnerLeadsList = ({ leads, filterStatus, onNavigateToLead, onCreateLead })
             Application <span className="filter-count">{formatCount(filterCounts.application)}</span>
           </button>
           <button
-            className={`filter-tab ${statusFilter === 'awaiting approval' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('awaiting approval')}
+            className={`filter-tab ${statusFilter === 'under review' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('under review')}
           >
-            Awaiting Approval <span className="filter-count">{formatCount(filterCounts['awaiting approval'])}</span>
+            Under Review <span className="filter-count">{formatCount(filterCounts['under review'])}</span>
           </button>
           <button
             className={`filter-tab ${statusFilter === 'onboarding' ? 'active' : ''}`}

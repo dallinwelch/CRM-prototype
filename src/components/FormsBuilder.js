@@ -19,7 +19,7 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
-import { mockLeadQuestionnaireForm, mockOnboardingForm } from '../mockData';
+import { mockOnboardingForm } from '../mockData';
 import { customPropertyFields } from './CRMSettings';
 
 const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
@@ -32,9 +32,7 @@ const FormsBuilder = ({ formType = 'lead-questionnaire', onBack }) => {
 
   // Load form data on mount
   useEffect(() => {
-    const formData = formType === 'lead-questionnaire' 
-      ? JSON.parse(JSON.stringify(mockLeadQuestionnaireForm))
-      : JSON.parse(JSON.stringify(mockOnboardingForm));
+    const formData = JSON.parse(JSON.stringify(mockOnboardingForm));
     
     setForm(formData);
     if (formData.sections.length > 0) {

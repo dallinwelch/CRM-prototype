@@ -34,11 +34,33 @@ import companyLogo from '../assets/companyLogo.png';
 const OwnerPortal = () => {
   const [activeNav, setActiveNav] = useState('properties');
   const [selectedProperty, setSelectedProperty] = useState('all');
-  const [currentView, setCurrentView] = useState('dashboard'); // dashboard, application-form
-  const [selectedLead, setSelectedLead] = useState(null);
-  const [testStage, setTestStage] = useState(0); // 0: awaiting approval, 1: signed agreement, 2: property setup, 3: onboarded
+  const [testStage, setTestStage] = useState(0); // 0: application, 1: sign docs, 2: under review, 3: onboarding, 4: completed
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Start with application form if testStage is 0 (application), otherwise show dashboard
+  const [currentView, setCurrentView] = useState('application-form');
+  
+  // Determine initial view based on status
+  const getOwnerStatus = () => {
+    switch(testStage) {
+      case 0:
+        return { status: 'application', onboardingCompletion: 50 };
+      case 1:
+        return { status: 'sign docs', onboardingCompletion: 70 };
+      case 2:
+        return { status: 'under review', onboardingCompletion: 80 };
+      case 3:
+        return { status: 'onboarding', onboardingCompletion: 90 };
+      case 4:
+        return { status: 'completed', onboardingCompletion: 100 };
+      default:
+        return { status: 'application', onboardingCompletion: 50 };
+    }
+  };
+  
+  const ownerStatus = getOwnerStatus();
+  const [selectedLead, setSelectedLead] = useState(null);
   const [properties, setProperties] = useState([
     {
       id: 'prop-002',
@@ -103,27 +125,12 @@ const OwnerPortal = () => {
     }
   ]);
 
-  // Map test stage to owner status and completion
-  const getOwnerStatus = () => {
-    switch(testStage) {
-      case 0:
-        return { status: 'awaiting approval', onboardingCompletion: 75 };
-      case 1:
-        return { status: 'onboarding', onboardingCompletion: 75 };
-      case 2:
-        return { status: 'onboarding', onboardingCompletion: 90 };
-      case 3:
-        return { status: 'completed', onboardingCompletion: 100 };
-      default:
-        return { status: 'awaiting approval', onboardingCompletion: 75 };
-    }
-  };
 
   const handleTestAdvance = () => {
-    if (testStage < 3) {
+    if (testStage < 4) {
       const newStage = testStage + 1;
       setTestStage(newStage);
-      if (newStage === 3) {
+      if (newStage === 4) {
         // Activate all properties when onboarding is complete
         setProperties(properties.map(prop => ({ ...prop, status: 'active' })));
         // Add onboarding completion to recent activity
@@ -218,8 +225,6 @@ const OwnerPortal = () => {
     }
   };
 
-  const ownerStatus = getOwnerStatus();
-
   // Function to check missing property setup fields
   const getMissingPropertyFields = (propertyIndex) => {
     const optionalFields = [
@@ -249,8 +254,8 @@ const OwnerPortal = () => {
     lastName: 'Chen',
     email: 'mchen@email.com',
     phone: '(555) 345-6789',
-    status: ownerStatus.status, // Can be: qualified, application, awaiting approval, onboarding, completed
-    stage: 'Awaiting Approval',
+    status: ownerStatus.status, // Can be: application, sign docs, under review, onboarding, completed
+    stage: 'Application',
     onboardingCompletion: ownerStatus.onboardingCompletion, // Progress percentage
     properties: properties, // Use state for dynamic property updates
     onboardingAnswers: {
@@ -290,7 +295,8 @@ const OwnerPortal = () => {
   const handleSubmitForReview = (formData) => {
     console.log('Submitting application for review:', formData);
     // In real app, this would call an API to submit for manager review
-    alert('Application submitted for review! Our team will get back to you soon.');
+    // Move to next stage: sign docs
+    setTestStage(1); // Change status to 'sign docs'
     setCurrentView('dashboard');
   };
 
@@ -305,7 +311,19 @@ const OwnerPortal = () => {
       doc.id === docId ? { ...doc, status: 'signed' } : doc
     );
     setDocuments(updatedDocs);
-    alert('Document signed successfully! It will now appear in your Files.');
+    
+    // Check if all documents are now signed
+    const allSigned = updatedDocs.every(doc => doc.status === 'signed');
+    
+    if (allSigned) {
+      // Automatically move to "under review" status
+      setTimeout(() => {
+        setTestStage(2);
+        alert('All documents signed! Your application is now under review. Our team will get back to you soon.');
+      }, 500);
+    } else {
+      alert('Document signed successfully! It will now appear in your Files.');
+    }
   };
 
   const handleViewDocument = (docId) => {
@@ -325,13 +343,6 @@ const OwnerPortal = () => {
 
   const getStatusInfo = () => {
     switch (currentOwner.status) {
-      case 'qualified':
-        return {
-          title: 'Ready to Apply',
-          description: 'Start your owner application',
-          icon: FileText,
-          color: 'blue'
-        };
       case 'application':
         return {
           title: 'Application In Progress',
@@ -339,9 +350,16 @@ const OwnerPortal = () => {
           icon: Clock,
           color: 'orange'
         };
-      case 'awaiting approval':
+      case 'sign docs':
         return {
-          title: 'Awaiting Approval',
+          title: 'Sign Documents',
+          description: 'Review and sign required documents',
+          icon: FileText,
+          color: 'blue'
+        };
+      case 'under review':
+        return {
+          title: 'Under Review',
           description: 'Your application is being reviewed',
           icon: AlertCircle,
           color: 'purple'
@@ -350,6 +368,13 @@ const OwnerPortal = () => {
         return {
           title: 'Onboarding',
           description: 'Complete final setup steps',
+          icon: CheckCircle,
+          color: 'green'
+        };
+      case 'completed':
+        return {
+          title: 'Completed',
+          description: 'All set!',
           icon: CheckCircle,
           color: 'green'
         };
@@ -469,10 +494,11 @@ const OwnerPortal = () => {
 
           <div className="header-actions">
             <button className="test-advance-button" onClick={handleTestAdvance}>
-              {testStage === 0 && 'Test Approve'}
-              {testStage === 1 && 'Continue to Property Setup'}
-              {testStage === 2 && 'Complete Onboarding'}
-              {testStage === 3 && 'Reset to Start'}
+              {testStage === 0 && 'Submit Application'}
+              {testStage === 1 && 'Sign Documents'}
+              {testStage === 2 && 'Approve Application'}
+              {testStage === 3 && 'Complete Onboarding'}
+              {testStage === 4 && 'Reset to Start'}
             </button>
             <button className="icon-button">
               <Bell size={20} />
@@ -502,53 +528,57 @@ const OwnerPortal = () => {
                 <h2 className="onboarding-stages-title">Your Onboarding Progress</h2>
                 
                 <div className="onboarding-stages">
-                  <div className={`stage ${currentOwner.status === 'qualified' || currentOwner.status === 'application' || currentOwner.status === 'awaiting approval' || currentOwner.status === 'onboarding' || currentOwner.status === 'completed' ? 'completed' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'application' ? 'current' : (currentOwner.status === 'sign docs' || currentOwner.status === 'under review' || currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
                     <div className="stage-indicator">
-                      <CheckCircle size={20} />
-                    </div>
-                    <div className="stage-content">
-                      <div className="stage-title">Lead</div>
-                      <div className="stage-description">Lead Complete</div>
-                    </div>
-                  </div>
-
-                  <div className="stage-connector"></div>
-
-                  <div className={`stage ${currentOwner.status === 'application' ? 'current' : currentOwner.status === 'awaiting approval' ? 'current' : (currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
-                    <div className="stage-indicator">
-                      {currentOwner.status === 'application' || currentOwner.status === 'awaiting approval' ? <Clock size={20} /> : <CheckCircle size={20} />}
+                      {currentOwner.status === 'application' ? <Clock size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
                       <div className="stage-title">Application</div>
                       <div className="stage-description">
-                        {currentOwner.status === 'application' ? 'In Progress' : currentOwner.status === 'awaiting approval' ? 'Awaiting Approval' : 'Complete'}
+                        {currentOwner.status === 'application' ? 'In Progress' : 'Complete'}
                       </div>
                     </div>
                   </div>
 
                   <div className="stage-connector"></div>
 
-                  <div className={`stage ${currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 75 ? 'current' : (currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion > 75) || currentOwner.status === 'completed' ? 'completed' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'sign docs' ? 'current' : (currentOwner.status === 'under review' || currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
                     <div className="stage-indicator">
-                      {currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 75 ? <FileText size={20} /> : <CheckCircle size={20} />}
+                      {currentOwner.status === 'sign docs' ? <FileText size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
-                      <div className="stage-title">Signed Agreements</div>
+                      <div className="stage-title">Sign Documents</div>
                       <div className="stage-description">
-                        {(currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion > 75) || currentOwner.status === 'completed' ? 'Signed Agreements Completed' : 'Management agreement pending'}
+                        {currentOwner.status === 'sign docs' ? 'Review and sign' : currentOwner.status === 'application' ? 'Pending' : 'Complete'}
                       </div>
                     </div>
                   </div>
 
                   <div className="stage-connector"></div>
 
-                  <div className={`stage ${currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 90 ? 'current' : currentOwner.status === 'completed' ? 'completed' : ''}`}>
+                  <div className={`stage ${currentOwner.status === 'under review' ? 'current' : (currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'completed' : ''}`}>
                     <div className="stage-indicator">
-                      {currentOwner.status === 'onboarding' && currentOwner.onboardingCompletion === 90 ? <Home size={20} /> : <CheckCircle size={20} />}
+                      {currentOwner.status === 'under review' ? <Clock size={20} /> : <CheckCircle size={20} />}
                     </div>
                     <div className="stage-content">
-                      <div className="stage-title">Property Setup</div>
-                      <div className="stage-description">Properties being configured</div>
+                      <div className="stage-title">Under Review</div>
+                      <div className="stage-description">
+                        {currentOwner.status === 'under review' ? 'Being reviewed' : (currentOwner.status === 'onboarding' || currentOwner.status === 'completed') ? 'Approved' : 'Pending'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stage-connector"></div>
+
+                  <div className={`stage ${currentOwner.status === 'onboarding' ? 'current' : currentOwner.status === 'completed' ? 'completed' : ''}`}>
+                    <div className="stage-indicator">
+                      {currentOwner.status === 'onboarding' ? <Home size={20} /> : <CheckCircle size={20} />}
+                    </div>
+                    <div className="stage-content">
+                      <div className="stage-title">Onboarding</div>
+                      <div className="stage-description">
+                        {currentOwner.status === 'onboarding' ? 'Property setup' : currentOwner.status === 'completed' ? 'Complete' : 'Pending'}
+                      </div>
                     </div>
                   </div>
 
@@ -559,20 +589,29 @@ const OwnerPortal = () => {
                       <CheckCircle size={32} />
                     </div>
                     <div className="stage-content">
-                      <div className="stage-title">Onboarded</div>
-                      <div className="stage-description">Welcome! You're all set</div>
+                      <div className="stage-title">Completed</div>
+                      <div className="stage-description">
+                        {currentOwner.status === 'completed' ? 'Welcome! All set' : 'Final step'}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {currentOwner.status === 'awaiting approval' && (
+                {currentOwner.status === 'under review' && (
                   <div className="action-message">
                     <AlertCircle size={18} />
                     <span>Your application is being reviewed. We'll notify you once approved!</span>
                   </div>
                 )}
 
-                {(currentOwner.status === 'application') && (
+                {currentOwner.status === 'sign docs' && (
+                  <div className="action-message clickable" onClick={() => window.scrollTo({ top: document.getElementById('documents-section')?.offsetTop, behavior: 'smooth' })}>
+                    <FileText size={18} />
+                    <span>Please review and sign your documents below →</span>
+                  </div>
+                )}
+
+                {currentOwner.status === 'application' && (
                   <div className="action-message clickable" onClick={() => handlePropertyClick(currentOwner.properties[0])}>
                     <FileText size={18} />
                     <span>Continue your application →</span>
@@ -593,9 +632,8 @@ const OwnerPortal = () => {
 
               {/* Documents to Sign */}
               {documents.filter(doc => doc.status === 'pending').length > 0 && 
-               currentOwner.status === 'onboarding' && 
-               currentOwner.onboardingCompletion === 75 && (
-                <div className="section-container">
+               currentOwner.status === 'sign docs' && (
+                <div className="section-container" id="documents-section">
                   <h2 className="section-title">Documents to Sign</h2>
                   <p className="section-subtitle">REVIEW AND SIGN REQUIRED DOCUMENTS</p>
                   

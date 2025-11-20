@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TrendingUp, BarChart3, Clock, Target, X } from 'lucide-react';
+import { TrendingUp, BarChart3, Clock, Target, X, Users, ChevronDown } from 'lucide-react';
 import { timeSeriesFunnelData, getPropertyCount } from '../mockData';
 import PMWLogo from '../assets/PMW logo.png';
 
-const PMWAnalytics = ({ leads }) => {
+const PMWAnalytics = ({ leads, selectedPeople, setSelectedPeople, showPeopleFilter, setShowPeopleFilter, assignedPeople }) => {
   const [viewMode, setViewMode] = useState('owners'); // 'owners' or 'properties'
   const [timePeriod, setTimePeriod] = useState('month'); // 'day', 'week', 'month', 'year', 'all'
   const [selectedChannel, setSelectedChannel] = useState('all'); // 'all', 'all-organic', 'all-paid', or specific channel
@@ -16,8 +16,13 @@ const PMWAnalytics = ({ leads }) => {
   const [showLandingPagePerformance, setShowLandingPagePerformance] = useState(true);
   const [showKeyMetrics, setShowKeyMetrics] = useState(true);
 
-  // Filter time-series data based on selected period
-  const getFilteredTimeSeriesData = () => {
+  // Calculate metrics based on view mode (must be defined before generateTimeSeriesDataFromLeads)
+  const getCount = (lead) => {
+    return viewMode === 'owners' ? 1 : getPropertyCount(lead);
+  };
+
+  // Generate time-series data from the filtered leads (not from mock data)
+  const generateTimeSeriesDataFromLeads = () => {
     const now = new Date();
     let startDate = new Date();
     
@@ -41,10 +46,66 @@ const PMWAnalytics = ({ leads }) => {
         startDate.setMonth(now.getMonth() - 1);
     }
     
-    return timeSeriesFunnelData.filter(d => new Date(d.date) >= startDate);
+    // Filter leads by time period
+    const filteredLeads = leads.filter(l => new Date(l.createdAt) >= startDate && l.status !== 'archived');
+    
+    // Group leads by date and channel
+    const grouped = {};
+    
+    filteredLeads.forEach(lead => {
+      const date = new Date(lead.createdAt);
+      let key;
+      
+      switch (timePeriod) {
+        case 'day':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
+          break;
+        case 'week':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          break;
+        case 'month': {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
+          break;
+        }
+        case 'year':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        case 'all':
+          key = `${date.getFullYear()}`;
+          break;
+        default:
+          key = lead.createdAt;
+      }
+      
+      const channel = lead.leadSourceChannel || 'other';
+      const category = lead.leadSourceCategory || 'other';
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          date: key,
+          byChannel: {},
+          byCategory: { organic: 0, paid: 0, other: 0 }
+        };
+      }
+      
+      // Track by channel
+      if (!grouped[key].byChannel[channel]) {
+        grouped[key].byChannel[channel] = { leads: 0, category };
+      }
+      grouped[key].byChannel[channel].leads += getCount(lead);
+      
+      // Track by category
+      if (category === 'organic' || category === 'paid' || category === 'other') {
+        grouped[key].byCategory[category] += getCount(lead);
+      }
+    });
+    
+    return Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
   };
 
-  const filteredTimeSeriesData = getFilteredTimeSeriesData();
+  const filteredTimeSeriesData = generateTimeSeriesDataFromLeads();
 
   // Get unique channels
   const organicChannels = ['Google', 'Bing', 'ChatGPT'];
@@ -128,11 +189,6 @@ const PMWAnalytics = ({ leads }) => {
 
   const phoneCallsOverTime = aggregatePhoneCallsOverTime();
 
-  // Calculate metrics based on view mode
-  const getCount = (lead) => {
-    return viewMode === 'owners' ? 1 : getPropertyCount(lead);
-  };
-
   // Calculate total counts for each category
   const calculateCategoryMetrics = (category) => {
     const categoryLeads = leads.filter(l => 
@@ -141,7 +197,7 @@ const PMWAnalytics = ({ leads }) => {
     );
     
     const totalCount = categoryLeads.reduce((sum, lead) => sum + getCount(lead), 0);
-    const applicationCount = categoryLeads.filter(l => l.status === 'application' || l.status === 'awaiting approval' || l.status === 'onboarding').reduce((sum, lead) => sum + getCount(lead), 0);
+    const applicationCount = categoryLeads.filter(l => l.status === 'application' || l.status === 'sign docs' || l.status === 'under review' || l.status === 'onboarding').reduce((sum, lead) => sum + getCount(lead), 0);
     const onboardedCount = categoryLeads.filter(l => 
       l.onboardingStatus === 'in_progress' && l.onboardingCompletion === 100
     ).reduce((sum, lead) => sum + getCount(lead), 0);
@@ -157,7 +213,7 @@ const PMWAnalytics = ({ leads }) => {
     );
     
     const totalCount = channelLeads.reduce((sum, lead) => sum + getCount(lead), 0);
-    const applicationCount = channelLeads.filter(l => l.status === 'application' || l.status === 'awaiting approval' || l.status === 'onboarding').reduce((sum, lead) => sum + getCount(lead), 0);
+    const applicationCount = channelLeads.filter(l => l.status === 'application' || l.status === 'sign docs' || l.status === 'under review' || l.status === 'onboarding').reduce((sum, lead) => sum + getCount(lead), 0);
     const onboardedCount = channelLeads.filter(l => 
       l.onboardingStatus === 'in_progress' && l.onboardingCompletion === 100
     ).reduce((sum, lead) => sum + getCount(lead), 0);
@@ -165,292 +221,67 @@ const PMWAnalytics = ({ leads }) => {
     return { totalCount, applicationCount, onboardedCount };
   };
 
-  // Aggregate time series data with proper grouping based on time period
+  // Aggregate time series data from the new structure
   const aggregateTimeSeriesData = (category, channel) => {
-    const data = filteredTimeSeriesData.filter(d => {
-      if (channel === 'all') {
-        return d.category === category;
-      }
-      return d.channel === channel;
-    });
+    if (filteredTimeSeriesData.length === 0) return [];
 
-    if (data.length === 0) return [];
-
-    // Group data based on time period
-    const grouped = {};
-    
-    data.forEach(d => {
-      const date = new Date(d.date);
-      let key;
-      
-      switch (timePeriod) {
-        case 'day':
-          // Group by hour
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
-          break;
-        case 'week':
-          // Group by day
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          break;
-        case 'month':
-          // Group by week
-          const weekStart = new Date(date);
-          weekStart.setDate(date.getDate() - date.getDay());
-          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
-          break;
-        case 'year':
-          // Group by month
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          break;
-        case 'all':
-          // Group by year
-          key = `${date.getFullYear()}`;
-          break;
-        default:
-          key = d.date;
-      }
-      
-      if (!grouped[key]) {
-        grouped[key] = { date: key, leads: 0, applications: 0, onboarded: 0, count: 0 };
-      }
-      grouped[key].leads += d.leads || 0;
-      grouped[key].applications += d.applications || 0;
-      grouped[key].onboarded += d.onboarded || 0;
-      grouped[key].count += 1;
-    });
-
-    // Convert to array and sort by date
-    return Object.values(grouped)
-      .map(g => ({
-        date: g.date,
-        leads: g.leads,
-        applications: g.applications,
-        onboarded: g.onboarded
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-  };
-
-  // Calculate property counts directly from leads array using same aggregation logic
-  const aggregatePropertiesFromLeads = (category, channel) => {
-    const now = new Date();
-    let startDate = new Date();
-    
-    switch (timePeriod) {
-      case 'day': startDate.setDate(now.getDate() - 1); break;
-      case 'week': startDate.setDate(now.getDate() - 7); break;
-      case 'month': startDate.setMonth(now.getMonth() - 1); break;
-      case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
-      case 'all': startDate = new Date(0); break;
-      default: startDate.setMonth(now.getMonth() - 1);
-    }
-    
-    // Filter leads by time period and category/channel
-    const filteredLeads = leads.filter(lead => {
-      const leadDate = new Date(lead.createdAt);
-      if (leadDate < startDate) return false;
+    // Since the data is already grouped by date in the format we want,
+    // we just need to extract the relevant channel/category data
+    return filteredTimeSeriesData.map(d => {
+      let leads = 0;
       
       if (channel === 'all') {
-        return lead.leadSourceCategory === category;
+        // Get leads for entire category (organic or paid)
+        leads = d.byCategory[category] || 0;
       } else {
-        return lead.leadSourceChannel === channel;
-      }
-    });
-    
-    // Group by date using same logic as time series aggregation
-    const grouped = {};
-    
-    filteredLeads.forEach(lead => {
-      const date = new Date(lead.createdAt);
-      let key;
-      
-      switch (timePeriod) {
-        case 'day':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
-          break;
-        case 'week':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          break;
-        case 'month': {
-          const weekStart = new Date(date);
-          weekStart.setDate(date.getDate() - date.getDay());
-          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
-          break;
-        }
-        case 'year':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          break;
-        case 'all':
-          key = `${date.getFullYear()}`;
-          break;
-        default:
-          key = lead.createdAt;
+        // Get leads for specific channel
+        leads = d.byChannel[channel]?.leads || 0;
       }
       
-      if (!grouped[key]) {
-        grouped[key] = { date: key, properties: 0 };
-      }
-      grouped[key].properties += getPropertyCount(lead);
-    });
-    
-    return Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
+      return {
+        date: d.date,
+        leads: leads,
+        applications: 0, // We're only tracking leads now per requirements
+        onboarded: 0
+      };
+    }).sort((a, b) => a.date.localeCompare(b.date));
   };
 
-  // Enhance aggregated data with property counts
-  const enhanceDataWithProperties = (aggregatedData, category = null, channel = null) => {
-    // Special handling for "All PMW" - aggregate properties from both organic and paid
-    let propertyLeads;
-    if (category === null && channel === null) {
-      // This is "All PMW" - combine organic and paid
-      propertyLeads = leads.filter(l => 
-        (l.leadSourceCategory === 'organic' || l.leadSourceCategory === 'paid') && 
-        l.status !== 'archived'
-      );
-    } else if (category && channel === 'all') {
-      // This is "All Organic" or "All Paid"
-      propertyLeads = leads.filter(l => 
-        l.leadSourceCategory === category && 
-        l.status !== 'archived'
-      );
-    } else if (channel) {
-      // This is a specific channel
-      propertyLeads = leads.filter(l => 
-        l.leadSourceChannel === channel && 
-        l.status !== 'archived'
-      );
-    } else {
-      return aggregatedData;
-    }
-    
-    const now = new Date();
-    let startDate = new Date();
-    
-    switch (timePeriod) {
-      case 'day': startDate.setDate(now.getDate() - 1); break;
-      case 'week': startDate.setDate(now.getDate() - 7); break;
-      case 'month': startDate.setMonth(now.getMonth() - 1); break;
-      case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
-      case 'all': startDate = new Date(0); break;
-      default: startDate.setMonth(now.getMonth() - 1);
-    }
-    
-    const filteredLeads = propertyLeads.filter(l => new Date(l.createdAt) >= startDate);
-    
-    // Group by date
-    const grouped = {};
-    filteredLeads.forEach(lead => {
-      const date = new Date(lead.createdAt);
-      let key;
-      
-      switch (timePeriod) {
-        case 'day':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
-          break;
-        case 'week':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          break;
-        case 'month': {
-          const weekStart = new Date(date);
-          weekStart.setDate(date.getDate() - date.getDay());
-          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
-          break;
-        }
-        case 'year':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          break;
-        case 'all':
-          key = `${date.getFullYear()}`;
-          break;
-        default:
-          key = lead.createdAt;
-      }
-      
-      if (!grouped[key]) {
-        grouped[key] = { date: key, properties: 0 };
-      }
-      grouped[key].properties += getPropertyCount(lead);
-    });
-    
-    const propertiesData = Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
-    
-    // Create a map of date -> properties for quick lookup
-    const propertiesMap = {};
-    propertiesData.forEach(p => {
-      propertiesMap[p.date] = p.properties;
-    });
-    
-    // Merge properties into aggregated data
-    return aggregatedData.map(dataPoint => ({
-      ...dataPoint,
-      properties: propertiesMap[dataPoint.date] || 0
-    }));
-  };
-
-  // Prepare combined data for all channels
+  // Prepare combined data for all channels from new structure
   const channelDataSets = (() => {
-    const allTimeSeriesData = filteredTimeSeriesData;
+    const metricKey = viewMode === 'properties' ? 'properties' : 'leads';
     
     // All PMW (organic + paid combined)
-    const allPMWData = allTimeSeriesData.filter(d => d.category === 'organic' || d.category === 'paid');
-    const grouped = {};
-    allPMWData.forEach(d => {
-      const date = new Date(d.date);
-      let key;
-      
-      switch (timePeriod) {
-        case 'day':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
-          break;
-        case 'week':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          break;
-        case 'month':
-          const weekStart = new Date(date);
-          weekStart.setDate(date.getDate() - date.getDay());
-          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
-          break;
-        case 'year':
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          break;
-        case 'all':
-          key = `${date.getFullYear()}`;
-          break;
-        default:
-          key = d.date;
-      }
-      
-      if (!grouped[key]) {
-        grouped[key] = { date: key, leads: 0, applications: 0, onboarded: 0 };
-      }
-      grouped[key].leads += d.leads || 0;
-      grouped[key].applications += d.applications || 0;
-      grouped[key].onboarded += d.onboarded || 0;
-    });
-    
-    const allPMWAggregated = Object.values(grouped)
-      .sort((a, b) => a.date.localeCompare(b.date));
-    
-    // Enhanced with properties for all PMW (combined organic + paid)
-    const enhancedAllPMW = enhanceDataWithProperties(allPMWAggregated, null, null);
+    const allPMWData = filteredTimeSeriesData.map(d => ({
+      date: d.date,
+      [metricKey]: (d.byCategory.organic || 0) + (d.byCategory.paid || 0)
+    }));
     
     // All Organic
-    const allOrganicData = aggregateTimeSeriesData('organic', 'all');
-    const enhancedAllOrganic = enhanceDataWithProperties(allOrganicData, 'organic', 'all');
+    const allOrganicData = filteredTimeSeriesData.map(d => ({
+      date: d.date,
+      [metricKey]: d.byCategory.organic || 0
+    }));
     
     // All Paid
-    const allPaidData = aggregateTimeSeriesData('paid', 'all');
-    const enhancedAllPaid = enhanceDataWithProperties(allPaidData, 'paid', 'all');
+    const allPaidData = filteredTimeSeriesData.map(d => ({
+      date: d.date,
+      [metricKey]: d.byCategory.paid || 0
+    }));
     
     // Individual channels
     const individualChannels = {};
     allChannels.forEach(channel => {
-      const channelData = aggregateTimeSeriesData(null, channel);
-      individualChannels[channel] = enhanceDataWithProperties(channelData, null, channel);
+      individualChannels[channel] = filteredTimeSeriesData.map(d => ({
+        date: d.date,
+        [metricKey]: d.byChannel[channel]?.leads || 0
+      }));
     });
     
     return {
-      'all': enhancedAllPMW,
-      'all-organic': enhancedAllOrganic,
-      'all-paid': enhancedAllPaid,
+      'all': allPMWData,
+      'all-organic': allOrganicData,
+      'all-paid': allPaidData,
       ...individualChannels
     };
   })();
@@ -933,8 +764,22 @@ const PMWAnalytics = ({ leads }) => {
       padding: '1.5rem',
       marginBottom: '2rem'
     }}>
-      {/* Header with Logo and Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      {/* Header with Logo and Toggle - Sticky */}
+      <div style={{ 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 100, 
+        backgroundColor: '#f8f9fa',
+        paddingTop: '1.5rem',
+        paddingBottom: '1.5rem',
+        marginBottom: '0',
+        marginTop: '-1.5rem',
+        marginLeft: '-1.5rem',
+        marginRight: '-1.5rem',
+        paddingLeft: '1.5rem',
+        paddingRight: '1.5rem'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <img 
             src={PMWLogo} 
@@ -955,41 +800,196 @@ const PMWAnalytics = ({ leads }) => {
           </div>
         </div>
 
-        {/* View Mode Toggle */}
-        <div style={{ display: 'flex', backgroundColor: 'white', borderRadius: '8px', border: '2px solid #3b82f6', overflow: 'hidden' }}>
-          <button
-            onClick={() => setViewMode('owners')}
-            style={{
-              padding: '0.5rem 1.5rem',
-              border: 'none',
-              backgroundColor: viewMode === 'owners' ? '#3b82f6' : 'white',
-              color: viewMode === 'owners' ? 'white' : '#3b82f6',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontSize: '0.875rem'
-            }}
-          >
-            Owners
-          </button>
-          <button
-            onClick={() => setViewMode('properties')}
-            style={{
-              padding: '0.5rem 1.5rem',
-              border: 'none',
-              backgroundColor: viewMode === 'properties' ? '#3b82f6' : 'white',
-              color: viewMode === 'properties' ? 'white' : '#3b82f6',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontSize: '0.875rem'
-            }}
-          >
-            Properties
-          </button>
+        {/* View Mode Toggle and People Filter */}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', backgroundColor: 'white', borderRadius: '8px', border: '2px solid #3b82f6', overflow: 'hidden' }}>
+            <button
+              onClick={() => setViewMode('owners')}
+              style={{
+                padding: '0.5rem 1.5rem',
+                border: 'none',
+                backgroundColor: viewMode === 'owners' ? '#3b82f6' : 'white',
+                color: viewMode === 'owners' ? 'white' : '#3b82f6',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              Owners
+            </button>
+            <button
+              onClick={() => setViewMode('properties')}
+              style={{
+                padding: '0.5rem 1.5rem',
+                border: 'none',
+                backgroundColor: viewMode === 'properties' ? '#3b82f6' : 'white',
+                color: viewMode === 'properties' ? 'white' : '#3b82f6',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              Properties
+            </button>
+          </div>
+
+          {/* People Filter */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowPeopleFilter(!showPeopleFilter)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '0.5rem 1.5rem',
+                borderRadius: '8px',
+                border: selectedPeople.has('all') ? '2px solid #e5e7eb' : '2px solid #10b981',
+                backgroundColor: selectedPeople.has('all') ? 'white' : '#f0fdf4',
+                color: selectedPeople.has('all') ? '#64748b' : '#047857',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              <Users size={16} />
+              <span>
+                {selectedPeople.has('all') 
+                  ? 'All People' 
+                  : `${selectedPeople.size} ${selectedPeople.size === 1 ? 'Person' : 'People'}`}
+              </span>
+              <ChevronDown size={16} />
+            </button>
+
+            {showPeopleFilter && (
+              <>
+                <div 
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 999
+                  }}
+                  onClick={() => setShowPeopleFilter(false)}
+                />
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  marginTop: '8px',
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  minWidth: '220px',
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                  zIndex: 1000,
+                  padding: '8px'
+                }}>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPeople.has('all')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedPeople(new Set(['all']));
+                        } else {
+                          setSelectedPeople(new Set());
+                        }
+                      }}
+                    />
+                    All People
+                  </label>
+                  <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }} />
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPeople.has('unassigned')}
+                      onChange={(e) => {
+                        const newPeople = new Set(selectedPeople);
+                        newPeople.delete('all');
+                        if (e.target.checked) {
+                          newPeople.add('unassigned');
+                        } else {
+                          newPeople.delete('unassigned');
+                        }
+                        if (newPeople.size === 0) newPeople.add('all');
+                        setSelectedPeople(newPeople);
+                      }}
+                    />
+                    Unassigned
+                  </label>
+                  {assignedPeople.length > 0 && (
+                    <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }} />
+                  )}
+                  {assignedPeople.map(person => (
+                    <label 
+                      key={person}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px',
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedPeople.has(person)}
+                        onChange={(e) => {
+                          const newPeople = new Set(selectedPeople);
+                          newPeople.delete('all');
+                          if (e.target.checked) {
+                            newPeople.add(person);
+                          } else {
+                            newPeople.delete(person);
+                          }
+                          if (newPeople.size === 0) newPeople.add('all');
+                          setSelectedPeople(newPeople);
+                        }}
+                      />
+                      {person}
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
         </div>
       </div>
 
       {/* Time Period Selector */}
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <span style={{ fontWeight: '600', color: '#1e293b', fontSize: '0.875rem' }}>Time Period:</span>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {['day', 'week', 'month', 'year', 'all'].map(period => (

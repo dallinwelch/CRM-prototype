@@ -14,7 +14,6 @@ const OnyxPropertyManagement = () => {
   });
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [activeSection, setActiveSection] = useState('services');
-  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   
   const [ownerFormData, setOwnerFormData] = useState({
     name: 'John Smith',
@@ -94,14 +93,25 @@ const OnyxPropertyManagement = () => {
 
   const handleOwnerFormSubmit = (e) => {
     e.preventDefault();
-    // Transfer data to detailed form and navigate
-    setDetailedFormData(prev => ({
-      ...prev,
+    
+    // In a real app, this would call an API to:
+    // 1. Create a lead with status "application" (application auto-starts)
+    // 2. Create owner portal account with email as username
+    // 3. Authenticate the user and redirect to portal
+    
+    console.log('Creating lead with auto-started application:', {
       name: ownerFormData.name,
       email: ownerFormData.email,
-      phone: ownerFormData.phone
-    }));
-    window.location.hash = 'owner-form';
+      phone: ownerFormData.phone,
+      inquiryType: ownerFormData.inquiryType,
+      comment: ownerFormData.comment,
+      status: 'application', // Application auto-starts
+      portalUsername: ownerFormData.email,
+      portalAccessCreated: true
+    });
+    
+    // Redirect to owner portal to continue application
+    window.location.href = '/owner-portal';
   };
 
   const handleDetailedFormChange = (e) => {
@@ -152,50 +162,25 @@ const OnyxPropertyManagement = () => {
 
   const handleDetailedFormSubmit = (e) => {
     e.preventDefault();
-    console.log('Detailed form submitted:', detailedFormData);
-    setShowSuccessScreen(true);
-  };
-
-  const handleCloseSuccess = () => {
-    setShowSuccessScreen(false);
-    window.location.hash = 'services';
+    
+    // In a real app, this would call an API to:
+    // 1. Create a lead with status "application" (application auto-starts)
+    // 2. Create owner portal account with email as username
+    // 3. Authenticate the user and redirect to portal
+    
+    console.log('Creating lead with auto-started application:', {
+      ...detailedFormData,
+      status: 'application', // Application auto-starts
+      portalUsername: detailedFormData.email,
+      portalAccessCreated: true
+    });
+    
+    // Redirect to owner portal to continue application
+    window.location.href = '/owner-portal';
   };
 
   return (
     <div className="onyx-site">
-      {/* Success Modal */}
-      {showSuccessScreen && (
-        <div className="success-modal-overlay" onClick={handleCloseSuccess}>
-          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="success-icon">
-              <div className="success-checkmark">✓</div>
-            </div>
-            <h2 className="success-title">Application Submitted Successfully! 🎉</h2>
-            <p className="success-message">
-              Thank you for choosing The Onyx Property Management! We're thrilled to have the 
-              opportunity to work with you.
-            </p>
-            <div className="success-details">
-              <div className="success-detail-item">
-                <span className="success-icon-text">📧</span>
-                <p>We've received your application and our team is already reviewing your {detailedFormData.numberOfProperties} {detailedFormData.numberOfProperties === '1' ? 'property' : 'properties'}.</p>
-              </div>
-              <div className="success-detail-item">
-                <span className="success-icon-text">📞</span>
-                <p>One of our property management specialists will reach out to you within 24-48 hours to discuss next steps.</p>
-              </div>
-              <div className="success-detail-item">
-                <span className="success-icon-text">✨</span>
-                <p>In the meantime, check your email at <strong>{detailedFormData.email}</strong> for your application confirmation.</p>
-              </div>
-            </div>
-            <button className="success-close-btn" onClick={handleCloseSuccess}>
-              Return to Home
-            </button>
-          </div>
-        </div>
-      )}
-      
       {/* Header */}
       <header className="onyx-header">
         <div className="onyx-header-content">

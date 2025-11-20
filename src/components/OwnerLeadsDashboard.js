@@ -32,6 +32,8 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
     approved: false
   });
   const [selectedLeadSource, setSelectedLeadSource] = useState('all');
+  const [selectedPeople, setSelectedPeople] = useState(new Set(['all']));
+  const [showPeopleFilter, setShowPeopleFilter] = useState(false);
   const [timePeriod, setTimePeriod] = useState('month'); // 'day', 'week', 'month', 'year', 'all'
   const [hoveredDataPoint, setHoveredDataPoint] = useState(null);
 
@@ -42,17 +44,43 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
     }));
   };
 
-  // Filter leads by source
-  const filteredLeads = selectedLeadSource === 'all' 
-    ? leads 
-    : leads.filter(l => l.leadSource === selectedLeadSource);
+  // Get unique list of people assigned to leads
+  const getAssignedPeople = () => {
+    const peopleSet = new Set();
+    leads.forEach(lead => {
+      if (lead.assignedTo) {
+        peopleSet.add(lead.assignedTo);
+      }
+    });
+    return Array.from(peopleSet).sort();
+  };
+
+  const assignedPeople = getAssignedPeople();
+
+  // Filter leads by source and assigned people
+  const filteredLeads = leads.filter(l => {
+    // Filter by source
+    const sourceMatch = selectedLeadSource === 'all' || l.leadSource === selectedLeadSource;
+    
+    // Filter by assigned people
+    let peopleMatch = false;
+    if (selectedPeople.has('all')) {
+      peopleMatch = true;
+    } else {
+      if (selectedPeople.has('unassigned') && !l.assignedTo) peopleMatch = true;
+      if (selectedPeople.has(l.assignedTo)) peopleMatch = true;
+    }
+    
+    return sourceMatch && peopleMatch;
+  });
 
   // Calculate stats - exclude archived and completed (converted to owners)
   const stats = {
     total: filteredLeads.filter(l => l.status !== 'archived' && l.status !== 'completed').length,
     lead: filteredLeads.filter(l => l.status === 'lead').length,
     application: filteredLeads.filter(l => l.status === 'application').length,
-    awaitingApproval: filteredLeads.filter(l => l.status === 'awaiting approval').length,
+    signDocs: filteredLeads.filter(l => l.status === 'sign docs').length,
+    underReview: filteredLeads.filter(l => l.status === 'under review').length,
     onboarding: filteredLeads.filter(l => l.status === 'onboarding').length
   };
 
@@ -66,11 +94,9 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
       application: filteredLeads.filter(l => l.status === 'application').length,
       lead: filteredLeads.filter(l => l.status === 'lead').length
     },
-    awaitingApproval: filteredLeads.filter(l => l.status === 'awaiting approval').length,
-    onboarded: filteredLeads.filter(l => 
-      l.onboardingStatus === 'in_progress' && 
-      l.onboardingCompletion === 100
-    ).length
+    signDocs: filteredLeads.filter(l => l.status === 'sign docs').length,
+    underReview: filteredLeads.filter(l => l.status === 'under review').length,
+    onboarded: filteredLeads.filter(l => l.status === 'completed').length
   };
 
   // Get all unique lead sources
@@ -78,10 +104,10 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
 
   // Calculate conversion rates
   const conversionRate = funnelData.leads.total > 0 
-    ? ((funnelData.awaitingApproval / funnelData.leads.total) * 100).toFixed(1)
+    ? ((funnelData.underReview / funnelData.leads.total) * 100).toFixed(1)
     : 0;
-  const onboardingRate = funnelData.awaitingApproval > 0 
-    ? ((funnelData.onboarded / funnelData.awaitingApproval) * 100).toFixed(1)
+  const onboardingRate = funnelData.underReview > 0 
+    ? ((funnelData.onboarded / funnelData.underReview) * 100).toFixed(1)
     : 0;
 
   // Filter time-series data based on selected period
@@ -123,7 +149,7 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
 
   const leadStatusLeads = getLeadsByStage('lead');
   const applicationLeads = getLeadsByStage('application');
-  const awaitingApprovalLeads = getLeadsByStage('awaiting approval');
+  const underReviewLeads = getLeadsByStage('under review');
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -368,7 +394,6 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
           <p className="dashboard-subtitle">Manage and track your owner lead pipeline</p>
         </div>
         <div className="dashboard-actions">
-         
           <button className="btn btn-primary" onClick={onCreateLead}>
             <UserPlus size={18} />
             New Lead
@@ -377,7 +402,14 @@ const OwnerLeadsDashboard = ({ leads, onNavigateToList, onNavigateToLead, onCrea
       </div>
 
       {/* PMW Analytics Dashboard */}
-      <PMWAnalytics leads={leads} />
+      <PMWAnalytics 
+        leads={filteredLeads}
+        selectedPeople={selectedPeople}
+        setSelectedPeople={setSelectedPeople}
+        showPeopleFilter={showPeopleFilter}
+        setShowPeopleFilter={setShowPeopleFilter}
+        assignedPeople={assignedPeople}
+      />
 
       {/* Time Series Line Graph - Pipeline Trends Over Time - REMOVED, now in PMW Analytics */}
       {false && (

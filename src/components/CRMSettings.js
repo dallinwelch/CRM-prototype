@@ -13,7 +13,7 @@ import {
   X,
   AlertCircle
 } from 'lucide-react';
-import { mockUsers, mockTemplates, currentUser, mockLeadQuestionnaireForm, mockOnboardingForm } from '../mockData';
+import { mockUsers, mockTemplates, currentUser, mockOnboardingForm } from '../mockData';
 
 // Custom fields that already exist in the property management system
 export const customPropertyFields = {
@@ -141,7 +141,7 @@ const CRMSettings = ({ onEditForm }) => {
 
   // Calculate form stats
   const getFormStats = (formType) => {
-    const form = formType === 'lead-questionnaire' ? mockLeadQuestionnaireForm : mockOnboardingForm;
+    const form = mockOnboardingForm;
     const totalFields = form.sections.reduce((acc, section) => acc + section.fields.length, 0);
     const requiredFields = form.sections.reduce((acc, section) => 
       acc + section.fields.filter(f => f.required).length, 0
@@ -389,7 +389,6 @@ const CRMSettings = ({ onEditForm }) => {
   );
 
   const FormsSection = () => {
-    const questionnaireStats = getFormStats('lead-questionnaire');
     const onboardingStats = getFormStats('onboarding-application');
 
     return (
@@ -401,50 +400,12 @@ const CRMSettings = ({ onEditForm }) => {
               Forms & Applications
             </h2>
             <p className="section-subtitle">
-              Manage owner lead questionnaire and onboarding application forms
+              Manage owner onboarding application forms
             </p>
           </div>
         </div>
 
         <div className="forms-list">
-          <div className="form-card">
-            <div className="form-card-header">
-              <div className="form-icon">
-                <FileText size={24} />
-              </div>
-              <div>
-                <h3>Owner Lead Questionnaire</h3>
-                <p>Qualifying questions for new owner leads</p>
-                <span className="form-notice-badge">No required fields allowed</span>
-              </div>
-            </div>
-            <div className="form-card-stats">
-              <div className="stat">
-                <span className="stat-label">Sections</span>
-                <span className="stat-value">{questionnaireStats.sections}</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Questions</span>
-                <span className="stat-value">{questionnaireStats.fields}</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Version</span>
-                <span className="stat-value">{questionnaireStats.version}</span>
-              </div>
-            </div>
-            {canEdit && (
-              <div className="form-card-actions">
-                <button 
-                  className="btn btn-secondary"
-                  onClick={() => onEditForm && onEditForm('lead-questionnaire')}
-                >
-                  <Edit size={16} />
-                  Edit Form
-                </button>
-              </div>
-            )}
-          </div>
-
           <div className="form-card">
             <div className="form-card-header">
               <div className="form-icon">
