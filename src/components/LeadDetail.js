@@ -1582,6 +1582,176 @@ const LeadDetail = ({ leadId, leads, onBack }) => {
               </div>
             )}
 
+            {/* DOCUMENTS TO SIGN SECTION - Show if documents exist */}
+            {isApplicant && lead.documents && lead.documents.length > 0 && (
+              <div className="detail-section full-width" style={{ 
+                border: '2px solid #e2e8f0', 
+                borderRadius: '12px',
+                overflow: 'hidden'
+              }}>
+                {/* Documents Header */}
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '16px 20px',
+                    background: '#f8fafc',
+                    borderBottom: '1px solid #e2e8f0'
+                  }}
+                >
+                  <h3 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={20} />
+                    Documents to Sign
+                  </h3>
+                  <span style={{
+                    padding: '4px 12px',
+                    background: lead.documents.every(doc => doc.status === 'signed') ? '#10b981' : '#f59e0b',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '600'
+                  }}>
+                    {lead.documents.filter(doc => doc.status === 'signed').length} / {lead.documents.length} Signed
+                  </span>
+                </div>
+
+                {/* Documents List */}
+                <div style={{ padding: '20px' }}>
+                  {lead.documents.map((document) => {
+                    const isSigned = document.status === 'signed';
+                    
+                    return (
+                      <div 
+                        key={document.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '16px 20px',
+                          marginBottom: '12px',
+                          background: isSigned ? '#f0fdf4' : '#fafafa',
+                          border: `1px solid ${isSigned ? '#bbf7d0' : '#e5e7eb'}`,
+                          borderRadius: '8px',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {/* Status Icon */}
+                        <div style={{ 
+                          marginRight: '16px',
+                          opacity: isSigned ? 1 : 0.3
+                        }}>
+                          <CheckCircle 
+                            size={24} 
+                            style={{ 
+                              color: isSigned ? '#10b981' : '#6b7280',
+                              fill: isSigned ? '#dcfce7' : 'none',
+                              strokeWidth: 2
+                            }} 
+                          />
+                        </div>
+
+                        {/* Document Info */}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ 
+                            fontSize: '15px', 
+                            fontWeight: '600',
+                            color: isSigned ? '#166534' : '#374151',
+                            marginBottom: '4px'
+                          }}>
+                            {document.name}
+                          </div>
+                          <div style={{ 
+                            fontSize: '13px', 
+                            color: isSigned ? '#16a34a' : '#6b7280',
+                            marginBottom: '2px'
+                          }}>
+                            {document.description}
+                          </div>
+                          {isSigned && document.signedDate && (
+                            <div style={{ 
+                              fontSize: '12px', 
+                              color: '#10b981',
+                              fontWeight: '500',
+                              marginTop: '4px'
+                            }}>
+                              ✓ Signed on {new Date(document.signedDate).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric' 
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Document Details */}
+                        <div style={{ 
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '4px'
+                        }}>
+                          <div style={{
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: '#94a3b8',
+                            padding: '4px 10px',
+                            background: 'white',
+                            borderRadius: '12px',
+                            border: '1px solid #e2e8f0'
+                          }}>
+                            {document.type}
+                          </div>
+                          <div style={{ 
+                            fontSize: '11px', 
+                            color: '#94a3b8'
+                          }}>
+                            {document.size}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* All Documents Signed Status */}
+                  {lead.documents.every(doc => doc.status === 'signed') && (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '18px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <CheckCircle size={20} style={{ color: '#10b981', flexShrink: 0 }} />
+                        <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#166534' }}>
+                          <strong>All Documents Signed!</strong> All required documents have been electronically signed and are ready for review.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pending Documents Status */}
+                  {!lead.documents.every(doc => doc.status === 'signed') && (
+                    <div style={{
+                      marginTop: '20px',
+                      padding: '14px 18px',
+                      background: '#fffbeb',
+                      border: '1px solid #fef3c7',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
+                      <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
+                      <div style={{ fontSize: '14px', lineHeight: '1.5', color: '#92400e' }}>
+                        <strong>Pending Signatures:</strong> Waiting for applicant to sign {lead.documents.filter(doc => doc.status !== 'signed').length} remaining document(s).
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* PROPERTY ONBOARDING SECTION - Shows after application approval */}
             {lead.applicationStatus === 'approved' && (
               <div className="detail-section full-width" style={{ 

@@ -166,6 +166,36 @@ export const mockLeads = [
       'field-mailing-address': '321 Park Avenue, Austin, TX 78701',
       'field-business-structure': 'Individual'
     },
+    documents: [
+      {
+        id: 'doc-001',
+        name: 'Property Management Agreement',
+        description: 'Standard agreement outlining terms and conditions',
+        type: 'Management Agreement',
+        status: 'signed',
+        uploadedDate: '2025-11-02',
+        signedDate: '2025-11-02',
+        size: '245 KB'
+      },
+      {
+        id: 'doc-002',
+        name: 'W-9 Tax Form',
+        description: 'Required for tax reporting purposes',
+        type: 'Tax Form',
+        status: 'pending',
+        uploadedDate: '2025-11-02',
+        size: '128 KB'
+      },
+      {
+        id: 'doc-003',
+        name: 'Direct Deposit Authorization',
+        description: 'Setup automatic rent payments to your account',
+        type: 'Banking Form',
+        status: 'pending',
+        uploadedDate: '2025-11-02',
+        size: '95 KB'
+      }
+    ],
     timeline: [
       {
         id: 'event-onyx-002',
@@ -2059,6 +2089,38 @@ export const mockLeads = [
         bathrooms: 2,
         petsAllowed: true,
         minRentPrice: 2650
+      }
+    ],
+    documents: [
+      {
+        id: 'doc-001',
+        name: 'Property Management Agreement',
+        description: 'Standard agreement outlining terms and conditions',
+        type: 'Management Agreement',
+        status: 'signed',
+        uploadedDate: '2025-10-28',
+        signedDate: '2025-10-29',
+        size: '245 KB'
+      },
+      {
+        id: 'doc-002',
+        name: 'W-9 Tax Form',
+        description: 'Required for tax reporting purposes',
+        type: 'Tax Form',
+        status: 'signed',
+        uploadedDate: '2025-10-28',
+        signedDate: '2025-10-29',
+        size: '128 KB'
+      },
+      {
+        id: 'doc-003',
+        name: 'Direct Deposit Authorization',
+        description: 'Setup automatic rent payments to your account',
+        type: 'Banking Form',
+        status: 'signed',
+        uploadedDate: '2025-10-28',
+        signedDate: '2025-10-30',
+        size: '95 KB'
       }
     ],
     questionnaireAnswers: {
